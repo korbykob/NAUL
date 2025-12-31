@@ -1,5 +1,10 @@
 #!/bin/bash
 set -e
+
+if [ ! -f "os/gnu-efi/x86_64/gnuefi/crt0-efi-x86_64.o" ]; then
+    make -C os/gnu-efi
+fi
+
 clear
 
 flags="-Iinclude -Ios/include -fpic -ffreestanding -fno-stack-protector -fno-stack-check -mno-red-zone -maccumulate-outgoing-args -c"
