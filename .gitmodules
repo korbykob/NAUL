@@ -1,0 +1,4 @@
+[submodule "os/gnu-efi"]
+	path = os/gnu-efi
+	url = https://github.com/rhboot/gnu-efi
+	ignore = dirty

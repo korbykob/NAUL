@@ -1,0 +1,77 @@
+#include <keyboard.h>
+#include <serial.h>
+#include <allocator.h>
+#include <idt.h>
+#include <pic.h>
+#include <io.h>
+#include <scheduler.h>
+#include <paging.h>
+#include <cpu.h>
+
+typedef struct
+{
+    void* next;
+    void* prev;
+    KeyboardBuffer* buffer;
+} KeyboardBufferElement;
+KeyboardBufferElement* keyboardBuffers = 0;
+bool managingKeyboards = false;
+
+void keyboard()
+{
+    uint8_t scancode = inb(0x60);
+    bool unpressed = scancode & 0b10000000;
+    if (unpressed)
+    {
+        scancode &= 0b01111111;
+    }
+    KeyboardBufferElement* element = keyboardBuffers;
+    while (element)
+    {
+        element->buffer->buffer[element->buffer->current].scancode = scancode;
+        element->buffer->buffer[element->buffer->current].pressed = !unpressed;
+        element->buffer->current++;
+        element = element->next;
+        if (element == keyboardBuffers)
+        {
+            break;
+        }
+    }
+    picAck(1);
+}
+
+__attribute__((naked)) void keyboardInterrupt()
+{
+    pushRegisters();
+    __asm__ volatile ("cld; call keyboard");
+    popRegisters();
+    __asm__ volatile ("iretq");
+}
+
+void initKeyboard()
+{
+    serialPrint("Setting up PS/2 keyboard");
+    keyboardBuffers = allocate(sizeof(KeyboardBufferElement));
+    keyboardBuffers->next = keyboardBuffers;
+    keyboardBuffers->prev = keyboardBuffers;
+    keyboardBuffers->buffer = 0;
+    serialPrint("Installing keyboard IRQ");
+    installIrq(1, keyboardInterrupt);
+    serialPrint("Unmasking interrupt");
+    unmaskPic(1);
+    serialPrint("Flushing PS/2 input buffer");
+    inb(0x60);
+    serialPrint("Set up PS/2 keyboard");
+}
+
+void registerKeyboard(KeyboardBuffer* buffer)
+{
+    lock(&managingKeyboards);
+    KeyboardBufferElement* element = allocate(sizeof(KeyboardBufferElement));
+    ((KeyboardBufferElement*)keyboardBuffers->prev)->next = element;
+    element->next = keyboardBuffers;
+    element->prev = keyboardBuffers->prev;
+    keyboardBuffers->prev = element;
+    element->buffer = buffer;
+    unlock(&managingKeyboards);
+}

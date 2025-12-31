@@ -1,0 +1,306 @@
+[
+  {
+    "arguments": [
+      "/usr/bin/gcc",
+      "-Iinclude",
+      "-Ios/include",
+      "-fpic",
+      "-ffreestanding",
+      "-fno-stack-protector",
+      "-fno-stack-check",
+      "-mno-red-zone",
+      "-maccumulate-outgoing-args",
+      "-c",
+      "-fshort-wchar",
+      "-Ios/gnu-efi/inc",
+      "-o",
+      "os/bin/bootloader.o",
+      "os/src/bootloader.c"
+    ],
+    "directory": "${workspaceFolder}",
+    "file": "${workspaceFolder}/os/src/bootloader.c",
+    "output": "${workspaceFolder}/os/bin/bootloader.o"
+  },
+  {
+    "arguments": [
+      "/usr/bin/gcc",
+      "-Iinclude",
+      "-Ios/include",
+      "-fpic",
+      "-ffreestanding",
+      "-fno-stack-protector",
+      "-fno-stack-check",
+      "-mno-red-zone",
+      "-maccumulate-outgoing-args",
+      "-c",
+      "-o",
+      "os/bin/serial.o",
+      "os/src/serial.c"
+    ],
+    "directory": "${workspaceFolder}",
+    "file": "${workspaceFolder}/os/src/serial.c",
+    "output": "${workspaceFolder}/os/bin/serial.o"
+  },
+  {
+    "arguments": [
+      "/usr/bin/gcc",
+      "-Iinclude",
+      "-Ios/include",
+      "-fpic",
+      "-ffreestanding",
+      "-fno-stack-protector",
+      "-fno-stack-check",
+      "-mno-red-zone",
+      "-maccumulate-outgoing-args",
+      "-c",
+      "-o",
+      "os/bin/allocator.o",
+      "os/src/allocator.c"
+    ],
+    "directory": "${workspaceFolder}",
+    "file": "${workspaceFolder}/os/src/allocator.c",
+    "output": "${workspaceFolder}/os/bin/allocator.o"
+  },
+  {
+    "arguments": [
+      "/usr/bin/gcc",
+      "-Iinclude",
+      "-Ios/include",
+      "-fpic",
+      "-ffreestanding",
+      "-fno-stack-protector",
+      "-fno-stack-check",
+      "-mno-red-zone",
+      "-maccumulate-outgoing-args",
+      "-c",
+      "-o",
+      "os/bin/filesystem.o",
+      "os/src/filesystem.c"
+    ],
+    "directory": "${workspaceFolder}",
+    "file": "${workspaceFolder}/os/src/filesystem.c",
+    "output": "${workspaceFolder}/os/bin/filesystem.o"
+  },
+  {
+    "arguments": [
+      "/usr/bin/gcc",
+      "-Iinclude",
+      "-Ios/include",
+      "-fpic",
+      "-ffreestanding",
+      "-fno-stack-protector",
+      "-fno-stack-check",
+      "-mno-red-zone",
+      "-maccumulate-outgoing-args",
+      "-c",
+      "-o",
+      "os/bin/gdt.o",
+      "os/src/gdt.c"
+    ],
+    "directory": "${workspaceFolder}",
+    "file": "${workspaceFolder}/os/src/gdt.c",
+    "output": "${workspaceFolder}/os/bin/gdt.o"
+  },
+  {
+    "arguments": [
+      "/usr/bin/gcc",
+      "-Iinclude",
+      "-Ios/include",
+      "-fpic",
+      "-ffreestanding",
+      "-fno-stack-protector",
+      "-fno-stack-check",
+      "-mno-red-zone",
+      "-maccumulate-outgoing-args",
+      "-c",
+      "-o",
+      "os/bin/idt.o",
+      "os/src/idt.c"
+    ],
+    "directory": "${workspaceFolder}",
+    "file": "${workspaceFolder}/os/src/idt.c",
+    "output": "${workspaceFolder}/os/bin/idt.o"
+  },
+  {
+    "arguments": [
+      "/usr/bin/gcc",
+      "-Iinclude",
+      "-Ios/include",
+      "-fpic",
+      "-ffreestanding",
+      "-fno-stack-protector",
+      "-fno-stack-check",
+      "-mno-red-zone",
+      "-maccumulate-outgoing-args",
+      "-c",
+      "-o",
+      "os/bin/terminal.o",
+      "os/src/terminal.c"
+    ],
+    "directory": "${workspaceFolder}",
+    "file": "${workspaceFolder}/os/src/terminal.c",
+    "output": "${workspaceFolder}/os/bin/terminal.o"
+  },
+  {
+    "arguments": [
+      "/usr/bin/gcc",
+      "-Iinclude",
+      "-Ios/include",
+      "-fpic",
+      "-ffreestanding",
+      "-fno-stack-protector",
+      "-fno-stack-check",
+      "-mno-red-zone",
+      "-maccumulate-outgoing-args",
+      "-c",
+      "-o",
+      "os/bin/paging.o",
+      "os/src/paging.c"
+    ],
+    "directory": "${workspaceFolder}",
+    "file": "${workspaceFolder}/os/src/paging.c",
+    "output": "${workspaceFolder}/os/bin/paging.o"
+  },
+  {
+    "arguments": [
+      "/usr/bin/gcc",
+      "-Iinclude",
+      "-Ios/include",
+      "-fpic",
+      "-ffreestanding",
+      "-fno-stack-protector",
+      "-fno-stack-check",
+      "-mno-red-zone",
+      "-maccumulate-outgoing-args",
+      "-c",
+      "-o",
+      "os/bin/syscalls.o",
+      "os/src/syscalls.c"
+    ],
+    "directory": "${workspaceFolder}",
+    "file": "${workspaceFolder}/os/src/syscalls.c",
+    "output": "${workspaceFolder}/os/bin/syscalls.o"
+  },
+  {
+    "arguments": [
+      "/usr/bin/gcc",
+      "-Iinclude",
+      "-Ios/include",
+      "-fpic",
+      "-ffreestanding",
+      "-fno-stack-protector",
+      "-fno-stack-check",
+      "-mno-red-zone",
+      "-maccumulate-outgoing-args",
+      "-c",
+      "-o",
+      "os/bin/pic.o",
+      "os/src/pic.c"
+    ],
+    "directory": "${workspaceFolder}",
+    "file": "${workspaceFolder}/os/src/pic.c",
+    "output": "${workspaceFolder}/os/bin/pic.o"
+  },
+  {
+    "arguments": [
+      "/usr/bin/gcc",
+      "-Iinclude",
+      "-Ios/include",
+      "-fpic",
+      "-ffreestanding",
+      "-fno-stack-protector",
+      "-fno-stack-check",
+      "-mno-red-zone",
+      "-maccumulate-outgoing-args",
+      "-c",
+      "-o",
+      "os/bin/scheduler.o",
+      "os/src/scheduler.c"
+    ],
+    "directory": "${workspaceFolder}",
+    "file": "${workspaceFolder}/os/src/scheduler.c",
+    "output": "${workspaceFolder}/os/bin/scheduler.o"
+  },
+  {
+    "arguments": [
+      "/usr/bin/gcc",
+      "-Iinclude",
+      "-Ios/include",
+      "-fpic",
+      "-ffreestanding",
+      "-fno-stack-protector",
+      "-fno-stack-check",
+      "-mno-red-zone",
+      "-maccumulate-outgoing-args",
+      "-c",
+      "-o",
+      "os/bin/hpet.o",
+      "os/src/hpet.c"
+    ],
+    "directory": "${workspaceFolder}",
+    "file": "${workspaceFolder}/os/src/hpet.c",
+    "output": "${workspaceFolder}/os/bin/hpet.o"
+  },
+  {
+    "arguments": [
+      "/usr/bin/gcc",
+      "-Iinclude",
+      "-Ios/include",
+      "-fpic",
+      "-ffreestanding",
+      "-fno-stack-protector",
+      "-fno-stack-check",
+      "-mno-red-zone",
+      "-maccumulate-outgoing-args",
+      "-c",
+      "-o",
+      "os/bin/keyboard.o",
+      "os/src/keyboard.c"
+    ],
+    "directory": "${workspaceFolder}",
+    "file": "${workspaceFolder}/os/src/keyboard.c",
+    "output": "${workspaceFolder}/os/bin/keyboard.o"
+  },
+  {
+    "arguments": [
+      "/usr/bin/gcc",
+      "-Iinclude",
+      "-Ios/include",
+      "-fpic",
+      "-ffreestanding",
+      "-fno-stack-protector",
+      "-fno-stack-check",
+      "-mno-red-zone",
+      "-maccumulate-outgoing-args",
+      "-c",
+      "-o",
+      "os/bin/kernel.o",
+      "os/src/kernel.c"
+    ],
+    "directory": "${workspaceFolder}",
+    "file": "${workspaceFolder}/os/src/kernel.c",
+    "output": "${workspaceFolder}/os/bin/kernel.o"
+  },
+  {
+    "arguments": [
+      "/usr/bin/gcc",
+      "-Iinclude",
+      "-Iprograms/include",
+      "-fno-pic",
+      "-fno-pie",
+      "-mcmodel=large",
+      "-ffreestanding",
+      "-fno-stack-protector",
+      "-fno-stack-check",
+      "-mno-red-zone",
+      "-maccumulate-outgoing-args",
+      "-c",
+      "-o",
+      "programs/bin/test/test.o",
+      "programs/src/test/test.c"
+    ],
+    "directory": "${workspaceFolder}",
+    "file": "${workspaceFolder}/programs/src/test/test.c",
+    "output": "${workspaceFolder}/programs/bin/test/test.o"
+  }
+]
