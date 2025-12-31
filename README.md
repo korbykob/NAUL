@@ -19,7 +19,7 @@ My operating system which is fortunately not another unix like OS, kinda the OS 
 - Syscalls (WIP)
 - Programs (WIP)
 ## Plans
-You think I have plans? pfft, everything I say I'll never do I end up doing anyways.
+You think I have plans? Pfft. Everything I say I'll never do, I end up doing anyways.
 ## Compiling
 First clone the repo and its submodules:
 ```
