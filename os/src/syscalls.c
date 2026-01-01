@@ -20,7 +20,7 @@ __attribute__((naked)) void syscallTrampoline()
 void initSyscalls()
 {
     serialPrint("Setting up syscalls");
-    installIsr(0x80, syscallTrampoline);
+    installIsr(0x69, syscallTrampoline);
     serialPrint("Set up syscalls");
 }
 
