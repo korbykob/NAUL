@@ -40,7 +40,7 @@ __attribute__((naked)) void updateScheduler()
 {
     pushRegisters();
     __asm__ volatile ("movb $0x20, %al; outb %al, $0x20");
-    __asm__ volatile ("movb %0, %%al; testb %%al, %%al; jnz skip" : : "g"(managingThreads));
+    __asm__ volatile ("xorb %%bl, %%bl; xorb %%al, %%al; lock cmpxchgb %%bl, %0; jne skip" : "+m"(managingThreads));
     __asm__ volatile ("movq %%rsp, %0" : "=g"(currentThread->sp));
     __asm__ volatile ("movq %1, %0" : "=g"(currentThread) : "g"(currentThread->next));
     __asm__ volatile ("nextThread:");
