@@ -23,9 +23,8 @@ void panic(uint8_t code)
     __asm__ volatile ("cli");
     char exceptionString[10];
     toString(exceptionString, code);
-    write("CPU exception occured: ");
+    write("\n\nCPU exception occured: ");
     write(exceptionString);
-    put('\n');
     blit(backBuffer, info->framebuffer, info->width, info->height);
     __asm__ volatile ("hlt");
 }
