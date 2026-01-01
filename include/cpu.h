@@ -10,5 +10,5 @@ static void lock(bool* mutex)
 
 static void unlock(bool* mutex)
 {
-    __asm__ volatile ("lock andb $0, %0" : "=m"(*mutex) : : "memory");
+    __asm__ volatile ("lock andb $0, %0" : "+m"(*mutex) : : "memory");
 }
