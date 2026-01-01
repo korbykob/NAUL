@@ -70,9 +70,8 @@ void execute(const char* filename)
     createThread((void (*)())(0x8000000000 + *(uint32_t*)data - 4));
 }
 
-void startup()
+void welcome()
 {
-    serialPrint("Yo puter ready B)");
     write("Welcome to NAUL (Not Another Unix Like)!\n\n");
     execute("/test.bin");
 }
@@ -91,5 +90,6 @@ void kernel(Info* information)
     initVideo();
     initFilesystem(info->fileData, info->fileCount);
     initTerminal(backBuffer, info->width, info->height, getFile("/font.psf", 0));
-    startup();
+    serialPrint("Yo puter ready B)");
+    welcome();
 }
