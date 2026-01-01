@@ -33,9 +33,15 @@ typedef struct
     uint8_t protection;
 } __attribute__((packed)) Hpet;
 
-uint64_t fileCount = 0;
-InitFile* fileData = NULL;
-Info information;
+Info information = 
+{
+    0,
+    0,
+    0,
+    0,
+    0,
+    0
+};
 
 EFI_FILE_INFO* openFolder(EFI_FILE_HANDLE folder)
 {
@@ -96,33 +102,33 @@ void parseFolder(EFI_FILE_HANDLE fs, const CHAR16* name, void (*found)(EFI_FILE_
 
 void countFiles(EFI_FILE_HANDLE fs, const CHAR16* name)
 {
-    fileCount++;
+    information.fileCount++;
 }
 
 void addFiles(EFI_FILE_HANDLE fs, const CHAR16* name)
 {
     UINTN nameLength = StrLen(name);
-    fileData[fileCount].name = AllocatePool(nameLength);
+    information.fileData[information.fileCount].name = AllocatePool(nameLength);
     for (UINTN i = 0; i < nameLength; i++)
     {
-        fileData[fileCount].name[i] = name[i + 1] == u'\\' ? u'/' : name[i + 1];
+        information.fileData[information.fileCount].name[i] = name[i + 1] == u'\\' ? u'/' : name[i + 1];
     }
     EFI_FILE_HANDLE file = NULL;
     uefi_call_wrapper(fs->Open, 5, fs, &file, name, EFI_FILE_MODE_READ, 0);
     EFI_FILE_INFO* info = LibFileInfo(file);
     if (!(info->Attribute & EFI_FILE_DIRECTORY))
     {
-        fileData[fileCount].size = info->FileSize;
-        fileData[fileCount].data = AllocatePool(info->FileSize);
-        uefi_call_wrapper(file->Read, 3, file, &info->FileSize, fileData[fileCount].data);
+        information.fileData[information.fileCount].size = info->FileSize;
+        information.fileData[information.fileCount].data = AllocatePool(info->FileSize);
+        uefi_call_wrapper(file->Read, 3, file, &info->FileSize, information.fileData[information.fileCount].data);
     }
     else
     {
-        fileData[fileCount].size = 0;
-        fileData[fileCount].data = NULL;
+        information.fileData[information.fileCount].size = 0;
+        information.fileData[information.fileCount].data = NULL;
     }
     FreePool(info);
-    fileCount++;
+    information.fileCount++;
 }
 
 EFI_STATUS efi_main(EFI_HANDLE ImageHandle, EFI_SYSTEM_TABLE* SystemTable)
@@ -172,7 +178,6 @@ EFI_STATUS efi_main(EFI_HANDLE ImageHandle, EFI_SYSTEM_TABLE* SystemTable)
     }
     serialPrint("Switching GOP mode");
     uefi_call_wrapper(GOP->SetMode, 2, GOP, selected);
-    uint64_t hpetAddress = 0;
     serialPrint("Searching tables");
     EFI_GUID guid = ACPI_20_TABLE_GUID;
     for (uint64_t i = 0; i < ST->NumberOfTableEntries; i++)
@@ -187,7 +192,7 @@ EFI_STATUS efi_main(EFI_HANDLE ImageHandle, EFI_SYSTEM_TABLE* SystemTable)
                 if (strncmpa(xsdt->entries[table]->signature, "HPET", 4) == 0)
                 {
                     serialPrint("Found HPET");
-                    hpetAddress = ((Hpet*)xsdt->entries[table])->address;
+                    information.hpetAddress = ((Hpet*)xsdt->entries[table])->address;
                 }
             }
             break;
@@ -201,8 +206,8 @@ EFI_STATUS efi_main(EFI_HANDLE ImageHandle, EFI_SYSTEM_TABLE* SystemTable)
     serialPrint("Counting files");
     parseFolder(root, u".", countFiles);
     serialPrint("Allocating room for files");
-    fileData = AllocatePool(sizeof(InitFile) * fileCount);
-    fileCount = 0;
+    information.fileData = AllocatePool(sizeof(InitFile) * information.fileCount);
+    information.fileCount = 0;
     serialPrint("Reading files");
     parseFolder(root, u".", addFiles);
     UINTN entries = 0;
@@ -242,9 +247,6 @@ EFI_STATUS efi_main(EFI_HANDLE ImageHandle, EFI_SYSTEM_TABLE* SystemTable)
     information.framebuffer = (uint32_t*)GOP->Mode->FrameBufferBase;
     information.width = GOP->Mode->Info->HorizontalResolution;
     information.height = GOP->Mode->Info->VerticalResolution;
-    information.fileData = fileData;
-    information.fileCount = fileCount;
-    information.hpetAddress = hpetAddress;
     kernel(&information);
     while (TRUE);
     return EFI_SUCCESS;
