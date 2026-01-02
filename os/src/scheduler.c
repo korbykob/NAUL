@@ -22,7 +22,6 @@ typedef struct
 
 Thread* threads = 0;
 Thread* currentThread = 0;
-bool managingThreads = false;
 
 void initScheduler()
 {
@@ -40,19 +39,17 @@ __attribute__((naked)) void updateScheduler()
 {
     pushRegisters();
     __asm__ volatile ("movb $0x20, %al; outb %al, $0x20");
-    __asm__ volatile ("xorb %%bl, %%bl; xorb %%al, %%al; lock cmpxchgb %%bl, %0; jne skip" : "+m"(managingThreads));
     __asm__ volatile ("movq %%rsp, %0" : "=g"(currentThread->sp));
     __asm__ volatile ("movq %1, %0" : "=g"(currentThread) : "g"(currentThread->next));
     __asm__ volatile ("nextThread:");
     __asm__ volatile ("movq %0, %%rsp" : : "g"(currentThread->sp));
-    __asm__ volatile ("skip:");
     popRegisters();
     __asm__ volatile ("iretq");
 }
 
 void destroyThread(uint64_t id)
 {
-    lock(&managingThreads);
+    __asm__ volatile ("cli");
     Thread* current = threads;
     while (current->id != id)
     {
@@ -60,23 +57,23 @@ void destroyThread(uint64_t id)
     }
     ((Thread*)current->prev)->next = current->next;
     unallocate(current);
-    unlock(&managingThreads);
+    __asm__ volatile ("sti");
 }
 
 void exitThread()
 {
-    lock(&managingThreads);
+    __asm__ volatile ("cli");
     Thread* next = currentThread->next;
     ((Thread*)currentThread->prev)->next = next;
     unallocate(currentThread);
     currentThread = next;
-    unlock(&managingThreads);
+    __asm__ volatile ("sti");
     __asm__ volatile ("jmp nextThread");
 }
 
 uint64_t createThread(void (*function)())
 {
-    lock(&managingThreads);
+    __asm__ volatile ("cli");
     uint64_t flags = 0;
     uint64_t cs = 0;
     uint64_t ss = 0;
@@ -121,6 +118,6 @@ uint64_t createThread(void (*function)())
     thread->next = threads;
     thread->prev = threads->prev;
     threads->prev = thread;
-    unlock(&managingThreads);
+    __asm__ volatile ("sti");
     return id;
 }
