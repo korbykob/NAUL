@@ -33,9 +33,9 @@ void updateScreen()
     uint64_t lastUpdate = 0;
     while (true)
     {
-        if (getFemtoseconds() - lastUpdate >= 1000000000000000 / 60)
+        if (getFemtoseconds() - lastUpdate >= femtosecondsPerSecond / 60)
         {
-            lastUpdate += 1000000000000000 / 60;
+            lastUpdate += femtosecondsPerSecond / 60;
             blit(backBuffer, info->framebuffer, info->width, info->height);
         }
     }
