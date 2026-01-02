@@ -67,17 +67,16 @@ void exitThread()
     ((Thread*)currentThread->prev)->next = next;
     unallocate(currentThread);
     currentThread = next;
-    __asm__ volatile ("sti");
     __asm__ volatile ("jmp nextThread");
 }
 
 uint64_t createThread(void (*function)())
 {
-    __asm__ volatile ("cli");
     uint64_t flags = 0;
     uint64_t cs = 0;
     uint64_t ss = 0;
     __asm__ volatile ("pushfq; pop %0; movq %%cs, %1; movq %%ss, %2" : "=g"(flags), "=r"(cs), "=r"(ss));
+    __asm__ volatile ("cli");
     Thread* thread = allocate(sizeof(Thread));
     thread->next = currentThread;
     uint64_t id = 0;
