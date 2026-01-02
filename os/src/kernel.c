@@ -16,7 +16,6 @@
 
 Info* info;
 uint32_t* backBuffer = 0;
-uint64_t lastUpdate = 0;
 
 void panic(uint8_t code)
 {
@@ -31,6 +30,7 @@ void panic(uint8_t code)
 
 void updateScreen()
 {
+    uint64_t lastUpdate = 0;
     while (true)
     {
         if (getFemtoseconds() - lastUpdate >= 1000000000000000 / 60)
