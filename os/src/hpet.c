@@ -20,7 +20,7 @@ void initHpet(uint64_t hpetAddress)
     serialPrint("Getting femtoseconds per tick");
     femtosecondsPerTick = (*(uint64_t*)address >> 32) & 0xFFFFFFFF;
     serialPrint("Setting timer tick frequency");
-    *(uint64_t*)(address + 0x108) = (1000000000000000 / femtosecondsPerTick) / 10000;
+    *(uint64_t*)(address + 0x108) = (femtosecondsPerSecond / femtosecondsPerTick) / 10000;
     serialPrint("Resetting main counter");
     *(uint64_t*)(address + 0xF0) = 0;
     serialPrint("Unmasking HPET interrupt");
