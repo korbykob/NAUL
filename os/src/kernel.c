@@ -72,7 +72,7 @@ void execute(const char* filename)
 
 void welcome()
 {
-    write("Welcome to NAUL (Not Another Unix Like)!\n\n");
+    write("Welcome to NAUL (Not A Unix Like)!\n\n");
     execute("/test.bin");
 }
 
