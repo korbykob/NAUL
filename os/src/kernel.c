@@ -11,11 +11,9 @@
 #include <scheduler.h>
 #include <hpet.h>
 #include <keyboard.h>
-#include <graphics.h>
 #include <str.h>
 
 Info* info;
-uint32_t* backBuffer = 0;
 
 void panic(uint8_t code)
 {
@@ -24,35 +22,7 @@ void panic(uint8_t code)
     toString(exceptionString, code);
     write("\n\nCPU exception occured: ");
     write(exceptionString);
-    blit(backBuffer, info->framebuffer, info->width, info->height);
     __asm__ volatile ("hlt");
-}
-
-void updateScreen()
-{
-    uint64_t lastUpdate = 0;
-    while (true)
-    {
-        if (getFemtoseconds() - lastUpdate >= femtosecondsPerSecond / 60)
-        {
-            lastUpdate += femtosecondsPerSecond / 60;
-            blit(backBuffer, info->framebuffer, info->width, info->height);
-        }
-    }
-}
-
-void initVideo()
-{
-    serialPrint("Setting up video");
-    backBuffer = allocate(info->width * info->height * sizeof(uint32_t));
-    serialPrint("Clearing out back buffer");
-    for (uint64_t i = 0; i < info->width * info->height; i++)
-    {
-        backBuffer[i] = 0;
-    }
-    serialPrint("Setting up screen thread");
-    createThread(updateScreen);
-    serialPrint("Set up video");
 }
 
 void execute(const char* filename)
@@ -87,9 +57,8 @@ void kernel(Info* information)
     initKeyboard();
     initScheduler();
     initHpet(info->hpetAddress);
-    initVideo();
     initFilesystem(info->fileData, info->fileCount);
-    initTerminal(backBuffer, info->width, info->height, getFile("/font.psf", 0));
+    initTerminal(info->framebuffer, info->width, info->height, getFile("/font.psf", 0));
     serialPrint("Yo puter ready B)");
     welcome();
 }
