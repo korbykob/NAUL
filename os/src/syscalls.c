@@ -26,5 +26,5 @@ void initSyscalls()
 
 void registerSyscall(uint64_t code, void *handler)
 {
-    syscallHandlers[code] = (uint64_t (*)())handler;
+    syscallHandlers[code] = (uint64_t (*)(uint64_t arg1, uint64_t arg2, uint64_t arg3))handler;
 }

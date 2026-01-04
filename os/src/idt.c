@@ -17,6 +17,7 @@ struct {
     uint64_t base;
 } __attribute__((packed)) idtr = { 4095, (uint64_t)idt };
 
+extern uint8_t decSize;
 uint8_t exceptionNumber = 31;
 
 void isr()
@@ -27,6 +28,7 @@ void isr()
 __attribute__((naked)) void exception()
 {
     __asm__ volatile ("decb exceptionNumber(%rip)");
+    __asm__ volatile ("decEnd = .");
     __asm__ volatile ("decb exceptionNumber(%rip)");
     __asm__ volatile ("decb exceptionNumber(%rip)");
     __asm__ volatile ("decb exceptionNumber(%rip)");
@@ -58,6 +60,7 @@ __attribute__((naked)) void exception()
     __asm__ volatile ("decb exceptionNumber(%rip)");
     __asm__ volatile ("decb exceptionNumber(%rip)");
     __asm__ volatile ("jmp isr");
+    __asm__ volatile ("decSize: .byte decEnd - exception");
 }
 
 void initIdt()
@@ -65,7 +68,7 @@ void initIdt()
     serialPrint("Setting up IDT");
     for (uint8_t i = 0; i < 32; i++)
     {
-        installIsr(i, (void (*)())((uint8_t*)exception + (i * 6)));
+        installIsr(i, (void (*)())((uint8_t*)exception + (i * decSize)));
     }
     serialPrint("Loading IDT");
     __asm__ volatile ("lidt %0" : : "m"(idtr));
