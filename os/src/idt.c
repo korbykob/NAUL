@@ -63,6 +63,16 @@ __attribute__((naked)) void exception()
     __asm__ volatile ("decSize: .byte decEnd - exception");
 }
 
+__attribute__((naked)) void masterSpurious()
+{
+    __asm__ volatile ("iretq");
+}
+
+__attribute__((naked)) void slaveSpurious()
+{
+    __asm__ volatile ("pushw %ax; movb $0x20, %al; outb %al, $0x20; popw %ax; iretq");
+}
+
 void initIdt()
 {
     serialPrint("Setting up IDT");
@@ -70,6 +80,8 @@ void initIdt()
     {
         installIsr(i, (void (*)())((uint8_t*)exception + (i * decSize)));
     }
+    installIrq(7, masterSpurious);
+    installIrq(15, slaveSpurious);
     serialPrint("Loading IDT");
     __asm__ volatile ("lidt %0" : : "m"(idtr));
     serialPrint("Loaded IDT");

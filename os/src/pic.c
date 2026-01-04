@@ -16,8 +16,8 @@ void initPic()
     serialPrint("Place PICs into 8086 mode");
     outb(0x21, 0x01);
     outb(0xA1, 0x01);
-    serialPrint("Masking all interrupts");
-    outb(0x21, 0xFF);
+    serialPrint("Setting interrupt masks");
+    outb(0x21, 0xFB);
     outb(0xA1, 0xFF);
     serialPrint("Enabling interrupts");
     __asm__ volatile ("sti");
