@@ -1,5 +1,5 @@
 # NAUL (Not A Unix Like)
-My operating system which is fortunately not another unix like OS, kinda the OS analogue of:
+My operating system which is my own very Unix unlike OS, kinda the OS analogue of:
 
 ![Nah imma do my own thing](https://media1.tenor.com/m/rRMj_95KPOUAAAAd/nah-imma-do-my-own-thing-miles-morales.gif)
 ## Features
