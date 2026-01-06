@@ -38,11 +38,15 @@ void initScheduler()
 __attribute__((naked)) void updateScheduler()
 {
     pushRegisters();
+    pushSseRegisters();
+    __asm__ volatile ("movq %cr3, %rax; pushq %rax");
     __asm__ volatile ("movb $0x20, %al; outb %al, $0x20");
     __asm__ volatile ("movq %%rsp, %0" : "=g"(currentThread->sp));
     __asm__ volatile ("movq %1, %0" : "=g"(currentThread) : "g"(currentThread->next));
     __asm__ volatile ("nextThread:");
     __asm__ volatile ("movq %0, %%rsp" : : "g"(currentThread->sp));
+    __asm__ volatile ("popq %rax; movq %rax, %cr3");
+    popSseRegisters();
     popRegisters();
     __asm__ volatile ("iretq");
 }
@@ -110,6 +114,8 @@ uint64_t createThread(void (*function)())
     currentThread = thread;
     __asm__ volatile ("movq %0, %%rsp" : : "g"(currentThread->sp));
     pushRegisters();
+    pushSseRegisters();
+    __asm__ volatile ("movq %%cr3, %%rax; pushq %%rax" : : : "%rax");
     __asm__ volatile ("movq %%rsp, %0" : "=g"(currentThread->sp));
     __asm__ volatile ("movq %1, %0" : "=g"(currentThread) : "g"(currentThread->next));
     __asm__ volatile ("movq %0, %%rsp" : : "g"(currentThread->sp));
