@@ -26,7 +26,7 @@ void keyboard()
         scancode &= 0b01111111;
     }
     KeyboardBufferElement* element = keyboardBuffers;
-    while (element)
+    while (true)
     {
         element->buffer->buffer[element->buffer->current].scancode = scancode;
         element->buffer->buffer[element->buffer->current].pressed = !unpressed;
@@ -60,7 +60,10 @@ void initKeyboard()
     serialPrint("Unmasking interrupt");
     unmaskPic(1);
     serialPrint("Flushing PS/2 input buffer");
-    inb(0x60);
+    if (inb(0x64) & 0x01)
+    {
+        inb(0x60);
+    }
     serialPrint("Set up PS/2 keyboard");
 }
 
