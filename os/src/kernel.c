@@ -15,43 +15,43 @@
 #include <str.h>
 
 const Exception exceptions[32] = {
-    { "division error", false },
-    { "debug", false },
-    { "non-maskable interrupt", false },
-    { "breakpoint", false },
-    { "overflow", false },
-    { "bound range exceeded", false },
-    { "invalid opcode", false },
-    { "device not available", false },
-    { "double fault", true },
-    { "coprocessor segment overrun", false },
-    { "invalid tss", true },
-    { "segment not present", true },
-    { "stack-segment fault", true },
-    { "general protection fault", true },
-    { "page fault", true },
+    { "Division error", false },
+    { "Debug", false },
+    { "Non-maskable interrupt", false },
+    { "Breakpoint", false },
+    { "Overflow", false },
+    { "Bound range exceeded", false },
+    { "Invalid opcode", false },
+    { "Device not available", false },
+    { "Double fault", true },
+    { "Coprocessor segment overrun", false },
+    { "Invalid tss", true },
+    { "Segment not present", true },
+    { "Stack-segment fault", true },
+    { "General protection fault", true },
+    { "Page fault", true },
     { "", false },
     { "x87 floating-point exception", false },
-    { "alignment check", true },
-    { "machine check", false },
+    { "Alignment check", true },
+    { "Machine check", false },
     { "SIMD floating-point exception", false },
-    { "virtualization exception", false },
-    { "control protection exception", true },
+    { "Virtualization exception", false },
+    { "Control protection exception", true },
     { "", false },
     { "", false },
     { "", false },
     { "", false },
     { "", false },
     { "", false },
-    { "hypervisor injection exception", false },
+    { "Hypervisor injection exception", false },
     { "VMM communication exception", true },
-    { "security exception", true },
+    { "Security exception", true },
     { "", false }
 };
 
 void panic(uint8_t exception, uint32_t code, uint64_t address)
 {
-    serialWrite("\nA ");
+    serialPut('\n');
     serialWrite(exceptions[exception].name);
     serialWrite(" occured");
     if (exceptions[exception].code)
