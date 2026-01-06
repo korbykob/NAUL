@@ -45,5 +45,7 @@ os/bin/kernel.o \
 -o os/bin/os.so -lgnuefi -lefi
 objcopy -j .text -j .sdata -j .data -j .rodata -j .dynamic -j .dynsym  -j .rel -j .rela -j .rel.* -j .rela.* -j .reloc --target efi-app-x86_64 --subsystem=10 os/bin/os.so os/bin/os.efi
 
+nm -n os/bin/os.efi > os/bin/symbols.txt
+
 mkdir -p programs/bin/test
 gcc $programFlags programs/src/test/test.c -o programs/bin/test/test.bin
