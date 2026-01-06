@@ -14,6 +14,7 @@ gcc $kernelFlags -fshort-wchar -Ios/gnu-efi/inc os/src/bootloader.c -o os/bin/bo
 gcc $kernelFlags os/src/serial.c -o os/bin/serial.o
 gcc $kernelFlags os/src/allocator.c -o os/bin/allocator.o
 gcc $kernelFlags os/src/filesystem.c -o os/bin/filesystem.o
+gcc $kernelFlags os/src/symbols.c -o os/bin/symbols.o
 gcc $kernelFlags os/src/gdt.c -o os/bin/gdt.o
 gcc $kernelFlags os/src/idt.c -o os/bin/idt.o
 gcc $kernelFlags os/src/terminal.c -o os/bin/terminal.o
@@ -30,6 +31,7 @@ os/bin/bootloader.o \
 os/bin/serial.o \
 os/bin/allocator.o \
 os/bin/filesystem.o \
+os/bin/symbols.o \
 os/bin/gdt.o \
 os/bin/idt.o \
 os/bin/terminal.o \

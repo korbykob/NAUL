@@ -19,10 +19,18 @@ const struct {
 extern uint8_t decSize;
 uint8_t exceptionNumber = 31;
 uint64_t code = 0;
+uint64_t address = 0;
 
 void isr()
 {
-    panic(exceptionNumber, code);
+    if (exceptions[exceptionNumber].code)
+    {
+        panic(exceptionNumber, code, address);
+    }
+    else
+    {
+        panic(exceptionNumber, 0, code);
+    }
 }
 
 __attribute__((naked)) void exception()
@@ -60,6 +68,7 @@ __attribute__((naked)) void exception()
     __asm__ volatile ("decb exceptionNumber(%rip)");
     __asm__ volatile ("decb exceptionNumber(%rip)");
     __asm__ volatile ("movq (%%rsp), %0" : "=r"(code));
+    __asm__ volatile ("movq 8(%%rsp), %0" : "=r"(address));
     __asm__ volatile ("jmp isr");
     __asm__ volatile ("decSize: .byte decEnd - exception");
 }

@@ -1,6 +1,7 @@
 #include <kernel.h>
 #include <serial.h>
 #include <filesystem.h>
+#include <symbols.h>
 #include <allocator.h>
 #include <gdt.h>
 #include <idt.h>
@@ -13,11 +14,7 @@
 #include <keyboard.h>
 #include <str.h>
 
-const struct 
-{
-    const char* name;
-    bool code;
-} exceptions[32] = {
+const Exception exceptions[32] = {
     { "division error", false },
     { "debug", false },
     { "non-maskable interrupt", false },
@@ -52,19 +49,33 @@ const struct
     { "", false }
 };
 
-void panic(uint8_t exception, uint32_t code)
+void panic(uint8_t exception, uint32_t code, uint64_t address)
 {
-    write("\nA ");
-    write(exceptions[exception].name);
-    write(" occured");
+    serialWrite("\nA ");
+    serialWrite(exceptions[exception].name);
+    serialWrite(" occured");
     if (exceptions[exception].code)
     {
-        write(" with error code: ");
+        serialWrite(" with error code 0x");
         char codeString[10];
         toHex(codeString, code);
-        write(codeString);
+        serialWrite(codeString);
     }
-    write(".\n");
+    serialWrite(" in ");
+    if (address > 0x8000000000)
+    {
+        serialWrite("a user process");
+    }
+    else
+    {
+        uint64_t offset = 0;
+        serialWrite(getSymbol(address, &offset));
+        serialWrite("+0x");
+        char offsetString[10];
+        toHex(offsetString, offset);
+        serialWrite(offsetString);
+    }
+    serialPut('\n');
     __asm__ volatile ("hlt");
 }
 
@@ -93,13 +104,14 @@ void kernel()
 {
     initPaging();
     initGdt();
+    initFilesystem();
+    initSymbols();
     initIdt();
     initSyscalls();
     initPic();
     initKeyboard();
     initScheduler();
     initHpet();
-    initFilesystem();
     initTerminal();
     serialPrint("Yo puter ready B)");
     welcome();
