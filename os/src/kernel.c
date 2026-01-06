@@ -13,13 +13,58 @@
 #include <keyboard.h>
 #include <str.h>
 
-void panic(uint8_t code)
+const struct 
 {
-    __asm__ volatile ("cli");
-    char exceptionString[10];
-    toString(exceptionString, code);
-    write("\n\nCPU exception occured: ");
-    write(exceptionString);
+    const char* name;
+    bool code;
+} exceptions[32] = {
+    { "division error", false },
+    { "debug", false },
+    { "non-maskable interrupt", false },
+    { "breakpoint", false },
+    { "overflow", false },
+    { "bound range exceeded", false },
+    { "invalid opcode", false },
+    { "device not available", false },
+    { "double fault", true },
+    { "coprocessor segment overrun", false },
+    { "invalid tss", true },
+    { "segment not present", true },
+    { "stack-segment fault", true },
+    { "general protection fault", true },
+    { "page fault", true },
+    { "", false },
+    { "x87 floating-point exception", false },
+    { "alignment check", true },
+    { "machine check", false },
+    { "SIMD floating-point exception", false },
+    { "virtualization exception", false },
+    { "control protection exception", true },
+    { "", false },
+    { "", false },
+    { "", false },
+    { "", false },
+    { "", false },
+    { "", false },
+    { "hypervisor injection exception", false },
+    { "VMM communication exception", true },
+    { "security exception", true },
+    { "", false }
+};
+
+void panic(uint8_t exception, uint32_t code)
+{
+    write("\nA ");
+    write(exceptions[exception].name);
+    write(" occured");
+    if (exceptions[exception].code)
+    {
+        write(" with error code: ");
+        char codeString[10];
+        toHex(codeString, code);
+        write(codeString);
+    }
+    write(".\n");
     __asm__ volatile ("hlt");
 }
 

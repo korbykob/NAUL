@@ -12,17 +12,17 @@ struct
     uint32_t higher;
     uint32_t zero;
 } __attribute__((packed)) idt[256];
-struct {
+const struct {
     uint16_t length;
     uint64_t base;
 } __attribute__((packed)) idtr = { 4095, (uint64_t)idt };
-
 extern uint8_t decSize;
 uint8_t exceptionNumber = 31;
+uint64_t code = 0;
 
 void isr()
 {
-    panic(exceptionNumber);
+    panic(exceptionNumber, code);
 }
 
 __attribute__((naked)) void exception()
@@ -59,6 +59,7 @@ __attribute__((naked)) void exception()
     __asm__ volatile ("decb exceptionNumber(%rip)");
     __asm__ volatile ("decb exceptionNumber(%rip)");
     __asm__ volatile ("decb exceptionNumber(%rip)");
+    __asm__ volatile ("movq (%%rsp), %0" : "=r"(code));
     __asm__ volatile ("jmp isr");
     __asm__ volatile ("decSize: .byte decEnd - exception");
 }
