@@ -13,8 +13,6 @@
 #include <keyboard.h>
 #include <str.h>
 
-Info* info;
-
 void panic(uint8_t code)
 {
     __asm__ volatile ("cli");
@@ -46,9 +44,8 @@ void welcome()
     execute("/test.bin");
 }
 
-void kernel(Info* information)
+void kernel()
 {
-    info = information;
     initPaging();
     initGdt();
     initIdt();
@@ -56,9 +53,9 @@ void kernel(Info* information)
     initPic();
     initKeyboard();
     initScheduler();
-    initHpet(info->hpetAddress);
-    initFilesystem(info->fileData, info->fileCount);
-    initTerminal(info->framebuffer, info->width, info->height, getFile("/font.psf", 0));
+    initHpet();
+    initFilesystem();
+    initTerminal();
     serialPrint("Yo puter ready B)");
     welcome();
 }

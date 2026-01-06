@@ -17,3 +17,5 @@ typedef struct
     uint64_t fileCount;
     uint64_t hpetAddress;
 } Info;
+
+extern Info information;

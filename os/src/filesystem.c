@@ -1,4 +1,5 @@
 #include <filesystem.h>
+#include <bootloader.h>
 #include <serial.h>
 #include <allocator.h>
 #include <scheduler.h>
@@ -16,7 +17,7 @@ typedef struct {
 File* files = 0;
 bool managingFiles = false;
 
-void initFilesystem(InitFile* fileData, uint64_t fileCount)
+void initFilesystem()
 {
     serialPrint("Setting up filesystem");
     files = allocate(sizeof(File));
@@ -25,14 +26,14 @@ void initFilesystem(InitFile* fileData, uint64_t fileCount)
     files->name = "";
     files->data = 0;
     serialPrint("Adding files to filesystem");
-    for (uint64_t i = 0; i < fileCount; i++)
+    for (uint64_t i = 0; i < information.fileCount; i++)
     {
-        if (fileData[i].data != 0)
+        if (information.fileData[i].data != 0)
         {
-            uint8_t* data = createFile(fileData[i].name, fileData[i].size);
-            for (uint64_t j = 0; j < fileData[i].size; j++)
+            uint8_t* data = createFile(information.fileData[i].name, information.fileData[i].size);
+            for (uint64_t j = 0; j < information.fileData[i].size; j++)
             {
-                data[j] = fileData[i].data[j];
+                data[j] = information.fileData[i].data[j];
             }
         }
     }

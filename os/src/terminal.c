@@ -1,5 +1,7 @@
 #include <terminal.h>
+#include <bootloader.h>
 #include <serial.h>
+#include <filesystem.h>
 #include <allocator.h>
 #include <scheduler.h>
 #include <syscalls.h>
@@ -7,11 +9,8 @@
 #include <keyboard.h>
 #include <cpu.h>
 
-uint32_t* videoBuffer = 0;
-uint32_t* backBuffer = 0;
-uint32_t width = 0;
-uint32_t height = 0;
 uint8_t* font = 0;
+uint32_t* backBuffer = 0;
 uint32_t terminalWidth = 0;
 uint32_t terminalHeight = 0;
 uint32_t cursorX = 0;
@@ -91,8 +90,8 @@ uint64_t typingCursor = 0;
 
 void drawCharacter(char character, uint32_t x, uint32_t y, uint32_t colour)
 {
-    uint32_t* address = videoBuffer + y * width + x;
-    uint32_t* backAddress = backBuffer + y * width + x;
+    uint32_t* address = information.framebuffer + y * information.width + x;
+    uint32_t* backAddress = backBuffer + y * information.width + x;
     uint8_t* glyph = font + 32 + 64 * character;
     for (uint8_t y = 0; y < 64; y += 2)
     {
@@ -116,8 +115,8 @@ void drawCharacter(char character, uint32_t x, uint32_t y, uint32_t colour)
             address++;
             backAddress++;
         }
-        address += width - 16;
-        backAddress += width - 16;
+        address += information.width - 16;
+        backAddress += information.width - 16;
     }
 }
 
@@ -181,28 +180,21 @@ void terminalKeyboard()
     }
 }
 
-void initTerminal(uint32_t* buffer, uint32_t screenX, uint32_t screenY, uint8_t* loadedFont)
+void initTerminal()
 {
     serialPrint("Setting up terminal");
-    registerSyscall(0, put);
-    registerSyscall(1, write);
-    registerSyscall(2, clear);
-    registerSyscall(3, read);
-    serialPrint("Setting up terminal parameters");
-    videoBuffer = buffer;
-    width = screenX;
-    height = screenY;
-    font = loadedFont;
+    serialPrint("Loading font");
+    font = getFile("/font.psf", 0);
     serialPrint("Allocating back buffer");
-    backBuffer = allocate(width * height * sizeof(uint32_t));
+    backBuffer = allocate(information.width * information.height * sizeof(uint32_t));
     serialPrint("Clearing out back buffer");
-    for (uint64_t i = 0; i < width * height; i++)
+    for (uint64_t i = 0; i < information.width * information.height; i++)
     {
         backBuffer[i] = 0;
     }
     serialPrint("Setting up terminal graphics");
-    terminalWidth = width / 16;
-    terminalHeight = height / 32;
+    terminalWidth = information.width / 16;
+    terminalHeight = information.height / 32;
     drawCharacter('_', 0, 0, 0);
     serialPrint("Registering keyboard handler");
     keyboardBuffer.current = 0;
@@ -214,9 +206,9 @@ void initTerminal(uint32_t* buffer, uint32_t screenX, uint32_t screenY, uint8_t*
 void drawRectangle(uint32_t x, uint32_t y, uint32_t sizeX, uint32_t sizeY, uint32_t colour)
 {
     uint64_t colours = ((uint64_t)colour << 32) | colour;
-    uint64_t* address = (uint64_t*)(videoBuffer + y * width + x);
-    uint64_t* backAddress = (uint64_t*)(backBuffer + y * width + x);
-    uint32_t drop = (width - sizeX) / 2;
+    uint64_t* address = (uint64_t*)(information.framebuffer + y * information.width + x);
+    uint64_t* backAddress = (uint64_t*)(backBuffer + y * information.width + x);
+    uint32_t drop = (information.width - sizeX) / 2;
     for (uint32_t y = 0; y < sizeY; y++)
     {
         for (uint32_t x = 0; x < sizeX; x += 2)
@@ -231,15 +223,15 @@ void drawRectangle(uint32_t x, uint32_t y, uint32_t sizeX, uint32_t sizeY, uint3
 
 void drop()
 {
-    uint64_t* destination = (uint64_t*)videoBuffer;
+    uint64_t* destination = (uint64_t*)information.framebuffer;
     uint64_t* backDestination = (uint64_t*)backBuffer;
-    uint64_t* source = (uint64_t*)(backBuffer + 32 * width);
-    for (uint64_t i = 0; i < width * (height - 32); i += 2)
+    uint64_t* source = (uint64_t*)(backBuffer + 32 * information.width);
+    for (uint64_t i = 0; i < information.width * (information.height - 32); i += 2)
     {
         *destination++ = *source;
         *backDestination++ = *source++;
     }
-    drawRectangle(0, height - 32, width, 32, 0);
+    drawRectangle(0, information.height - 32, information.width, 32, 0);
 }
 
 void put(char character)
@@ -307,9 +299,9 @@ void write(const char* message)
 void clear()
 {
     lock(&writing);
-    uint64_t* destination = (uint64_t*)videoBuffer;
+    uint64_t* destination = (uint64_t*)information.framebuffer;
     uint64_t* backDestination = (uint64_t*)backBuffer;
-    for (uint64_t i = 0; i < width * height; i += 2)
+    for (uint64_t i = 0; i < information.width * information.height; i += 2)
     {
         *destination++ = 0;
         *backDestination++ = 0;
