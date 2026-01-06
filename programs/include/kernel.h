@@ -11,5 +11,5 @@ static uint64_t execute(const char* filename)
 
 static void quit()
 {
-    __asm__ volatile ("movq $1, %%rdi; int $0x69" : :  : "%rdi", "%rax");
+    __asm__ volatile ("movq $1, %%rdi; int $0x69" : : : "%rdi", "%rax");
 }

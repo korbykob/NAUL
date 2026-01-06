@@ -57,25 +57,31 @@ void panic(uint8_t exception, uint32_t code, uint64_t address)
     if (exceptions[exception].code)
     {
         serialWrite(" with error code 0x");
-        char codeString[10];
+        char codeString[9];
         toHex(codeString, code);
         serialWrite(codeString);
     }
     serialWrite(" in ");
     if (address > 0x8000000000)
     {
+        address -= 0x8000000000;
         serialWrite("a user process");
     }
     else
     {
+        address -= getOffset();
         uint64_t offset = 0;
         serialWrite(getSymbol(address, &offset));
         serialWrite("+0x");
-        char offsetString[10];
+        char offsetString[17];
         toHex(offsetString, offset);
         serialWrite(offsetString);
     }
-    serialPut('\n');
+    serialWrite(" (0x");
+    char offsetString[17];
+    toHex(offsetString, address);
+    serialWrite(offsetString);
+    serialWrite(")\n");
     __asm__ volatile ("hlt");
 }
 

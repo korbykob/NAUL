@@ -61,9 +61,13 @@ void initSymbols()
     serialPrint("Set up symbols");
 }
 
+uint64_t getOffset()
+{
+    return loadedOffset;
+}
+
 const char* getSymbol(uint64_t address, uint64_t* offset)
 {
-    address -= loadedOffset;
     uint64_t closestId = 0;
     uint64_t smallestDifference = __UINT64_MAX__;
     for (uint64_t i = 0; i < symbolCount; i++)
