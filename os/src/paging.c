@@ -63,6 +63,12 @@ uint64_t createTable(void* start, uint64_t pages)
     return (uint64_t)pml4t;
 }
 
+void unallocateTable(uint64_t table)
+{
+    unallocate((void*)(((uint64_t*)table)[1] & ~0xFFFUL));
+    unallocate((void*)table);
+}
+
 void* getAddress(void* address)
 {
     if ((uint64_t)address >= 0x8000000000)

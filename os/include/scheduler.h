@@ -6,6 +6,9 @@ void initScheduler();
 
 void updateScheduler();
 
+uint64_t createThread(void (*function)());
+
 void destroyThread(uint64_t id);
 
-uint64_t createThread(void (*function)());
+void exitThread();
+

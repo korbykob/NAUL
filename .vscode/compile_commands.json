@@ -316,6 +316,28 @@
       "-fno-pie",
       "-mcmodel=large",
       "-o",
+      "programs/bin/shell/shell.bin",
+      "programs/src/shell/shell.c"
+    ],
+    "directory": "${workspaceFolder}",
+    "file": "${workspaceFolder}/programs/src/shell/shell.c",
+    "output": "${workspaceFolder}/programs/bin/shell/shell.bin"
+  },
+  {
+    "arguments": [
+      "/usr/bin/gcc",
+      "-c",
+      "-Iinclude",
+      "-ffreestanding",
+      "-fno-stack-protector",
+      "-fno-stack-check",
+      "-mno-red-zone",
+      "-maccumulate-outgoing-args",
+      "-Iprograms/include",
+      "-fno-pic",
+      "-fno-pie",
+      "-mcmodel=large",
+      "-o",
       "programs/bin/test/test.bin",
       "programs/src/test/test.c"
     ],

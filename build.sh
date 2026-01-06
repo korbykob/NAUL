@@ -47,5 +47,8 @@ objcopy -j .text -j .sdata -j .data -j .rodata -j .dynamic -j .dynsym  -j .rel -
 
 nm -n os/bin/os.efi > os/bin/symbols.txt
 
+mkdir -p programs/bin/shell
+gcc $programFlags programs/src/shell/shell.c -o programs/bin/shell/shell.bin
+
 mkdir -p programs/bin/test
 gcc $programFlags programs/src/test/test.c -o programs/bin/test/test.bin

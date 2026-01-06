@@ -79,7 +79,7 @@ void panic(uint8_t exception, uint32_t code, uint64_t address)
     __asm__ volatile ("hlt");
 }
 
-void execute(const char* filename)
+uint64_t execute(const char* filename)
 {
     uint64_t size = 0;
     uint8_t* data = getFile(filename, &size);
@@ -89,15 +89,27 @@ void execute(const char* filename)
     {
         program[i] = data[i + 4];
     }
-    uint64_t table = createTable(program, (size - 1) / 0x200000 + 1);
+    uint64_t table = 0;
+    __asm__ volatile ("mov %%cr3, %0" : "=r"(table));
+    __asm__ volatile ("mov %0, %%cr3" : : "r"(createTable(program, (size - 1) / 0x200000 + 1)));
+    uint64_t thread = createThread((void (*)())(0x8000000000 + *(uint32_t*)data - 4));
     __asm__ volatile ("mov %0, %%cr3" : : "r"(table));
-    createThread((void (*)())(0x8000000000 + *(uint32_t*)data - 4));
+    return thread;
+}
+
+void quit()
+{
+    unallocate(getAddress((void*)0x8000000000));
+    uint64_t table = 0;
+    __asm__ volatile ("mov %%cr3, %0" : "=r"(table));
+    unallocateTable(table);
+    exitThread();
 }
 
 void welcome()
 {
     write("Welcome to NAUL (Not A Unix Like)!\n\n");
-    execute("/test.bin");
+    execute("/shell.bin");
 }
 
 void kernel()
@@ -108,6 +120,8 @@ void kernel()
     initSymbols();
     initIdt();
     initSyscalls();
+    registerSyscall(0, execute);
+    registerSyscall(1, quit);
     initPic();
     initKeyboard();
     initScheduler();

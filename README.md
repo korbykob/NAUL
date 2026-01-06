@@ -17,6 +17,8 @@ My operating system which is my own very Unix unlike OS, kinda the OS analogue o
 - Multithreading (and mutexes)
 - Terminal input and output
 - Symbol tables
+- Processes
+- Syscalls (WIP)
 ## Plans
 You think I have plans? Pfft. Everything I say I'll never do, I end up doing anyways.
 ## Compiling

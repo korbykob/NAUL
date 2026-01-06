@@ -186,6 +186,10 @@ void terminalKeyboard()
 void initTerminal()
 {
     serialPrint("Setting up terminal");
+    registerSyscall(2, put);
+    registerSyscall(3, write);
+    registerSyscall(4, clear);
+    registerSyscall(5, read);
     serialPrint("Loading font");
     font = getFile("/font.psf", 0);
     serialPrint("Allocating back buffer");

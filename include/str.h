@@ -172,3 +172,17 @@ static uint64_t compareStrings(const char* a, const char* b)
     return *a - *b;
 }
 
+static uint64_t compareStart(const char* a, const char* b, uint64_t length)
+{
+    while (*a && length)
+    {
+        if (*a != *b)
+        {
+            break;
+        }
+        a++;
+        b++;
+        length--;
+    }
+    return length ? *a - *b : 0;
+}

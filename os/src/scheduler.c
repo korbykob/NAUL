@@ -51,29 +51,6 @@ __attribute__((naked)) void updateScheduler()
     __asm__ volatile ("iretq");
 }
 
-void destroyThread(uint64_t id)
-{
-    __asm__ volatile ("cli");
-    Thread* current = threads;
-    while (current->id != id)
-    {
-        current = current->next;
-    }
-    ((Thread*)current->prev)->next = current->next;
-    unallocate(current);
-    __asm__ volatile ("sti");
-}
-
-void exitThread()
-{
-    __asm__ volatile ("cli");
-    Thread* next = currentThread->next;
-    ((Thread*)currentThread->prev)->next = next;
-    unallocate(currentThread);
-    currentThread = next;
-    __asm__ volatile ("jmp nextThread");
-}
-
 uint64_t createThread(void (*function)())
 {
     uint64_t flags = 0;
@@ -125,4 +102,28 @@ uint64_t createThread(void (*function)())
     threads->prev = thread;
     __asm__ volatile ("sti");
     return id;
+}
+
+void destroyThread(uint64_t id)
+{
+    __asm__ volatile ("cli");
+    Thread* current = threads;
+    while (current->id != id)
+    {
+        current = current->next;
+    }
+    ((Thread*)current->prev)->next = current->next;
+    unallocate(current);
+    __asm__ volatile ("sti");
+}
+
+void exitThread()
+{
+    __asm__ volatile ("cli");
+    Thread* next = currentThread->next;
+    ((Thread*)currentThread->prev)->next = next;
+    next->prev = currentThread->prev;
+    unallocate(currentThread);
+    currentThread = next;
+    __asm__ volatile ("jmp nextThread");
 }
