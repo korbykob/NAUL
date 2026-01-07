@@ -21,18 +21,13 @@ My operating system which is my own very Unix unlike OS, kinda the OS analogue o
 - Syscalls (WIP)
 ## Plans
 You think I have plans? Pfft. Everything I say I'll never do, I end up doing anyways.
-## Compiling
+## Emulating
 First clone the repo and its submodules:
 ```
 git clone --recursive https://github.com/korbykob/NAUL.git
 ```
-Ensure you have modern gcc, ld, objcopy, nm, and make binaries and run:
+Ensure you have QEMU, build essentials, and [uefi-run](https://github.com/richard-w/uefi-run) installed and run:
 ```
 cd NAUL
-./build.sh
-```
-## Running
-After compiling you can run this under QEMU, ensure you have [uefi-run](https://github.com/richard-w/uefi-run) installed and run:
-```
 ./run.sh
 ```
