@@ -35,6 +35,7 @@
       "-Ios/include",
       "-fpic",
       "-c",
+      "-nostdinc",
       "-o",
       "os/bin/serial.o",
       "os/src/serial.c"
@@ -56,6 +57,7 @@
       "-Ios/include",
       "-fpic",
       "-c",
+      "-nostdinc",
       "-o",
       "os/bin/allocator.o",
       "os/src/allocator.c"
@@ -77,6 +79,7 @@
       "-Ios/include",
       "-fpic",
       "-c",
+      "-nostdinc",
       "-o",
       "os/bin/filesystem.o",
       "os/src/filesystem.c"
@@ -98,6 +101,7 @@
       "-Ios/include",
       "-fpic",
       "-c",
+      "-nostdinc",
       "-o",
       "os/bin/symbols.o",
       "os/src/symbols.c"
@@ -119,6 +123,7 @@
       "-Ios/include",
       "-fpic",
       "-c",
+      "-nostdinc",
       "-o",
       "os/bin/gdt.o",
       "os/src/gdt.c"
@@ -140,6 +145,7 @@
       "-Ios/include",
       "-fpic",
       "-c",
+      "-nostdinc",
       "-o",
       "os/bin/idt.o",
       "os/src/idt.c"
@@ -161,6 +167,7 @@
       "-Ios/include",
       "-fpic",
       "-c",
+      "-nostdinc",
       "-o",
       "os/bin/terminal.o",
       "os/src/terminal.c"
@@ -182,6 +189,7 @@
       "-Ios/include",
       "-fpic",
       "-c",
+      "-nostdinc",
       "-o",
       "os/bin/paging.o",
       "os/src/paging.c"
@@ -203,6 +211,7 @@
       "-Ios/include",
       "-fpic",
       "-c",
+      "-nostdinc",
       "-o",
       "os/bin/syscalls.o",
       "os/src/syscalls.c"
@@ -224,6 +233,7 @@
       "-Ios/include",
       "-fpic",
       "-c",
+      "-nostdinc",
       "-o",
       "os/bin/pic.o",
       "os/src/pic.c"
@@ -245,6 +255,7 @@
       "-Ios/include",
       "-fpic",
       "-c",
+      "-nostdinc",
       "-o",
       "os/bin/scheduler.o",
       "os/src/scheduler.c"
@@ -266,6 +277,7 @@
       "-Ios/include",
       "-fpic",
       "-c",
+      "-nostdinc",
       "-o",
       "os/bin/hpet.o",
       "os/src/hpet.c"
@@ -287,6 +299,7 @@
       "-Ios/include",
       "-fpic",
       "-c",
+      "-nostdinc",
       "-o",
       "os/bin/keyboard.o",
       "os/src/keyboard.c"
@@ -308,6 +321,7 @@
       "-Ios/include",
       "-fpic",
       "-c",
+      "-nostdinc",
       "-o",
       "os/bin/kernel.o",
       "os/src/kernel.c"

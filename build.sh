@@ -6,7 +6,8 @@ if [ ! -f "os/gnu-efi/x86_64/gnuefi/crt0-efi-x86_64.o" ]; then
 fi
 
 cflags="-Iinclude -ffreestanding -fno-stack-protector -fno-stack-check -mno-red-zone -maccumulate-outgoing-args -g"
-kernelCflags="$cflags -Ios/include -fpic -c"
+bootloaderCflags="$cflags -Ios/include -fpic -c -fshort-wchar -Ios/gnu-efi/inc"
+kernelCflags="$cflags -Ios/include -fpic -c -nostdinc"
 programCflags="$cflags -Iprograms/include -static -fno-pic -fno-pie -mcmodel=large -c"
 
 lflags="-znoexecstack"
@@ -14,7 +15,7 @@ kernellLflags="$lflags -shared -Bsymbolic -Los/gnu-efi/x86_64/lib -Los/gnu-efi/x
 programLflags="$lflags -Tprograms/linker.ld -no-pie"
 
 mkdir -p os/bin
-gcc $kernelCflags -fshort-wchar -Ios/gnu-efi/inc os/src/bootloader.c -o os/bin/bootloader.o
+gcc $bootloaderCflags os/src/bootloader.c -o os/bin/bootloader.o
 gcc $kernelCflags os/src/serial.c -o os/bin/serial.o
 gcc $kernelCflags os/src/allocator.c -o os/bin/allocator.o
 gcc $kernelCflags os/src/filesystem.c -o os/bin/filesystem.o
