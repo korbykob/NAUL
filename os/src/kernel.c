@@ -51,6 +51,7 @@ const Exception exceptions[32] = {
 
 void panic(uint8_t exception, uint32_t code, uint64_t address)
 {
+    __asm__ volatile ("cli");
     serialPut('\n');
     serialWrite(exceptions[exception].name);
     serialWrite(" occured");
