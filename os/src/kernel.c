@@ -120,11 +120,11 @@ void welcome()
 
 void kernel()
 {
-    initPaging();
     initGdt();
+    initIdt();
+    initPaging();
     initFilesystem();
     initSymbols();
-    initIdt();
     initSyscalls();
     registerSyscall(0, execute);
     registerSyscall(1, quit);
