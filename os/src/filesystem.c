@@ -40,6 +40,27 @@ void initFilesystem()
     serialPrint("Set up filesystem");
 }
 
+bool checkFile(const char* name)
+{
+    lock(&managingFiles);
+    File* file = files;
+    while (file)
+    {
+        if (compareStrings(name, file->name) == 0)
+        {
+            unlock(&managingFiles);
+            return true;
+        }
+        file = file->next;
+        if (file == files)
+        {
+            break;
+        }
+    }
+    unlock(&managingFiles);
+    return false;
+}
+
 void* createFile(const char* name, uint64_t size)
 {
     lock(&managingFiles);
