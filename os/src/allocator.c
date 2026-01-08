@@ -1,5 +1,6 @@
 #include <allocator.h>
 #include <serial.h>
+#include <syscalls.h>
 #include <scheduler.h>
 #include <cpu.h>
 
@@ -17,6 +18,10 @@ bool allocating = false;
 void initAllocator(uint64_t end)
 {
     serialPrint("Setting up allocator");
+    registerSyscall(6, allocate);
+    registerSyscall(7, allocateAligned);
+    registerSyscall(8, unallocate);
+    serialPrint("Storing allocation location");
     allocated = (Allocation*)(end - sizeof(Allocation));
     serialPrint("Set up allocator");
 }
