@@ -191,7 +191,7 @@ void initTerminal()
     registerSyscall(4, clear);
     registerSyscall(5, read);
     serialPrint("Loading font");
-    font = getFile("/font.psf", 0);
+    font = getFile("/naul/font.psf", 0);
     serialPrint("Allocating back buffer");
     backBuffer = allocate(information.width * information.height * sizeof(uint32_t));
     serialPrint("Clearing out back buffer");

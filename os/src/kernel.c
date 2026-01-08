@@ -116,7 +116,7 @@ void quit()
 void welcome()
 {
     write("Welcome to NAUL (Not A Unix Like)!\n\n");
-    execute("/shell.bin");
+    execute("/programs/shell.bin");
 }
 
 void kernel()

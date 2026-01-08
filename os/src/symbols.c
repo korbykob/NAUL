@@ -13,7 +13,7 @@ void initSymbols()
 {
     serialPrint("Setting up symbols");
     uint64_t symbolsSize = 0;
-    char* symbols = (char*)getFile("/symbols.txt", &symbolsSize);
+    char* symbols = (char*)getFile("/naul/symbols.txt", &symbolsSize);
     serialPrint("Getting symbol count");
     symbolCount = 1;
     for (uint64_t i = 0; i < symbolsSize - 1; i++)
