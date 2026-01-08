@@ -1,21 +1,23 @@
 #pragma once
 
+#include "syscalls.h"
+
 static void put(char character)
 {
-    __asm__ volatile ("movq $2, %%rdi; movq %0, %%rsi; int $0x69" : : "g"(character) : "%rdi", "%rsi", "%rax");
+    SYSCALL_1(2, character);
 }
 
 static void write(const char* message)
 {
-    __asm__ volatile ("movq $3, %%rdi; movq %0, %%rsi; int $0x69" : : "g"(message) : "%rdi", "%rsi", "%rax");
+    SYSCALL_1(3, message);
 }
 
 static void clear()
 {
-    __asm__ volatile ("movq $4, %%rdi; int $0x69" : :  : "%rdi", "%rax");
+    SYSCALL_0(4);
 }
 
 static void read(char* buffer)
 {
-    __asm__ volatile ("movq $5, %%rdi; movq %0, %%rsi; int $0x69" : : "g"(buffer) : "%rdi", "%rsi", "%rax");
+    SYSCALL_1(5, buffer);
 }
