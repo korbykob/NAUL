@@ -28,7 +28,11 @@ void initFilesystem()
     serialPrint("Adding files to filesystem");
     for (uint64_t i = 0; i < information.fileCount; i++)
     {
-        if (information.fileData[i].data != 0)
+        if (information.fileData[i].data == 0)
+        {
+            createFolder(information.fileData[i].name);
+        }
+        else
         {
             uint8_t* data = createFile(information.fileData[i].name, information.fileData[i].size);
             for (uint64_t j = 0; j < information.fileData[i].size; j++)
@@ -40,13 +44,13 @@ void initFilesystem()
     serialPrint("Set up filesystem");
 }
 
-bool checkFile(const char* name)
+bool checkFolder(const char* name)
 {
     lock(&managingFiles);
     File* file = files;
     while (file)
     {
-        if (compareStrings(name, file->name) == 0)
+        if (compareStrings(name, file->name) == 0 && file->data == 0)
         {
             unlock(&managingFiles);
             return true;
@@ -59,6 +63,46 @@ bool checkFile(const char* name)
     }
     unlock(&managingFiles);
     return false;
+}
+
+bool checkFile(const char* name)
+{
+    lock(&managingFiles);
+    File* file = files;
+    while (file)
+    {
+        if (compareStrings(name, file->name) == 0 && file->data)
+        {
+            unlock(&managingFiles);
+            return true;
+        }
+        file = file->next;
+        if (file == files)
+        {
+            break;
+        }
+    }
+    unlock(&managingFiles);
+    return false;
+}
+
+void createFolder(const char* name)
+{
+    lock(&managingFiles);
+    File* file = allocate(sizeof(File));
+    ((File*)files->prev)->next = file;
+    file->next = files;
+    file->prev = files->prev;
+    files->prev = file;
+    uint64_t length = stringLength(name) + 1;
+    file->name = allocate(length);
+    for (uint64_t i = 0; i < length; i++)
+    {
+        file->name[i] = name[i];
+    }
+    file->size = 0;
+    file->data = 0;
+    unlock(&managingFiles);
 }
 
 void* createFile(const char* name, uint64_t size)
@@ -79,6 +123,44 @@ void* createFile(const char* name, uint64_t size)
     file->data = allocate(size);
     unlock(&managingFiles);
     return file->data;
+}
+
+const char** getFiles(const char* root, uint64_t* count)
+{
+    lock(&managingFiles);
+    *count = 0;
+    uint64_t length = stringLength(root);
+    File* file = files;
+    while (file)
+    {
+        if (compareStart(file->name, root, length) == 0 && !stringContains(file->name + length, L'/'))
+        {
+            *count = *count + 1;
+        }
+        file = file->next;
+        if (file == files)
+        {
+            break;
+        }
+    }
+    const char** items = allocate(*count * sizeof(const char*));
+    uint64_t i = 0;
+    file = files;
+    while (file)
+    {
+        if (compareStart(file->name, root, length) == 0 && !stringContains(file->name + length, L'/'))
+        {
+            items[i] = file->name;
+            i++;
+        }
+        file = file->next;
+        if (file == files)
+        {
+            break;
+        }
+    }
+    unlock(&managingFiles);
+    return items;
 }
 
 uint8_t* getFile(const char* name, uint64_t* size)
