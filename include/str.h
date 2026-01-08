@@ -186,3 +186,23 @@ static uint64_t compareStart(const char* a, const char* b, uint64_t length)
     }
     return length ? *a - *b : 0;
 }
+
+static void copyString(const char* source, char* destination)
+{
+    while (*source)
+    {
+        *destination++ = *source++;
+    }
+}
+
+static bool stringContains(const char* string, char character)
+{
+    while (*string)
+    {
+        if (*string++ == character)
+        {
+            return true;
+        }
+    }
+    return false;
+}
