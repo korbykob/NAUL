@@ -115,7 +115,7 @@ void quit()
 
 void welcome()
 {
-    write("Welcome to NAUL (Not A Unix Like)!\n\n");
+    write("Welcome to NAUL (Not A Unix Like)!\n\nStarting shell, use \"help\" for more information:\n");
     execute("/programs/shell.bin");
 }
 
