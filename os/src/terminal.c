@@ -296,10 +296,9 @@ void put(char character)
 
 void write(const char* message)
 {
-    const char* messageAddress = getAddress((void*)message);
-    while (*messageAddress)
+    while (*message)
     {
-        put(*messageAddress++);
+        put(*message++);
     }
 }
 
