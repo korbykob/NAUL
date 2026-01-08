@@ -1,7 +1,8 @@
 #include <hpet.h>
-#include <bootloader.h>
 #include <serial.h>
+#include <bootloader.h>
 #include <idt.h>
+#include <syscalls.h>
 #include <pic.h>
 #include <scheduler.h>
 
@@ -11,6 +12,7 @@ void initHpet()
 {
     serialPrint("Setting up HPET");
     installIrq(0, updateScheduler);
+    registerSyscall(16, getFemtoseconds);
     serialPrint("Enabling legacy replacement mode");
     *(uint32_t*)(information.hpetAddress + 0x10) |= 0b11;
     serialPrint("Enabling periodic mode and interrupts");

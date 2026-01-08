@@ -3,6 +3,7 @@
 #include <definitions.h>
 
 #define femtosecondsPerSecond 1000000000000000
+#define femtosecondsPerMicrosecond 1000000000
 
 void initHpet();
 
