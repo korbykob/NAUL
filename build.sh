@@ -8,7 +8,7 @@ fi
 cflags="-Iinclude -ffreestanding -fno-stack-protector -fno-stack-check -mno-red-zone -maccumulate-outgoing-args -g"
 bootloaderCflags="$cflags -Ios/include -fpic -c -fshort-wchar -Ios/gnu-efi/inc"
 kernelCflags="$cflags -Ios/include -fpic -c -nostdinc"
-programCflags="$cflags -Iprograms/include -static -fno-pic -fno-pie -mcmodel=large -c"
+programCflags="$cflags -Iprograms/include -static -fno-pic -fno-pie -mcmodel=large -c -nostdinc"
 
 lflags="-znoexecstack"
 kernellLflags="$lflags -shared -Bsymbolic -Los/gnu-efi/x86_64/lib -Los/gnu-efi/x86_64/gnuefi -Tos/gnu-efi/gnuefi/elf_x86_64_efi.lds os/gnu-efi/x86_64/gnuefi/crt0-efi-x86_64.o"

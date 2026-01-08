@@ -345,6 +345,7 @@
       "-fno-pie",
       "-mcmodel=large",
       "-c",
+      "-nostdinc",
       "-o",
       "programs/bin/shell/shell.o",
       "programs/src/shell/shell.c"
@@ -368,6 +369,7 @@
       "-fno-pie",
       "-mcmodel=large",
       "-c",
+      "-nostdinc",
       "-o",
       "programs/bin/test/test.o",
       "programs/src/test/test.c"
