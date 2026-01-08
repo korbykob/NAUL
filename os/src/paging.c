@@ -2,7 +2,6 @@
 #include <serial.h>
 #include <allocator.h>
 
-uint64_t uefiPml4t = 0;
 uint64_t mainPdpt = 0;
 
 uint64_t createPDPT(void* start, uint64_t pages)
