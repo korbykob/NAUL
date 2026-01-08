@@ -16,7 +16,6 @@ programLflags="$lflags -Tprograms/linker.ld -no-pie"
 
 mkdir -p os/bin
 gcc $bootloaderCflags os/src/bootloader.c -o os/bin/bootloader.o
-gcc $kernelCflags os/src/serial.c -o os/bin/serial.o
 gcc $kernelCflags os/src/allocator.c -o os/bin/allocator.o
 gcc $kernelCflags os/src/filesystem.c -o os/bin/filesystem.o
 gcc $kernelCflags os/src/symbols.c -o os/bin/symbols.o
@@ -33,7 +32,6 @@ gcc $kernelCflags os/src/kernel.c -o os/bin/kernel.o
 
 ld $kernellLflags \
 os/bin/bootloader.o \
-os/bin/serial.o \
 os/bin/allocator.o \
 os/bin/filesystem.o \
 os/bin/symbols.o \

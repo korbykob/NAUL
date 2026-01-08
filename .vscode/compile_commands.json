@@ -37,28 +37,6 @@
       "-c",
       "-nostdinc",
       "-o",
-      "os/bin/serial.o",
-      "os/src/serial.c"
-    ],
-    "directory": "${workspaceFolder}",
-    "file": "${workspaceFolder}/os/src/serial.c",
-    "output": "${workspaceFolder}/os/bin/serial.o"
-  },
-  {
-    "arguments": [
-      "/usr/bin/gcc",
-      "-Iinclude",
-      "-ffreestanding",
-      "-fno-stack-protector",
-      "-fno-stack-check",
-      "-mno-red-zone",
-      "-maccumulate-outgoing-args",
-      "-g",
-      "-Ios/include",
-      "-fpic",
-      "-c",
-      "-nostdinc",
-      "-o",
       "os/bin/allocator.o",
       "os/src/allocator.c"
     ],
