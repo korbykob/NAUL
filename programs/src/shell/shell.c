@@ -32,10 +32,10 @@ exit: Exit the shell\n\
 ping: Reply with \"Pong!\"\n\
 clear: Clear the terminal\n\
 kys: Panic the system\n\
-*: List files in the current directory\n\
-(foldername)/: Enter the folder\n\
+*: List files in the folder\n\
+(folder)/: Enter the folder\n\
 ..: Go back a folder\n\
-(filename): Execute the file\n");
+(file): Execute the file\n");
             }
             else if (compareStrings(command, "exit") == 0)
             {
