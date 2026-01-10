@@ -1,6 +1,7 @@
 #pragma once
 
 #include "syscalls.h"
+#include <definitions.h>
 
 static void put(char character)
 {
@@ -17,7 +18,7 @@ static void clear()
     SYSCALL_0(4);
 }
 
-static void read(char* buffer)
+static void read(char* buffer, uint64_t length)
 {
-    SYSCALL_1(5, buffer);
+    SYSCALL_2(5, buffer, length);
 }

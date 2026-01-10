@@ -15,7 +15,7 @@ void entry()
     while (true)
     {
         write(directory);
-        read(command);
+        read(command, 255);
         uint64_t commandLength = stringLength(command);
         if (commandLength)
         {

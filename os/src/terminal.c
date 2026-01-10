@@ -87,6 +87,7 @@ bool shift = false;
 bool caps = false;
 char* typingBuffer = 0;
 uint64_t typingCursor = 0;
+uint64_t typingLength = 0;
 
 void drawCharacter(char character, uint32_t x, uint32_t y, uint32_t colour)
 {
@@ -165,7 +166,7 @@ void terminalKeyboard()
                             }
                             break;
                         default:
-                            if (keyboardBuffer.buffer[i].pressed)
+                            if (keyboardBuffer.buffer[i].pressed && typingCursor < typingLength)
                             {
                                 char character = (caps ? !shift : shift) ? capsScancodes[keyboardBuffer.buffer[i].scancode] : scancodes[keyboardBuffer.buffer[i].scancode];
                                 if (character)
@@ -317,9 +318,10 @@ void clear()
     unlock(&writing);
 }
 
-void read(char* buffer)
+void read(char* buffer, uint64_t length)
 {
     typingCursor = 0;
     typingBuffer = getAddress(buffer);
+    typingLength = length;
     while (typingBuffer);
 }

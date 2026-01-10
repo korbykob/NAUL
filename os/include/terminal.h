@@ -10,4 +10,4 @@ void write(const char* message);
 
 void clear();
 
-void read(char* buffer);
+void read(char* buffer, uint64_t length);
