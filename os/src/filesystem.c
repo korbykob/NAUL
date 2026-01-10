@@ -142,7 +142,7 @@ const char** getFiles(const char* root, uint64_t* count)
     File* file = files;
     while (file)
     {
-        if (compareStart(file->name, root, length) == 0 && !stringContains(file->name + length, L'/'))
+        if (compareStrings(file->name, root) != 0 && compareStart(file->name, root, length) == 0 && !stringContains(file->name + length + 1, '/'))
         {
             *count = *count + 1;
         }
@@ -157,7 +157,7 @@ const char** getFiles(const char* root, uint64_t* count)
     file = files;
     while (file)
     {
-        if (compareStart(file->name, root, length) == 0 && !stringContains(file->name + length, L'/'))
+        if (compareStrings(file->name, root) != 0 && compareStart(file->name, root, length) == 0 && !stringContains(file->name + length + 1, '/'))
         {
             items[i] = file->name;
             i++;
