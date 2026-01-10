@@ -32,7 +32,7 @@ exit: Exit the shell\n\
 ping: Reply with \"Pong!\"\n\
 clear: Clear the terminal\n\
 kys: Panic the system\n\
-*: List files in the folder\n\
+(folder)/*: List files in the folder\n\
 (folder)/: Enter the folder\n\
 ..: Go back a folder\n\
 (file): Execute the file\n");
@@ -77,7 +77,7 @@ kys: Panic the system\n\
                     write("Folder does not exist\n");
                 }
             }
-            else if (buffer[bufferLength - 1] == '/')
+            else if (buffer[bufferLength - 1] == '/' && buffer[bufferLength - 2] != '/')
             {
                 buffer[bufferLength - 1] = '\0';
                 if (checkFolder(buffer))
