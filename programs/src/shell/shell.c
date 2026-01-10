@@ -32,7 +32,7 @@ exit: Exit the shell\n\
 ping: Reply with \"Pong!\"\n\
 clear: Clear the terminal\n\
 kys: Panic the system\n\
-files: List files in the current directory\n\
+*: List files in the current directory\n\
 ..: Go back a folder\n\
 (filename): Execute the file\n\
 (foldername)/: Enter the folder\n");
@@ -54,7 +54,7 @@ files: List files in the current directory\n\
                 write("Killing myself!\n");
                 __asm__ volatile ("ud2");
             }
-            else if (compareStrings(command, "files") == 0)
+            else if (compareStrings(command, "*") == 0)
             {
                 uint64_t count = 0;
                 const char** files = getFiles(directory, &count);
