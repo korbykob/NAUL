@@ -33,9 +33,9 @@ ping: Reply with \"Pong!\"\n\
 clear: Clear the terminal\n\
 kys: Panic the system\n\
 *: List files in the current directory\n\
+(foldername)/: Enter the folder\n\
 ..: Go back a folder\n\
-(filename): Execute the file\n\
-(foldername)/: Enter the folder\n");
+(filename): Execute the file\n");
             }
             else if (compareStrings(command, "exit") == 0)
             {
@@ -54,20 +54,45 @@ kys: Panic the system\n\
                 write("Killing myself!\n");
                 __asm__ volatile ("ud2");
             }
-            else if (compareStrings(command, "*") == 0)
+            else if (buffer[bufferLength - 2] == '/' && buffer[bufferLength - 1] == '*')
             {
-                uint64_t count = 0;
-                const char** files = getFiles(directory, &count);
-                for (uint64_t i = 0; i < count; i++)
+                buffer[bufferLength - 2] = '\0';
+                if (checkFolder(buffer))
                 {
-                    write(files[i] + directoryLength);
-                    if (checkFolder(files[i]))
+                    uint64_t count = 0;
+                    const char** files = getFiles(buffer, &count);
+                    for (uint64_t i = 0; i < count; i++)
                     {
-                        put('/');
+                        write(files[i] + bufferLength - 1);
+                        if (checkFolder(files[i]))
+                        {
+                            put('/');
+                        }
+                        put('\n');
                     }
-                    put('\n');
+                    unallocate(files);
                 }
-                unallocate(files);
+                else
+                {
+                    write("Folder does not exist\n");
+                }
+            }
+            else if (buffer[bufferLength - 1] == '/')
+            {
+                buffer[bufferLength - 1] = '\0';
+                if (checkFolder(buffer))
+                {
+                    unallocate(directory);
+                    directoryLength = bufferLength;
+                    directory = allocate(directoryLength + 1);
+                    copyString(buffer, directory);
+                    directory[directoryLength - 1] = '/';
+                    directory[directoryLength] = '\0';
+                }
+                else
+                {
+                    write("Folder does not exist\n");
+                }
             }
             else if (compareStrings(command, "..") == 0)
             {
@@ -92,19 +117,6 @@ kys: Panic the system\n\
                 else
                 {
                     write("File is not executable\n");
-                }
-            }
-            else if (buffer[bufferLength - 1] == '/')
-            {
-                buffer[bufferLength - 1] = '\0';
-                if (checkFolder(buffer))
-                {
-                    unallocate(directory);
-                    directoryLength = bufferLength;
-                    directory = allocate(directoryLength + 1);
-                    copyString(buffer, directory);
-                    directory[directoryLength - 1] = '/';
-                    directory[directoryLength] = '\0';
                 }
             }
             else
