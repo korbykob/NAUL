@@ -14,6 +14,12 @@
 #include <keyboard.h>
 #include <str.h>
 
+typedef struct
+{
+    void* next;
+    uint64_t address;
+} FramePointer;
+
 const Exception exceptions[32] = {
     { "Division error", false },
     { "Debug", false },
@@ -49,7 +55,7 @@ const Exception exceptions[32] = {
     { "", false }
 };
 
-void panic(uint8_t exception, uint32_t code, uint64_t address)
+void panic(uint8_t exception, uint32_t code)
 {
     __asm__ volatile ("cli");
     serialPut('\n');
@@ -62,27 +68,39 @@ void panic(uint8_t exception, uint32_t code, uint64_t address)
         toHex(codeString, code);
         serialWrite(codeString);
     }
-    serialWrite(" in ");
-    if (address > 0x8000000000)
+    serialWrite(" in:\n");
+    FramePointer* frame = 0;
+    __asm__ volatile ("movq %%rbp, %0" : "=g"(frame));
+    while (frame)
     {
-        address -= 0x8000000000;
-        serialWrite("a user process");
-    }
-    else
-    {
-        address -= getOffset();
-        uint64_t offset = 0;
-        serialWrite(getSymbol(address, &offset));
-        serialWrite("+0x");
+        uint64_t address = frame->address - 5;
+        bool process = address >= 0x8000000000;
+        if (process)
+        {
+            address -= 0x8000000000;
+            serialWrite("Within a process");
+        }
+        else
+        {
+            address -= getOffset();
+            uint64_t offset = 0;
+            serialWrite(getSymbol(address, &offset));
+            serialWrite("+0x");
+            char offsetString[17];
+            toHex(offsetString, offset);
+            serialWrite(offsetString);
+        }
+        serialWrite(" (0x");
         char offsetString[17];
-        toHex(offsetString, offset);
+        toHex(offsetString, address);
         serialWrite(offsetString);
+        serialWrite(")\n");
+        frame = frame->next;
+        if (process && frame->next == 0)
+        {
+            break;
+        }
     }
-    serialWrite(" (0x");
-    char offsetString[17];
-    toHex(offsetString, address);
-    serialWrite(offsetString);
-    serialWrite(")\n");
     __asm__ volatile ("hlt");
 }
 
@@ -113,14 +131,9 @@ void quit()
     exitThread();
 }
 
-void welcome()
-{
-    write("Welcome to NAUL (Not A Unix Like)!\n\nStarting shell, use \"help\" for more information:\n");
-    execute("/programs/shell.bin");
-}
-
 void kernel()
 {
+    __asm__ volatile ("xorq %rbp, %rbp");
     initGdt();
     initIdt();
     initPaging();
@@ -135,5 +148,6 @@ void kernel()
     initHpet();
     initTerminal();
     serialPrint("Yo puter ready B)");
-    welcome();
+    write("Welcome to NAUL (Not A Unix Like)!\n\nStarting shell, use \"help\" for more information:\n");
+    execute("/programs/shell.bin");
 }

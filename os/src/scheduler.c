@@ -90,7 +90,7 @@ uint64_t createThread(void (*function)())
     __asm__ volatile ("movq %%rsp, %0" : "=g"(currentThread->sp));
     currentThread = thread;
     __asm__ volatile ("movq %0, %%rsp" : : "g"(currentThread->sp));
-    pushRegisters();
+    __asm__ volatile ("pushq %rax; pushq %rbx; pushq %rcx; pushq %rdx; pushq %rsi; pushq %rdi; pushq $0; pushq %rsp; pushq %r8; pushq %r9; pushq %r10; pushq %r11; pushq %r12; pushq %r13; pushq %r14; pushq %r15");
     pushSseRegisters();
     __asm__ volatile ("movq %%cr3, %%rax; pushq %%rax" : : : "%rax");
     __asm__ volatile ("movq %%rsp, %0" : "=g"(currentThread->sp));

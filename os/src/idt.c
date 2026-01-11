@@ -18,18 +18,19 @@ const struct {
 } __attribute__((packed)) idtr = { 4095, (uint64_t)idt };
 extern uint8_t decSize;
 uint8_t exceptionNumber = 31;
-uint64_t code = 0;
-uint64_t address = 0;
+uint64_t codeA = 0;
+uint64_t codeB = 0;
 
 void isr()
 {
+    __asm__ volatile ("isrStart:");
     if (exceptions[exceptionNumber].code)
     {
-        panic(exceptionNumber, code, address);
+        __asm__ volatile ("pushq %0; movq %1, %%rdi; movq %2, %%rsi; jmp panic" : : "g"(codeB + 5), "g"((uint64_t)exceptionNumber), "g"(codeA));
     }
     else
     {
-        panic(exceptionNumber, 0, code);
+        __asm__ volatile ("pushq %0; movq %1, %%rdi; movq $0, %%rsi; jmp panic" : : "g"(codeA + 5), "g"((uint64_t)exceptionNumber));
     }
 }
 
@@ -67,9 +68,9 @@ __attribute__((naked)) void exception()
     __asm__ volatile ("decb exceptionNumber(%rip)");
     __asm__ volatile ("decb exceptionNumber(%rip)");
     __asm__ volatile ("decb exceptionNumber(%rip)");
-    __asm__ volatile ("movq (%%rsp), %0" : "=r"(code));
-    __asm__ volatile ("movq 8(%%rsp), %0" : "=r"(address));
-    __asm__ volatile ("jmp isr");
+    __asm__ volatile ("movq (%%rsp), %0" : "=r"(codeA));
+    __asm__ volatile ("movq 8(%%rsp), %0" : "=r"(codeB));
+    __asm__ volatile ("jmp isrStart");
     __asm__ volatile ("decSize: .byte decEnd - exception");
 }
 
