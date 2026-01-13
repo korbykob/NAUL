@@ -23,7 +23,6 @@ void entry()
             char* buffer = allocate(bufferLength + 1);
             copyString(directory, buffer);
             copyString(command, buffer + directoryLength);
-            buffer[bufferLength] = '\0';
             if (compareStrings(command, "help") == 0)
             {
                 write("\

@@ -105,10 +105,7 @@ void createFolder(const char* name)
     files->prev = file;
     uint64_t length = stringLength(name) + 1;
     file->name = allocate(length);
-    for (uint64_t i = 0; i < length; i++)
-    {
-        file->name[i] = name[i];
-    }
+    copyString(name, file->name);
     file->size = 0;
     file->data = 0;
     unlock(&managingFiles);
@@ -124,10 +121,7 @@ void* createFile(const char* name, uint64_t size)
     files->prev = file;
     uint64_t length = stringLength(name) + 1;
     file->name = allocate(length);
-    for (uint64_t i = 0; i < length; i++)
-    {
-        file->name[i] = name[i];
-    }
+    copyString(name, file->name);
     file->size = size;
     file->data = allocate(size);
     unlock(&managingFiles);

@@ -193,6 +193,7 @@ static void copyString(const char* source, char* destination)
     {
         *destination++ = *source++;
     }
+    *destination = '\0';
 }
 
 static bool stringContains(const char* string, char character)
