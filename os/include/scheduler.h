@@ -12,3 +12,7 @@ void destroyThread(uint64_t id);
 
 void exitThread();
 
+static void yieldThread()
+{
+    __asm__ volatile ("int $0x67");
+}

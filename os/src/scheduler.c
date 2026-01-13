@@ -1,5 +1,6 @@
 #include <scheduler.h>
 #include <serial.h>
+#include <idt.h>
 #include <allocator.h>
 #include <cpu.h>
 
@@ -23,9 +24,21 @@ typedef struct
 Thread* threads = 0;
 Thread* currentThread = 0;
 
+__attribute__((naked)) void skipThread()
+{
+    pushRegisters();
+    pushSseRegisters();
+    __asm__ volatile ("movq %cr3, %rax; pushq %rax");
+    __asm__ volatile ("movq %%rsp, %0" : "=g"(currentThread->sp));
+    __asm__ volatile ("movq %1, %0" : "=g"(currentThread) : "g"(currentThread->next));
+    __asm__ volatile ("jmp nextThread");
+}
+
 void initScheduler()
 {
     serialPrint("Setting up scheduler");
+    installIsr(0x67, skipThread);
+    serialPrint("Creating main thread");
     threads = allocate(sizeof(Thread));
     threads->next = threads;
     threads->prev = threads;
