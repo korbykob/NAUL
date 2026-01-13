@@ -6,6 +6,7 @@
 #include <scheduler.h>
 #include <str.h>
 #include <cpu.h>
+#include <mem.h>
 
 typedef struct {
     void* next;
@@ -44,10 +45,7 @@ void initFilesystem()
         else
         {
             uint8_t* data = createFile(information.fileData[i].name, information.fileData[i].size);
-            for (uint64_t j = 0; j < information.fileData[i].size; j++)
-            {
-                data[j] = information.fileData[i].data[j];
-            }
+            copyMemory(information.fileData[i].data, data, information.fileData[i].size);
         }
     }
     serialPrint("Set up filesystem");
