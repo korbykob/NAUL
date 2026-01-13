@@ -8,15 +8,16 @@
 #include <paging.h>
 #include <keyboard.h>
 #include <cpu.h>
+#include <mem.h>
 
 uint8_t* font = 0;
-uint32_t* backBuffer = 0;
+char* backBuffer = 0;
 uint32_t terminalWidth = 0;
 uint32_t terminalHeight = 0;
 uint32_t cursorX = 0;
 uint32_t cursorY = 0;
 bool writing = false;
-const char scancodes[] = {
+const char scancodes[256] = {
     0, 0, '1', '2', '3', '4', '5', '6', '7', '8', /* 9 */
     '9', '0', '-', '=', 0, /* Backspace */
     0, /* Tab */
@@ -24,7 +25,7 @@ const char scancodes[] = {
     't', 'y', 'u', 'i', 'o', 'p', '[', ']', 0, /* Enter key */
     0, /* 29 - Control */
     'a', 's', 'd', 'f', 'g', 'h', 'j', 'k', 'l', ';', /* 39 */
-    '\'', '`',  0, /* Left shift */
+    '\'', '`', 0, /* Left shift */
     '\\', 'z', 'x', 'c', 'v', 'b', 'n', /* 49 */
     'm', ',', '.', '/', 0, /* Right shift */
     '*', 0, /* Alt */
@@ -48,7 +49,7 @@ const char scancodes[] = {
     0, /* F12 Key */
     0 /* All other keys are undefined */
 };
-const char capsScancodes[] = {
+const char capsScancodes[256] = {
     0, 0, '!', '@', '#', '$', '%', '^', '&', '*', /* 9 */
     '(', ')', '_', '+', 0, /* Backspace */
     0, /* Tab */
@@ -56,7 +57,7 @@ const char capsScancodes[] = {
     'T', 'Y', 'U', 'I', 'O', 'P', '{', '}', 0, /* Enter key */
     0, /* 29 - Control */
     'A', 'S', 'D', 'F', 'G', 'H', 'J', 'K', 'L', ':', /* 39 */
-    '"', '~',  0, /* Left shift */
+    '"', '~', 0, /* Left shift */
     '|', 'Z', 'X', 'C', 'V', 'B', 'N', /* 49 */
     'M', '<', '>', '?', 0, /* Right shift */
     '*', 0, /* Alt */
@@ -92,7 +93,6 @@ uint64_t typingLength = 0;
 void drawCharacter(char character, uint32_t x, uint32_t y, uint32_t colour)
 {
     uint32_t* address = information.framebuffer + y * information.width + x;
-    uint32_t* backAddress = backBuffer + y * information.width + x;
     uint8_t* glyph = font + 32 + 64 * character;
     for (uint8_t y = 0; y < 64; y += 2)
     {
@@ -101,23 +101,18 @@ void drawCharacter(char character, uint32_t x, uint32_t y, uint32_t colour)
             if (glyph[y] & (0b10000000 >> x))
             {
                 *address = colour;
-                *backAddress = colour;
             }
             address++;
-            backAddress++;
         }
         for (uint8_t x = 0; x < 8; x++)
         {
             if (glyph[y + 1] & (0b10000000 >> x))
             {
                 *address = colour;
-                *backAddress = colour;
             }
             address++;
-            backAddress++;
         }
         address += information.width - 16;
-        backAddress += information.width - 16;
     }
 }
 
@@ -193,16 +188,13 @@ void initTerminal()
     registerSyscall(5, read);
     serialPrint("Loading font");
     font = getFile("/naul/font.psf", 0);
-    serialPrint("Allocating back buffer");
-    backBuffer = allocate(information.width * information.height * sizeof(uint32_t));
-    serialPrint("Clearing out back buffer");
-    for (uint64_t i = 0; i < information.width * information.height; i++)
-    {
-        backBuffer[i] = 0;
-    }
     serialPrint("Setting up terminal graphics");
     terminalWidth = information.width / 16;
     terminalHeight = information.height / 32;
+    serialPrint("Allocating back buffer");
+    backBuffer = allocate(terminalWidth * terminalHeight * sizeof(char));
+    serialPrint("Setting up back buffer");
+    setMemory(backBuffer, '\0', terminalWidth * terminalHeight);
     drawCharacter('_', 0, 0, 0);
     serialPrint("Registering keyboard handler");
     keyboardBuffer.current = 0;
@@ -211,41 +203,43 @@ void initTerminal()
     serialPrint("Set up terminal");
 }
 
-void drawRectangle(uint32_t x, uint32_t y, uint32_t sizeX, uint32_t sizeY, uint32_t colour)
-{
-    uint64_t colours = ((uint64_t)colour << 32) | colour;
-    uint64_t* address = (uint64_t*)(information.framebuffer + y * information.width + x);
-    uint64_t* backAddress = (uint64_t*)(backBuffer + y * information.width + x);
-    uint32_t drop = (information.width - sizeX) / 2;
-    for (uint32_t y = 0; y < sizeY; y++)
-    {
-        for (uint32_t x = 0; x < sizeX; x += 2)
-        {
-            *address++ = colours;
-            *backAddress++ = colours;
-        }
-        address += drop;
-        backAddress += drop;
-    }
-}
-
 void drop()
 {
-    uint64_t* destination = (uint64_t*)information.framebuffer;
-    uint64_t* backDestination = (uint64_t*)backBuffer;
-    uint64_t* source = (uint64_t*)(backBuffer + 32 * information.width);
-    for (uint64_t i = 0; i < information.width * (information.height - 32); i += 2)
+    uint64_t x = 0;
+    uint64_t y = 0;
+    char* buffer = backBuffer;
+    char* bufferDrop = backBuffer;
+    for (uint64_t i = 0; i < terminalWidth * terminalHeight; i++)
     {
-        *destination++ = *source;
-        *backDestination++ = *source++;
+        if (*buffer != '\0')
+        {
+            drawCharacter(*buffer, x * 16, y * 32, 0);
+        }
+        if (i >= terminalWidth)
+        {
+            *bufferDrop = *buffer;
+            if (*bufferDrop != '\0')
+            {
+                drawCharacter(*bufferDrop, x * 16, (y - 1) * 32, 0x989898);
+            }
+            bufferDrop++;
+        }
+        buffer++;
+        x++;
+        if (x == terminalWidth)
+        {
+            y++;
+            x = 0;
+        }
     }
-    drawRectangle(0, information.height - 32, information.width, 32, 0);
+    setMemory(backBuffer + (terminalHeight - 1) * terminalWidth, '\0', terminalWidth);
 }
 
 void put(char character)
 {
     lock(&writing);
     drawCharacter('_', cursorX * 16, cursorY * 32, 0);
+    backBuffer[cursorY * terminalWidth + cursorX] = '\0';
     if (character == '\b')
     {
         if (cursorX > 0)
@@ -257,13 +251,15 @@ void put(char character)
             cursorY--;
             cursorX = terminalWidth - 1;
         }
-        drawRectangle(cursorX * 16, cursorY * 32, 16, 32, 0);
+        drawCharacter(backBuffer[cursorY * terminalWidth + cursorX], cursorX * 16, cursorY * 32, 0);
+        backBuffer[cursorY * terminalWidth + cursorX] = '\0';
     }
     else
     {
         if (character != '\n')
         {
             drawCharacter(character, cursorX * 16, cursorY * 32, 0x989898);
+            backBuffer[cursorY * terminalWidth + cursorX] = character;
             cursorX++;
             if (cursorX == terminalWidth)
             {
@@ -292,6 +288,7 @@ void put(char character)
         }
     }
     drawCharacter('_', cursorX * 16, cursorY * 32, 0x989898);
+    backBuffer[cursorY * terminalWidth + cursorX] = '_';
     unlock(&writing);
 }
 
@@ -306,12 +303,23 @@ void write(const char* message)
 void clear()
 {
     lock(&writing);
-    uint64_t* destination = (uint64_t*)information.framebuffer;
-    uint64_t* backDestination = (uint64_t*)backBuffer;
-    for (uint64_t i = 0; i < information.width * information.height; i += 2)
+    uint64_t x = 0;
+    uint64_t y = 0;
+    char* buffer = backBuffer;
+    for (uint64_t i = 0; i < terminalWidth * terminalHeight; i++)
     {
-        *destination++ = 0;
-        *backDestination++ = 0;
+        if (*buffer != '\0')
+        {
+            drawCharacter(*buffer, x * 16, y * 32, 0);
+            *buffer = '\0';
+        }
+        buffer++;
+        x++;
+        if (x == terminalWidth)
+        {
+            y++;
+            x = 0;
+        }
     }
     cursorX = 0;
     cursorY = 0;
