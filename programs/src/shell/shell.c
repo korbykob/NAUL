@@ -38,6 +38,8 @@ kys: Panic the system\n\
             }
             else if (compareStrings(command, "exit") == 0)
             {
+                unallocate(buffer);
+                unallocate(directory);
                 quit();
             }
             else if (compareStrings(command, "ping") == 0)
