@@ -78,3 +78,21 @@ void registerKeyboard(KeyboardBuffer* buffer)
     element->buffer = buffer;
     unlock(&managingKeyboards);
 }
+
+void unregisterKeyboard(KeyboardBuffer* buffer)
+{
+    lock(&managingKeyboards);
+    KeyboardBufferElement* element = keyboardBuffers;
+    while (element)
+    {
+        if (element->buffer == buffer)
+        {
+            ((KeyboardBufferElement*)element->prev)->next = element->next;
+            ((KeyboardBufferElement*)element->next)->prev = element->prev;
+            unallocate(element);
+            break;
+        }
+        element = element->next;
+    }
+    unlock(&managingKeyboards);
+}

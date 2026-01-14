@@ -15,3 +15,5 @@ typedef struct
 void initKeyboard();
 
 void registerKeyboard(KeyboardBuffer* buffer);
+
+void unregisterKeyboard(KeyboardBuffer* buffer);
