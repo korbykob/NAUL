@@ -126,6 +126,7 @@ void destroyThread(uint64_t id)
         current = current->next;
     }
     ((Thread*)current->prev)->next = current->next;
+    ((Thread*)current->next)->prev = current->prev;
     unallocate(current);
     __asm__ volatile ("sti");
 }
