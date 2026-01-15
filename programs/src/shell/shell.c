@@ -74,7 +74,7 @@ TERM_GREEN "(file)     " TERM_DEFAULT ": Execute the file\n");
                         write(files[i] + bufferLength - 1);
                         if (folder)
                         {
-                            write(TERM_DEFAULT);
+                            write("/" TERM_DEFAULT);
                         }
                         put('\n');
                     }
