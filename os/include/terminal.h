@@ -2,10 +2,10 @@
 
 #include <definitions.h>
 
-#define DEFAULT "\xff\x00"
-#define WHITE "\xff\x01"
-#define BLUE "\xff\x02"
-#define GREEN "\xff\x03"
+#define TERM_DEFAULT "\xff\x00"
+#define TERM_WHITE "\xff\x01"
+#define TERM_BLUE "\xff\x02"
+#define TERM_GREEN "\xff\x03"
 
 void initTerminal();
 

@@ -14,9 +14,9 @@ void entry()
     char command[256];
     while (true)
     {
-        write(BLUE);
+        write(TERM_BLUE);
         write(directory);
-        write(DEFAULT);
+        write(TERM_DEFAULT);
         read(command, 255);
         uint64_t commandLength = stringLength(command);
         if (commandLength)
@@ -28,15 +28,15 @@ void entry()
             if (compareStrings(command, "help") == 0)
             {
                 write(
-GREEN "help       " DEFAULT ": Shows this info screen\n"
-GREEN "exit       " DEFAULT ": Exit the shell\n"
-GREEN "ping       " DEFAULT ": Reply with \"Pong!\"\n"
-GREEN "clear      " DEFAULT ": Clear the terminal\n"
-GREEN "kys        " DEFAULT ": Panic the system\n"
-GREEN "(folder)/* " DEFAULT ": List files in the folder\n"
-GREEN "(folder)/  " DEFAULT ": Enter the folder\n"
-GREEN "..         " DEFAULT ": Go back a folder\n"
-GREEN "(file)     " DEFAULT ": Execute the file\n");
+TERM_GREEN "help       " TERM_DEFAULT ": Shows this info screen\n"
+TERM_GREEN "exit       " TERM_DEFAULT ": Exit the shell\n"
+TERM_GREEN "ping       " TERM_DEFAULT ": Reply with \"Pong!\"\n"
+TERM_GREEN "clear      " TERM_DEFAULT ": Clear the terminal\n"
+TERM_GREEN "kys        " TERM_DEFAULT ": Panic the system\n"
+TERM_GREEN "(folder)/* " TERM_DEFAULT ": List files in the folder\n"
+TERM_GREEN "(folder)/  " TERM_DEFAULT ": Enter the folder\n"
+TERM_GREEN "..         " TERM_DEFAULT ": Go back a folder\n"
+TERM_GREEN "(file)     " TERM_DEFAULT ": Execute the file\n");
             }
             else if (compareStrings(command, "exit") == 0)
             {
@@ -69,12 +69,12 @@ GREEN "(file)     " DEFAULT ": Execute the file\n");
                         bool folder = checkFolder(files[i]);
                         if (folder)
                         {
-                            write(BLUE);
+                            write(TERM_BLUE);
                         }
                         write(files[i] + bufferLength - 1);
                         if (folder)
                         {
-                            write(DEFAULT);
+                            write(TERM_DEFAULT);
                         }
                         put('\n');
                     }

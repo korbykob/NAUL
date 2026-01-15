@@ -149,6 +149,6 @@ void kernel()
     initHpet();
     initTerminal();
     serialPrint("Yo puter ready B)");
-    write("Welcome to " WHITE "NAUL" DEFAULT " (Not A Unix Like)!\n\nStarting shell, use \"help\" for more information:\n");
+    write("Welcome to " TERM_WHITE "NAUL" TERM_DEFAULT " (Not A Unix Like)!\n\nStarting shell, use \"help\" for more information:\n");
     execute("/programs/shell.bin");
 }
