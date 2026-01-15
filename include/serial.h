@@ -18,9 +18,9 @@ static void serialWrite(const char* string)
 
 static void serialPrint(const char* string)
 {
-    serialPut('[');
+    serialWrite("\e[1;34m[");
     serialWrite(__builtin_strrchr(__BASE_FILE__, '/') + 1);
-    serialWrite("]: ");
+    serialWrite("]:\e[0m ");
     serialWrite(string);
     serialPut('\n');
 }

@@ -58,7 +58,7 @@ const Exception exceptions[32] = {
 void panic(uint8_t exception, uint32_t code)
 {
     __asm__ volatile ("cli");
-    serialPut('\n');
+    serialWrite("\e[91m\n");
     serialWrite(exceptions[exception].name);
     serialWrite(" occured");
     if (exceptions[exception].code)
@@ -101,6 +101,7 @@ void panic(uint8_t exception, uint32_t code)
             break;
         }
     }
+    serialWrite("\e[0m");
     __asm__ volatile ("hlt");
 }
 
