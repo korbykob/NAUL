@@ -14,7 +14,9 @@ void entry()
     char command[256];
     while (true)
     {
+        write(BLUE);
         write(directory);
+        write(DEFAULT);
         read(command, 255);
         uint64_t commandLength = stringLength(command);
         if (commandLength)
@@ -25,16 +27,16 @@ void entry()
             copyString(command, buffer + directoryLength);
             if (compareStrings(command, "help") == 0)
             {
-                write("\
-help: Shows this info screen\n\
-exit: Exit the shell\n\
-ping: Reply with \"Pong!\"\n\
-clear: Clear the terminal\n\
-kys: Panic the system\n\
-(folder)/*: List files in the folder\n\
-(folder)/: Enter the folder\n\
-..: Go back a folder\n\
-(file): Execute the file\n");
+                write(
+GREEN "help       " DEFAULT ": Shows this info screen\n"
+GREEN "exit       " DEFAULT ": Exit the shell\n"
+GREEN "ping       " DEFAULT ": Reply with \"Pong!\"\n"
+GREEN "clear      " DEFAULT ": Clear the terminal\n"
+GREEN "kys        " DEFAULT ": Panic the system\n"
+GREEN "(folder)/* " DEFAULT ": List files in the folder\n"
+GREEN "(folder)/  " DEFAULT ": Enter the folder\n"
+GREEN "..         " DEFAULT ": Go back a folder\n"
+GREEN "(file)     " DEFAULT ": Execute the file\n");
             }
             else if (compareStrings(command, "exit") == 0)
             {
@@ -64,10 +66,15 @@ kys: Panic the system\n\
                     const char** files = getFiles(buffer, &count);
                     for (uint64_t i = 0; i < count; i++)
                     {
-                        write(files[i] + bufferLength - 1);
-                        if (checkFolder(files[i]))
+                        bool folder = checkFolder(files[i]);
+                        if (folder)
                         {
-                            put('/');
+                            write(BLUE);
+                        }
+                        write(files[i] + bufferLength - 1);
+                        if (folder)
+                        {
+                            write(DEFAULT);
                         }
                         put('\n');
                     }

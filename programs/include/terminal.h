@@ -3,6 +3,11 @@
 #include "syscalls.h"
 #include <definitions.h>
 
+#define DEFAULT "\xff\x00"
+#define WHITE "\xff\x01"
+#define BLUE "\xff\x02"
+#define GREEN "\xff\x03"
+
 static void put(char character)
 {
     SYSCALL_1(2, character);
