@@ -217,7 +217,7 @@ void initTerminal()
     serialPrint("Allocating back buffer");
     backBuffer = allocate(terminalWidth * terminalHeight * sizeof(char) * 2);
     serialPrint("Setting up back buffer");
-    setMemory(backBuffer, '\0', terminalWidth * terminalHeight);
+    setMemory(backBuffer, '\0', terminalWidth * terminalHeight * 2);
     serialPrint("Creating blink thread");
     createThread(blinkThread);
     serialPrint("Registering keyboard handler");
