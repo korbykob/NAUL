@@ -2,6 +2,7 @@
 #include <allocator.h>
 #include <terminal.h>
 #include <kernel.h>
+#include <scheduler.h>
 #include <filesystem.h>
 #include <str.h>
 
@@ -120,7 +121,7 @@ TERM_GREEN "(file)     " TERM_DEFAULT ": Execute the file\n");
             {
                 if (compareStrings(buffer + bufferLength - 4, ".bin") == 0)
                 {
-                    execute(buffer);
+                    waitForThread(execute(buffer));
                 }
                 else
                 {

@@ -1,6 +1,7 @@
 #include <scheduler.h>
 #include <serial.h>
 #include <idt.h>
+#include <syscalls.h>
 #include <allocator.h>
 #include <cpu.h>
 
@@ -17,6 +18,7 @@ typedef struct
     void* next;
     void* prev;
     uint64_t id;
+    uint64_t waiting;
     uint8_t stack[0x100000];
     uint64_t sp;
 } Thread;
@@ -37,12 +39,17 @@ __attribute__((naked)) void skipThread()
 void initScheduler()
 {
     serialPrint("Setting up scheduler");
+    registerSyscall(17, createThread);
+    registerSyscall(18, waitForThread);
+    registerSyscall(19, destroyThread);
+    registerSyscall(20, exitThread);
     installIsr(0x67, skipThread);
     serialPrint("Creating main thread");
     threads = allocate(sizeof(Thread));
     threads->next = threads;
     threads->prev = threads;
     threads->id = 0;
+    threads->waiting = 0;
     __asm__ volatile ("movq %%rsp, %0" : "=g"(threads->sp));
     currentThread = threads;
     serialPrint("Set up scheduler");
@@ -55,8 +62,10 @@ __attribute__((naked)) void updateScheduler()
     __asm__ volatile ("movq %cr3, %rax; pushq %rax");
     __asm__ volatile ("movb $0x20, %al; outb %al, $0x20");
     __asm__ volatile ("movq %%rsp, %0" : "=g"(currentThread->sp));
+    __asm__ volatile ("tryNext:");
     __asm__ volatile ("movq %1, %0" : "=g"(currentThread) : "g"(currentThread->next));
     __asm__ volatile ("nextThread:");
+    __asm__ volatile ("testq %0, %0; jnz tryNext" : : "g"(currentThread->waiting));
     __asm__ volatile ("movq %0, %%rsp" : : "g"(currentThread->sp));
     __asm__ volatile ("popq %rax; movq %rax, %cr3");
     popSseRegisters();
@@ -92,6 +101,7 @@ uint64_t createThread(void (*function)())
         }
     }
     thread->id = id;
+    thread->waiting = 0;
     thread->sp = (uint64_t)&thread->stack + sizeof(thread->stack) - sizeof(InterruptFrame) - sizeof(void (**)());
     InterruptFrame* frame = (InterruptFrame*)thread->sp;
     frame->ip = (uint64_t)function;
@@ -117,6 +127,12 @@ uint64_t createThread(void (*function)())
     return id;
 }
 
+void waitForThread(uint64_t id)
+{
+    currentThread->waiting = id;
+    yieldThread();
+}
+
 void destroyThread(uint64_t id)
 {
     __asm__ volatile ("cli");
@@ -128,12 +144,38 @@ void destroyThread(uint64_t id)
     ((Thread*)current->prev)->next = current->next;
     ((Thread*)current->next)->prev = current->prev;
     unallocate(current);
+    current = threads;
+    while (true)
+    {
+        if (current->waiting == id)
+        {
+            current->waiting = 0;
+        }
+        current = current->next;
+        if (current == threads)
+        {
+            break;
+        }
+    }
     __asm__ volatile ("sti");
 }
 
 void exitThread()
 {
     __asm__ volatile ("cli");
+    Thread* current = threads;
+    while (true)
+    {
+        if (current->waiting == currentThread->id)
+        {
+            current->waiting = 0;
+        }
+        current = current->next;
+        if (current == threads)
+        {
+            break;
+        }
+    }
     Thread* next = currentThread->next;
     ((Thread*)currentThread->prev)->next = next;
     next->prev = currentThread->prev;

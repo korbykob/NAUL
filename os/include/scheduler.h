@@ -8,6 +8,8 @@ void updateScheduler();
 
 uint64_t createThread(void (*function)());
 
+void waitForThread(uint64_t id);
+
 void destroyThread(uint64_t id);
 
 void exitThread();
