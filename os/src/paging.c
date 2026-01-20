@@ -1,25 +1,21 @@
 #include <paging.h>
 #include <serial.h>
 #include <allocator.h>
+#include <cpu.h>
+#include <mem.h>
 
 uint64_t mainPdpt = 0;
 
 uint64_t createPDPT(void* start, uint64_t pages)
 {
     uint64_t* pdpt = (uint64_t*)allocateAligned(0x1000 + ((pages - 1) / 512 + 1) * 0x1000, 0x1000);
-    for (uint16_t i = 0; i < 512; i++)
-    {
-        pdpt[i] = 0;
-    }
+    setMemory(pdpt, 0, 0x1000);
     uint64_t address = (uint64_t)start;
     uint16_t table = 0;
     while (pages != 0)
     {
         uint64_t* pdt = pdpt + 512 + (table * 512);
-        for (uint16_t i = 0; i < 512; i++)
-        {
-            pdt[i] = 0;
-        }
+        setMemory(pdt, 0, 0x1000);
         uint16_t count = min(pages, 512);
         for (uint16_t i = 0; i < count; i++)
         {
@@ -38,12 +34,11 @@ void initPaging()
     serialPrint("Setting up paging");
     uint64_t* pml4t = (uint64_t*)allocateAligned(0x1000, 0x1000);
     serialPrint("Clearing out table");
-    for (uint16_t i = 0; i < 512; i++)
-    {
-        pml4t[i] = 0;
-    }
+    setMemory(pml4t, 0, 0x1000);
     serialPrint("Allocating first entry");
-    mainPdpt = createPDPT(0, 0x40000);
+    uint64_t* uefiPml4t = 0;
+    __asm__ volatile ("mov %%cr3, %0" : "=r"(uefiPml4t));
+    mainPdpt = uefiPml4t[0];
     pml4t[0] = mainPdpt;
     serialPrint("Applying paging");
     __asm__ volatile ("mov %0, %%cr3" : : "r"(pml4t));
@@ -53,10 +48,7 @@ void initPaging()
 uint64_t createTable(void* start, uint64_t pages)
 {
     uint64_t* pml4t = (uint64_t*)allocateAligned(0x1000, 0x1000);
-    for (uint16_t i = 0; i < 512; i++)
-    {
-        pml4t[i] = 0;
-    }
+    setMemory(pml4t, 0, 0x1000);
     pml4t[0] = mainPdpt;
     pml4t[1] = createPDPT(start, pages);
     return (uint64_t)pml4t;
