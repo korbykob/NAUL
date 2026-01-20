@@ -55,18 +55,10 @@ const Exception exceptions[32] = {
     { "", false }
 };
 
-bool panicked = false;
-
 void panic(uint8_t exception, uint32_t code)
 {
     __asm__ volatile ("cli");
     serialWrite("\e[91m\n");
-    if (panicked)
-    {
-        serialWrite("Error occured during panic\e[0m\n");
-        __asm__ volatile ("hlt");
-    }
-    panicked = true;
     serialWrite(exceptions[exception].name);
     serialWrite(" occured");
     if (exceptions[exception].code)
@@ -87,7 +79,7 @@ void panic(uint8_t exception, uint32_t code)
             address -= 0x8000000000;
             serialWrite("Within a process");
         }
-        else
+        else if (address >= getOffset())
         {
             address -= getOffset();
             uint64_t offset = 0;
@@ -96,6 +88,11 @@ void panic(uint8_t exception, uint32_t code)
             char offsetString[17];
             toHex(offsetString, offset);
             serialWrite(offsetString);
+        }
+        else
+        {
+            serialWrite("An error occured parsing the stack trace\n");
+            break;
         }
         serialWrite(" (0x");
         char offsetString[17];
