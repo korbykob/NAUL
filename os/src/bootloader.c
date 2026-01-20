@@ -247,6 +247,7 @@ EFI_STATUS efi_main(EFI_HANDLE ImageHandle, EFI_SYSTEM_TABLE* SystemTable)
     information.framebuffer = (uint32_t*)GOP->Mode->FrameBufferBase;
     information.width = GOP->Mode->Info->HorizontalResolution;
     information.height = GOP->Mode->Info->VerticalResolution;
+    __asm__ volatile ("xorq %rbp, %rbp");
     kernel();
     while (TRUE);
     return EFI_SUCCESS;

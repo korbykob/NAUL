@@ -74,8 +74,7 @@ void panic(uint8_t exception, uint32_t code)
     while (frame)
     {
         uint64_t address = frame->address - 5;
-        bool process = address >= 0x8000000000;
-        if (process)
+        if (address >= 0x8000000000)
         {
             address -= 0x8000000000;
             serialWrite("Within a process");
@@ -96,7 +95,7 @@ void panic(uint8_t exception, uint32_t code)
         serialWrite(offsetString);
         serialWrite(")\n");
         frame = frame->next;
-        if (process && frame->next == 0)
+        if (frame->next == 0)
         {
             break;
         }
@@ -134,7 +133,6 @@ void quit()
 
 void kernel()
 {
-    __asm__ volatile ("xorq %rbp, %rbp");
     initGdt();
     initIdt();
     initPaging();
