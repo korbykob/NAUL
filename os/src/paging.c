@@ -6,29 +6,6 @@
 
 uint64_t mainPdpt = 0;
 
-uint64_t createPDPT(void* start, uint64_t pages)
-{
-    uint64_t* pdpt = (uint64_t*)allocateAligned(0x1000 + ((pages - 1) / 512 + 1) * 0x1000, 0x1000);
-    setMemory(pdpt, 0, 0x1000);
-    uint64_t address = (uint64_t)start;
-    uint16_t table = 0;
-    while (pages != 0)
-    {
-        uint64_t* pdt = pdpt + 512 + (table * 512);
-        setMemory(pdt, 0, 0x1000);
-        uint16_t count = min(pages, 512);
-        for (uint16_t i = 0; i < count; i++)
-        {
-            pdt[i] = address | 0b10000011;
-            address += 0x200000;
-            pages--;
-        }
-        pdpt[table] = (uint64_t)pdt | 0b11;
-        table++;
-    }
-    return (uint64_t)pdpt | 0b11;
-}
-
 void initPaging()
 {
     serialPrint("Setting up paging");
@@ -47,10 +24,28 @@ void initPaging()
 
 uint64_t createTable(void* start, uint64_t pages)
 {
-    uint64_t* pml4t = (uint64_t*)allocateAligned(0x1000, 0x1000);
+    uint64_t* pml4t = (uint64_t*)allocateAligned(0x1000 + 0x1000 + ((pages - 1) / 512 + 1) * 0x1000, 0x1000);
     setMemory(pml4t, 0, 0x1000);
     pml4t[0] = mainPdpt;
-    pml4t[1] = createPDPT(start, pages);
+    uint64_t* pdpt = pml4t + 512;
+    setMemory(pdpt, 0, 0x1000);
+    uint64_t address = (uint64_t)start;
+    uint16_t table = 0;
+    while (pages != 0)
+    {
+        uint64_t* pdt = pdpt + 512 + (table * 512);
+        setMemory(pdt, 0, 0x1000);
+        uint16_t count = min(pages, 512);
+        for (uint16_t i = 0; i < count; i++)
+        {
+            pdt[i] = address | 0b10000011;
+            address += 0x200000;
+            pages--;
+        }
+        pdpt[table] = (uint64_t)pdt | 0b11;
+        table++;
+    }
+    pml4t[1] = (uint64_t)pdpt | 0b11;
     return (uint64_t)pml4t;
 }
 
