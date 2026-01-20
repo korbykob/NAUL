@@ -127,7 +127,7 @@ void quit()
     unallocate(getAddress((void*)0x8000000000));
     uint64_t table = 0;
     __asm__ volatile ("mov %%cr3, %0" : "=r"(table));
-    unallocateTable(table);
+    unallocate((void*)table);
     exitThread();
 }
 
