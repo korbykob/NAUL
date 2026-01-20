@@ -194,8 +194,11 @@ void blinkThread()
         if (femtoseconds - last >= femtosecondsPerSecond / 2)
         {
             last = femtoseconds;
-            drawCharacter('_', cursorX * 16, cursorY * 32, blink ? colours[colour] : 0);
-            blink = !blink;
+            if (!writing)
+            {
+                drawCharacter('_', cursorX * 16, cursorY * 32, blink ? colours[colour] : 0);
+                blink = !blink;
+            }
         }
         yieldThread();
     }
