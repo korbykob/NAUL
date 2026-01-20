@@ -37,7 +37,7 @@ TERM_GREEN "kys        " TERM_DEFAULT ": Panic the system\n"
 TERM_GREEN "(folder)/* " TERM_DEFAULT ": List files in the folder\n"
 TERM_GREEN "(folder)/  " TERM_DEFAULT ": Enter the folder\n"
 TERM_GREEN "..         " TERM_DEFAULT ": Go back a folder\n"
-TERM_GREEN "(file)     " TERM_DEFAULT ": Execute the file\n");
+TERM_GREEN "(file)     " TERM_DEFAULT ": Execute or read the file\n");
             }
             else if (compareStrings(command, "exit") == 0)
             {
@@ -125,7 +125,16 @@ TERM_GREEN "(file)     " TERM_DEFAULT ": Execute the file\n");
                 }
                 else
                 {
-                    write("File is not executable\n");
+                    uint64_t size = 0;
+                    const char* file = (const char*)getFile(buffer, &size);
+                    for (uint64_t i = 0; i < size; i++)
+                    {
+                        if (*file)
+                        {
+                            put(*file);
+                        }
+                        file++;
+                    }
                 }
             }
             else
