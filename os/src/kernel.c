@@ -55,10 +55,18 @@ const Exception exceptions[32] = {
     { "", false }
 };
 
+bool panicked = false;
+
 void panic(uint8_t exception, uint32_t code)
 {
     __asm__ volatile ("cli");
     serialWrite("\e[91m\n");
+    if (panicked)
+    {
+        serialWrite("Error occured during panic\e[0m\n");
+        __asm__ volatile ("hlt");
+    }
+    panicked = true;
     serialWrite(exceptions[exception].name);
     serialWrite(" occured");
     if (exceptions[exception].code)
