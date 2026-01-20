@@ -1,6 +1,8 @@
 #!/bin/bash
 set -e
 
+./build.sh
+
 sudo mkdir -p staging
 sudo mount /dev/sdb1 staging
 
