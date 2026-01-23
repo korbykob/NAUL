@@ -1,4 +1,5 @@
 #include <gdt.h>
+#include <definitions.h>
 #include <serial.h>
 
 const uint64_t gdt[3] =
