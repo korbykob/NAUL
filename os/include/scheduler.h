@@ -4,7 +4,7 @@
 
 void initScheduler();
 
-void updateScheduler();
+uint64_t getMilliseconds();
 
 uint64_t createThread(void (*function)());
 

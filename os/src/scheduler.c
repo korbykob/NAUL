@@ -1,6 +1,7 @@
 #include <scheduler.h>
 #include <serial.h>
 #include <idt.h>
+#include <pic.h>
 #include <syscalls.h>
 #include <allocator.h>
 #include <cpu.h>
@@ -23,6 +24,9 @@ typedef struct
     uint64_t sp;
 } Thread;
 
+bool pitWait = false;
+uint32_t ticksPerMillisecond = 0;
+uint64_t ticks = 0;
 Thread* threads = 0;
 Thread* currentThread = 0;
 
@@ -36,9 +40,38 @@ __attribute__((naked)) void skipThread()
     __asm__ volatile ("jmp nextThread");
 }
 
+__attribute__((naked)) void pitWaiter()
+{
+    __asm__ volatile ("pushw %ax");
+    __asm__ volatile ("movb $0, pitWait(%rip)");
+    __asm__ volatile ("movb $0x20, %al; outb %al, $0x20");
+    __asm__ volatile ("popw %ax");
+    __asm__ volatile ("iretq");
+}
+
+__attribute__((naked)) void updateScheduler()
+{
+    pushRegisters();
+    pushSseRegisters();
+    __asm__ volatile ("movq %cr3, %rax; pushq %rax");
+    __asm__ volatile ("movl $0xfee000B0, %eax; movl $0, (%eax)");
+    __asm__ volatile ("incq ticks(%rip)");
+    __asm__ volatile ("movq %%rsp, %0" : "=g"(currentThread->sp));
+    __asm__ volatile ("tryNext:");
+    __asm__ volatile ("movq %1, %0" : "=g"(currentThread) : "g"(currentThread->next));
+    __asm__ volatile ("nextThread:");
+    __asm__ volatile ("testq %0, %0; jnz tryNext" : : "g"(currentThread->waiting));
+    __asm__ volatile ("movq %0, %%rsp" : : "g"(currentThread->sp));
+    __asm__ volatile ("popq %rax; movq %rax, %cr3");
+    popSseRegisters();
+    popRegisters();
+    __asm__ volatile ("iretq");
+}
+
 void initScheduler()
 {
     serialPrint("Setting up scheduler");
+    registerSyscall(16, getMilliseconds);
     registerSyscall(17, createThread);
     registerSyscall(18, waitForThread);
     registerSyscall(19, destroyThread);
@@ -52,25 +85,34 @@ void initScheduler()
     threads->waiting = 0;
     __asm__ volatile ("movq %%rsp, %0" : "=g"(threads->sp));
     currentThread = threads;
+    serialPrint("Setting up PIT timer");
+    installIrq(0, pitWaiter);
+    unmaskPic(0);
+    serialPrint("Setting timer divisor");
+    *(uint32_t*)0xfee003E0 = 0x3;
+    serialPrint("Configuring PIT timer");
+    outb(0x43, 0b00110000);
+    uint16_t divisor = 1193182 / 1000;
+    outb(0x40, divisor & 0xFF);
+    outb(0x40, (divisor >> 8) & 0xFF);
+    *(uint32_t*)0xfee00380 = __UINT32_MAX__;
+    pitWait = true;
+    while (pitWait);
+    ticksPerMillisecond = __UINT32_MAX__ - *(uint32_t*)0xfee00390;
+    serialPrint("Stopping PIT timer");
+    maskPic(0);
+    serialPrint("Configuring LAPIC timer");
+    installIsr(32, updateScheduler);
+    serialPrint("Setting initial timer count");
+    *(uint32_t*)0xfee00380 = ticksPerMillisecond;
+    serialPrint("Setting interrupt vector");
+    *(uint32_t*)0xfee00320 = 0x20020;
     serialPrint("Set up scheduler");
 }
 
-__attribute__((naked)) void updateScheduler()
+uint64_t getMilliseconds()
 {
-    pushRegisters();
-    pushSseRegisters();
-    __asm__ volatile ("movq %cr3, %rax; pushq %rax");
-    __asm__ volatile ("movb $0x20, %al; outb %al, $0x20");
-    __asm__ volatile ("movq %%rsp, %0" : "=g"(currentThread->sp));
-    __asm__ volatile ("tryNext:");
-    __asm__ volatile ("movq %1, %0" : "=g"(currentThread) : "g"(currentThread->next));
-    __asm__ volatile ("nextThread:");
-    __asm__ volatile ("testq %0, %0; jnz tryNext" : : "g"(currentThread->waiting));
-    __asm__ volatile ("movq %0, %%rsp" : : "g"(currentThread->sp));
-    __asm__ volatile ("popq %rax; movq %rax, %cr3");
-    popSseRegisters();
-    popRegisters();
-    __asm__ volatile ("iretq");
+    return ticks;
 }
 
 uint64_t createThread(void (*function)())

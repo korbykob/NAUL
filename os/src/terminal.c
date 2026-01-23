@@ -4,7 +4,6 @@
 #include <filesystem.h>
 #include <allocator.h>
 #include <scheduler.h>
-#include <hpet.h>
 #include <syscalls.h>
 #include <paging.h>
 #include <keyboard.h>
@@ -187,13 +186,13 @@ void terminalKeyboard()
 void blinkThread()
 {
     bool blink = false;
-    uint64_t last = getFemtoseconds();
+    uint64_t last = getMilliseconds();
     while (true)
     {
-        uint64_t femtoseconds = getFemtoseconds();
-        if (femtoseconds - last >= femtosecondsPerSecond / 2)
+        uint64_t milliseconds = getMilliseconds();
+        if (milliseconds - last >= 1000 / 2)
         {
-            last = femtoseconds;
+            last = milliseconds;
             if (!writing)
             {
                 drawCharacter('_', cursorX * 16, cursorY * 32, blink ? colours[colour] : 0);

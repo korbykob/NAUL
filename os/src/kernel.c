@@ -10,7 +10,6 @@
 #include <syscalls.h>
 #include <pic.h>
 #include <scheduler.h>
-#include <hpet.h>
 #include <keyboard.h>
 #include <str.h>
 
@@ -147,9 +146,8 @@ void kernel()
     registerSyscall(0, execute);
     registerSyscall(1, quit);
     initPic();
-    initKeyboard();
     initScheduler();
-    initHpet();
+    initKeyboard();
     initTerminal();
     serialPrint("Yo puter ready B)");
     write("Welcome to " TERM_WHITE "NAUL" TERM_DEFAULT " (Not A Unix Like)!\n\nStarting shell, use \"" TERM_GREEN "help" TERM_DEFAULT "\" for more information:\n");
