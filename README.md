@@ -12,13 +12,14 @@ My operating system which is my own very Unix unlike OS, kinda the OS analogue o
 - PS/2 keyboard support
 - Allocator
 - Paging
-- HPET support
+- LAPIC timer support
 - Ram filesystem
 - Multithreading (and mutexes)
 - Terminal input and output
 - Symbol tables
 - Processes
-- Syscalls (WIP)
+- Terminal
+- Syscalls
 ## Plans
 You think I have plans? Pfft. Everything I say I'll never do, I end up doing anyways.
 ## Emulating
