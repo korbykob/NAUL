@@ -3,7 +3,6 @@
 #include <syscalls.h>
 #include <bootloader.h>
 #include <allocator.h>
-#include <scheduler.h>
 #include <str.h>
 #include <cpu.h>
 #include <mem.h>

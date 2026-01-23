@@ -1,7 +1,6 @@
 #include <allocator.h>
 #include <serial.h>
 #include <syscalls.h>
-#include <scheduler.h>
 #include <cpu.h>
 
 typedef struct

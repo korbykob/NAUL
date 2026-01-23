@@ -4,8 +4,6 @@
 #include <idt.h>
 #include <pic.h>
 #include <io.h>
-#include <scheduler.h>
-#include <paging.h>
 #include <cpu.h>
 
 typedef struct

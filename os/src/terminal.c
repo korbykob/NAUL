@@ -1,6 +1,6 @@
 #include <terminal.h>
-#include <bootloader.h>
 #include <serial.h>
+#include <bootloader.h>
 #include <filesystem.h>
 #include <allocator.h>
 #include <scheduler.h>

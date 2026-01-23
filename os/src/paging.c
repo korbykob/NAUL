@@ -1,7 +1,6 @@
 #include <paging.h>
 #include <serial.h>
 #include <allocator.h>
-#include <cpu.h>
 #include <mem.h>
 
 uint64_t mainPdpt = 0;
