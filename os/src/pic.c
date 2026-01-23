@@ -36,6 +36,18 @@ void unmaskPic(uint8_t interrupt)
     }
 }
 
+void maskPic(uint8_t interrupt)
+{
+    if (interrupt < 8)
+    {
+        outb(0x21, inb(0x21) | (1 << interrupt));
+    }
+    else
+    {
+        outb(0xA1, inb(0xA1) | (1 << (interrupt - 8)));
+    }
+}
+
 void picAck(uint8_t interrupt)
 {
     outb(0x20, 0x20);
