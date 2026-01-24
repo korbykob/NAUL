@@ -25,6 +25,7 @@ gcc $kernelCflags os/src/terminal.c -o os/bin/terminal.o
 gcc $kernelCflags os/src/paging.c -o os/bin/paging.o
 gcc $kernelCflags os/src/syscalls.c -o os/bin/syscalls.o
 gcc $kernelCflags os/src/pic.c -o os/bin/pic.o
+gcc $kernelCflags os/src/hpet.c -o os/bin/hpet.o
 gcc $kernelCflags os/src/scheduler.c -o os/bin/scheduler.o
 gcc $kernelCflags os/src/keyboard.c -o os/bin/keyboard.o
 gcc $kernelCflags os/src/kernel.c -o os/bin/kernel.o
@@ -40,6 +41,7 @@ os/bin/terminal.o \
 os/bin/paging.o \
 os/bin/syscalls.o \
 os/bin/pic.o \
+os/bin/hpet.o \
 os/bin/scheduler.o \
 os/bin/keyboard.o \
 os/bin/kernel.o \

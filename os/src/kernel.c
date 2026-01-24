@@ -9,6 +9,7 @@
 #include <paging.h>
 #include <syscalls.h>
 #include <pic.h>
+#include <hpet.h>
 #include <scheduler.h>
 #include <keyboard.h>
 #include <str.h>
@@ -146,6 +147,7 @@ void kernel()
     registerSyscall(0, execute);
     registerSyscall(1, quit);
     initPic();
+    initHpet();
     initScheduler();
     initKeyboard();
     initTerminal();

@@ -235,6 +235,28 @@
       "-c",
       "-nostdinc",
       "-o",
+      "os/bin/hpet.o",
+      "os/src/hpet.c"
+    ],
+    "directory": "${workspaceFolder}",
+    "file": "${workspaceFolder}/os/src/hpet.c",
+    "output": "${workspaceFolder}/os/bin/hpet.o"
+  },
+  {
+    "arguments": [
+      "/usr/bin/gcc",
+      "-Iinclude",
+      "-ffreestanding",
+      "-fno-stack-protector",
+      "-fno-stack-check",
+      "-mno-red-zone",
+      "-maccumulate-outgoing-args",
+      "-g",
+      "-Ios/include",
+      "-fpic",
+      "-c",
+      "-nostdinc",
+      "-o",
       "os/bin/scheduler.o",
       "os/src/scheduler.c"
     ],

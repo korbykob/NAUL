@@ -3,11 +3,6 @@
 #include "syscalls.h"
 #include <definitions.h>
 
-static uint64_t getMilliseconds()
-{
-    SYSCALL_0_RETURN(16, uint64_t);
-}
-
 static uint64_t createThread(void (*function)())
 {
     SYSCALL_1_RETURN(17, uint64_t, function);

@@ -5,8 +5,37 @@
 #include <allocator.h>
 #include <kernel.h>
 
+typedef struct
+{
+    char signature[4];
+    uint32_t length;
+    uint8_t revision;
+    uint8_t checksum;
+    char oemId[6];
+    char oemTableID[8];
+    uint32_t oemRevision;
+    uint32_t creatorID;
+    uint32_t creatorRevision;
+} __attribute__ ((packed)) AcpiSdtHeader;
+typedef struct
+{
+    AcpiSdtHeader header;
+    AcpiSdtHeader* entries[];
+} __attribute__ ((packed)) Xsdt;
+typedef struct 
+{
+    AcpiSdtHeader header;
+    uint32_t blockId;
+    uint32_t gas;
+    uint64_t address;
+    uint8_t number;
+    uint16_t minimum;
+    uint8_t protection;
+} __attribute__((packed)) Hpet;
+
 Info information = 
 {
+    0,
     0,
     0,
     0,
@@ -149,6 +178,27 @@ EFI_STATUS efi_main(EFI_HANDLE ImageHandle, EFI_SYSTEM_TABLE* SystemTable)
     }
     serialPrint("Switching GOP mode");
     uefi_call_wrapper(GOP->SetMode, 2, GOP, selected);
+    serialPrint("Searching tables");
+    EFI_GUID guid = ACPI_20_TABLE_GUID;
+    for (uint64_t i = 0; i < ST->NumberOfTableEntries; i++)
+    {
+        if (CompareGuid(&ST->ConfigurationTable[i].VendorGuid, &guid) == 0)
+        {
+            serialPrint("Found ACPI 2.0 table");
+            Xsdt* xsdt = *(Xsdt**)(ST->ConfigurationTable[i].VendorTable + 24);
+            serialPrint("Searching ACPI table");
+            for (uint32_t table = 0; table < (xsdt->header.length - sizeof(AcpiSdtHeader)) / sizeof(AcpiSdtHeader*); table++)
+            {
+                if (strncmpa(xsdt->entries[table]->signature, "HPET", 4) == 0)
+                {
+                    serialPrint("Found HPET");
+                    information.hpetAddress = ((Hpet*)xsdt->entries[table])->address;
+                    break;
+                }
+            }
+            break;
+        }
+    }
     serialPrint("Locating LIP protocol");
     EFI_LOADED_IMAGE* image = NULL;
     uefi_call_wrapper(BS->HandleProtocol, 3, ImageHandle, &LoadedImageProtocol, &image);

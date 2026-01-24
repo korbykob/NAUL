@@ -15,6 +15,7 @@ typedef struct
     uint32_t height;
     InitFile* fileData;
     uint64_t fileCount;
+    uint64_t hpetAddress;
 } Info;
 
 extern Info information;

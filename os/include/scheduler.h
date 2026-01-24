@@ -4,8 +4,6 @@
 
 void initScheduler();
 
-uint64_t getMilliseconds();
-
 uint64_t createThread(void (*function)());
 
 void waitForThread(uint64_t id);
