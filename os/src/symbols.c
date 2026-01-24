@@ -3,6 +3,7 @@
 #include <filesystem.h>
 #include <allocator.h>
 #include <str.h>
+#include <mem.h>
 
 uint64_t loadedOffset = 0;
 uint64_t symbolCount = 0;
@@ -27,9 +28,12 @@ void initSymbols()
     symbolAddresses = allocate(symbolCount * sizeof(uint64_t));
     symbolNames = allocate(symbolCount * sizeof(char**));
     serialPrint("Reading symbols file");
+    char name[17];
+    name[16] = '\0';
     for (uint64_t i = 0; i < symbolCount; i++)
     {
-        symbolAddresses[i] = fromHex(symbols);
+        copyMemory(symbols, name, 16);
+        symbolAddresses[i] = fromHex(name);
         symbols += 19;
         uint64_t length = 0;
         while (symbols[length] != '\n')
@@ -37,12 +41,9 @@ void initSymbols()
             length++;
         }
         symbolNames[i] = allocate(length + 1);
-        for (uint64_t j = 0; j < length; j++)
-        {
-            symbolNames[i][j] = *symbols++;
-        }
+        copyMemory(symbols, symbolNames[i], length);
         symbolNames[i][length] = '\0';
-        symbols++;
+        symbols += length + 1;
     }
     serialPrint("Calculating loaded offset");
     uint64_t offset = 0;
