@@ -91,10 +91,12 @@ void initScheduler()
     serialPrint("Setting timer divisor");
     *(uint32_t*)0xfee003E0 = 0x3;
     serialPrint("Configuring PIT timer");
-    outb(0x43, 0b00110000);
+    outb(0x43, 0b00110100);
     uint16_t divisor = 1193182 / 1000;
-    outb(0x40, divisor & 0xFF);
-    outb(0x40, (divisor >> 8) & 0xFF);
+    outb(0x40, divisor);
+    outb(0x40, divisor >> 8);
+    pitWait = true;
+    while (pitWait);
     *(uint32_t*)0xfee00380 = __UINT32_MAX__;
     pitWait = true;
     while (pitWait);
