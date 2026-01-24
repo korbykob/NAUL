@@ -29,7 +29,6 @@ void initSymbols()
     serialPrint("Reading symbols file");
     for (uint64_t i = 0; i < symbolCount; i++)
     {
-        symbols[16] = '\0';
         symbolAddresses[i] = fromHex(symbols);
         symbols += 19;
         uint64_t length = 0;

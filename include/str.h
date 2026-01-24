@@ -107,6 +107,9 @@ static uint64_t fromHex(const char* string)
     {
         switch (string[i])
         {
+            case '0':
+                result += 0 * value;
+                break;
             case '1':
                 result += 1 * value;
                 break;
@@ -151,6 +154,9 @@ static uint64_t fromHex(const char* string)
                 break;
             case 'f':
                 result += 15 * value;
+                break;
+            default:
+                i = 0;
                 break;
         }
         value *= 16;
