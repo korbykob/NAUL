@@ -55,8 +55,6 @@ __attribute__((naked)) void updateScheduler()
     __asm__ volatile ("iretq");
 }
 
-#include <str.h>
-
 void initScheduler()
 {
     serialPrint("Setting up scheduler");
