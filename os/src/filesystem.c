@@ -44,7 +44,7 @@ void initFilesystem()
         else
         {
             uint8_t* data = createFile(information.fileData[i].name, information.fileData[i].size);
-            copyMemory(information.fileData[i].data, data, information.fileData[i].size);
+            copyMemory8(information.fileData[i].data, data, information.fileData[i].size);
         }
     }
     serialPrint("Set up filesystem");

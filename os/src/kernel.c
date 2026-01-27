@@ -13,6 +13,7 @@
 #include <scheduler.h>
 #include <keyboard.h>
 #include <str.h>
+#include <mem.h>
 
 typedef struct
 {
@@ -115,10 +116,7 @@ uint64_t execute(const char* filename)
     uint8_t* data = getFile(filename, &size);
     size -= 4;
     uint8_t* program = allocateAligned(size, 0x200000);
-    for (uint64_t i = 0; i < size; i++)
-    {
-        program[i] = data[i + 4];
-    }
+    copyMemory8(data + 4, program, size);
     uint64_t table = 0;
     __asm__ volatile ("mov %%cr3, %0" : "=r"(table));
     __asm__ volatile ("mov %0, %%cr3" : : "r"(createTable(program, (size - 1) / 0x200000 + 1)));

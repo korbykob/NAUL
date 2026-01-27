@@ -10,7 +10,7 @@ void initPaging()
     serialPrint("Setting up paging");
     uint64_t* pml4t = (uint64_t*)allocateAligned(0x1000, 0x1000);
     serialPrint("Clearing out table");
-    setMemory(pml4t, 0, 0x1000);
+    setMemory64(pml4t, 0, 512);
     serialPrint("Allocating first entry");
     uint64_t* uefiPml4t = 0;
     __asm__ volatile ("mov %%cr3, %0" : "=r"(uefiPml4t));
@@ -24,16 +24,16 @@ void initPaging()
 uint64_t createTable(void* start, uint64_t pages)
 {
     uint64_t* pml4t = (uint64_t*)allocateAligned(0x1000 + 0x1000 + ((pages - 1) / 512 + 1) * 0x1000, 0x1000);
-    setMemory(pml4t, 0, 0x1000);
+    setMemory64(pml4t, 0, 512);
     pml4t[0] = mainPdpt;
     uint64_t* pdpt = pml4t + 512;
-    setMemory(pdpt, 0, 0x1000);
+    setMemory64(pdpt, 0, 512);
     uint64_t address = (uint64_t)start;
     uint16_t table = 0;
     while (pages != 0)
     {
         uint64_t* pdt = pdpt + 512 + (table * 512);
-        setMemory(pdt, 0, 0x1000);
+        setMemory64(pdt, 0, 512);
         uint16_t count = min(pages, 512);
         for (uint16_t i = 0; i < count; i++)
         {

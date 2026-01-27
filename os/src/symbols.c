@@ -32,7 +32,7 @@ void initSymbols()
     name[16] = '\0';
     for (uint64_t i = 0; i < symbolCount; i++)
     {
-        copyMemory(symbols, name, 16);
+        copyMemory8(symbols, name, 16);
         symbolAddresses[i] = fromHex(name);
         symbols += 19;
         uint64_t length = 0;
@@ -41,7 +41,7 @@ void initSymbols()
             length++;
         }
         symbolNames[i] = allocate(length + 1);
-        copyMemory(symbols, symbolNames[i], length);
+        copyMemory8(symbols, symbolNames[i], length);
         symbolNames[i][length] = '\0';
         symbols += length + 1;
     }

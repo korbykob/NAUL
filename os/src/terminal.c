@@ -220,7 +220,7 @@ void initTerminal()
     serialPrint("Allocating back buffer");
     backBuffer = allocate(terminalWidth * terminalHeight * sizeof(char) * 2);
     serialPrint("Setting up back buffer");
-    setMemory(backBuffer, '\0', terminalWidth * terminalHeight * 2);
+    setMemory16(backBuffer, '\0', terminalWidth * terminalHeight);
     serialPrint("Creating blink thread");
     createThread(blinkThread);
     serialPrint("Registering keyboard handler");
@@ -260,7 +260,7 @@ void drop()
             x = 0;
         }
     }
-    setMemory(backBuffer + (terminalHeight - 1) * terminalPitch, 0, terminalPitch);
+    setMemory8(backBuffer + (terminalHeight - 1) * terminalPitch, 0, terminalPitch);
 }
 
 void put(char character)
