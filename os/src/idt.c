@@ -1,6 +1,6 @@
 #include <idt.h>
 #include <serial.h>
-#include <kernel.h>
+#include <panic.h>
 
 struct
 {
