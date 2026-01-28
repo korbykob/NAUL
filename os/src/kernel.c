@@ -13,6 +13,7 @@
 #include <hpet.h>
 #include <scheduler.h>
 #include <keyboard.h>
+#include <display.h>
 #include <mem.h>
 
 uint64_t execute(const char* filename)
@@ -54,6 +55,7 @@ void kernel()
     initHpet();
     initScheduler();
     initKeyboard();
+    initDisplay();
     initTerminal();
     serialPrint("Yo puter ready B)");
     write("Welcome to " TERM_WHITE "NAUL" TERM_DEFAULT " (Not A Unix Like)!\n\nStarting shell, use \"" TERM_GREEN "help" TERM_DEFAULT "\" for more information:\n");

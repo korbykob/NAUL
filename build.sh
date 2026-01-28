@@ -29,6 +29,7 @@ gcc $kernelCflags os/src/hpet.c -o os/bin/hpet.o
 gcc $kernelCflags os/src/scheduler.c -o os/bin/scheduler.o
 gcc $kernelCflags os/src/keyboard.c -o os/bin/keyboard.o
 gcc $kernelCflags os/src/panic.c -o os/bin/panic.o
+gcc $kernelCflags os/src/display.c -o os/bin/display.o
 gcc $kernelCflags os/src/kernel.c -o os/bin/kernel.o
 
 ld $kernellLflags \
@@ -46,6 +47,7 @@ os/bin/hpet.o \
 os/bin/scheduler.o \
 os/bin/keyboard.o \
 os/bin/panic.o \
+os/bin/display.o \
 os/bin/kernel.o \
 -o os/bin/os.so -lgnuefi -lefi
 objcopy -j .text -j .sdata -j .data -j .rodata -j .dynamic -j .dynsym  -j .rel -j .rela -j .rel.* -j .rela.* -j .reloc --target efi-app-x86_64 --subsystem=10 os/bin/os.so os/bin/os.efi

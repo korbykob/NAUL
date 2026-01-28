@@ -323,6 +323,28 @@
       "-c",
       "-nostdinc",
       "-o",
+      "os/bin/display.o",
+      "os/src/display.c"
+    ],
+    "directory": "${workspaceFolder}",
+    "file": "${workspaceFolder}/os/src/display.c",
+    "output": "${workspaceFolder}/os/bin/display.o"
+  },
+  {
+    "arguments": [
+      "/usr/bin/gcc",
+      "-Iinclude",
+      "-ffreestanding",
+      "-fno-stack-protector",
+      "-fno-stack-check",
+      "-mno-red-zone",
+      "-maccumulate-outgoing-args",
+      "-g",
+      "-Ios/include",
+      "-fpic",
+      "-c",
+      "-nostdinc",
+      "-o",
       "os/bin/kernel.o",
       "os/src/kernel.c"
     ],
