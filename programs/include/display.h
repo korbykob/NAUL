@@ -7,7 +7,7 @@ typedef struct
 {
     uint32_t* buffer;
     uint32_t width;
-    uint64_t height;
+    uint32_t height;
 } Display;
 
 static void obtainDisplay(Display* display)
