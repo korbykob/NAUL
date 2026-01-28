@@ -1,9 +1,11 @@
 #include <keyboard.h>
 #include <serial.h>
+#include <syscalls.h>
 #include <allocator.h>
 #include <idt.h>
 #include <pic.h>
 #include <io.h>
+#include <paging.h>
 #include <cpu.h>
 
 typedef struct
@@ -48,6 +50,9 @@ __attribute__((naked)) void keyboardInterrupt()
 void initKeyboard()
 {
     serialPrint("Setting up PS/2 keyboard");
+    registerSyscall(21, registerKeyboard);
+    registerSyscall(22, unregisterKeyboard);
+    serialPrint("Allocating keyboard buffers");
     keyboardBuffers = allocate(sizeof(KeyboardBufferElement));
     keyboardBuffers->next = keyboardBuffers;
     keyboardBuffers->prev = keyboardBuffers;
@@ -72,17 +77,18 @@ void registerKeyboard(KeyboardBuffer* buffer)
     element->next = keyboardBuffers;
     element->prev = keyboardBuffers->prev;
     keyboardBuffers->prev = element;
-    element->buffer = buffer;
+    element->buffer = getAddress(buffer);
     __asm__ volatile ("sti");
 }
 
 void unregisterKeyboard(KeyboardBuffer* buffer)
 {
     __asm__ volatile ("cli");
+    KeyboardBuffer* address = getAddress(buffer);
     KeyboardBufferElement* element = keyboardBuffers;
     while (element)
     {
-        if (element->buffer == buffer)
+        if (element->buffer == address)
         {
             ((KeyboardBufferElement*)element->prev)->next = element->next;
             ((KeyboardBufferElement*)element->next)->prev = element->prev;
