@@ -14,6 +14,7 @@ typedef struct
     void* prev;
     KeyboardBuffer* buffer;
 } KeyboardBufferElement;
+
 KeyboardBufferElement* keyboardBuffers = 0;
 
 void keyboard()
@@ -27,9 +28,12 @@ void keyboard()
     KeyboardBufferElement* element = keyboardBuffers;
     while (true)
     {
-        element->buffer->buffer[element->buffer->current].scancode = scancode;
-        element->buffer->buffer[element->buffer->current].pressed = !unpressed;
-        element->buffer->current++;
+        if (element->buffer)
+        {
+            element->buffer->buffer[element->buffer->current].scancode = scancode;
+            element->buffer->buffer[element->buffer->current].pressed = !unpressed;
+            element->buffer->current++;
+        }
         element = element->next;
         if (element == keyboardBuffers)
         {
