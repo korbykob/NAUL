@@ -41,3 +41,23 @@ static void copyMemory64(void* source, void* destination, uint64_t count)
 {
     __asm__ volatile ("rep movsq" : "+S"(source), "+D"(destination), "+c"(count) : : "memory");
 }
+
+static void copyMemory128(void* source, void* destination, uint64_t count)
+{
+    for (uint64_t i = 0; i < count; i++)
+    {
+        __asm__ volatile ("vmovdqu %0, %%xmm1; vmovdqu %%xmm1, %1" : : "m"(*(uint8_t*)source), "m"(*(uint8_t*)destination) : "%xmm1", "memory");
+        source += 16;
+        destination += 16;
+    }
+}
+
+static void copyMemory256(void* source, void* destination, uint64_t count)
+{
+    for (uint64_t i = 0; i < count; i++)
+    {
+        __asm__ volatile ("vmovdqu %0, %%ymm1; vmovdqu %%ymm1, %1" : : "m"(*(uint8_t*)source), "m"(*(uint8_t*)destination) : "%ymm1", "memory");
+        source += 32;
+        destination += 32;
+    }
+}

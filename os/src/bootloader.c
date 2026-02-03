@@ -244,10 +244,13 @@ EFI_STATUS efi_main(EFI_HANDLE ImageHandle, EFI_SYSTEM_TABLE* SystemTable)
     }
     serialPrint("Exiting boot services");
     uefi_call_wrapper(BS->ExitBootServices, 2, ImageHandle, key);
-    serialPrint("Entering kernel");
+    serialPrint("Enabling AVX");
+    __asm__ volatile ("movq %%cr4, %%rax; xorq $0x40000, %%rax; movq %%rax, %%cr4; xorq %%rcx, %%rcx; xgetbv; orl $7, %%eax; xsetbv" : : : "%rdx", "%rcx", "%rax");
+    serialPrint("Setting up information");
     information.framebuffer = (uint32_t*)GOP->Mode->FrameBufferBase;
     information.width = GOP->Mode->Info->HorizontalResolution;
     information.height = GOP->Mode->Info->VerticalResolution;
+    serialPrint("Entering kernel");
     __asm__ volatile ("xorq %rbp, %rbp");
     kernel();
     while (TRUE);
