@@ -9,6 +9,8 @@ typedef struct
     uint32_t height;
 } Display;
 
+extern bool displayObtained;
+
 void initDisplay();
 
 void obtainDisplay(Display* display);

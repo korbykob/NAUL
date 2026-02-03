@@ -8,6 +8,7 @@
 #include <syscalls.h>
 #include <paging.h>
 #include <keyboard.h>
+#include <display.h>
 #include <cpu.h>
 #include <mem.h>
 
@@ -126,7 +127,7 @@ void terminalKeyboard()
     {
         if (keyboardBuffer.current > 0)
         {
-            for (uint64_t i = 0; i < keyboardBuffer.current; i++)
+            for (uint8_t i = 0; i < keyboardBuffer.current; i++)
             {
                 switch (keyboardBuffer.buffer[i].scancode)
                 {
@@ -194,7 +195,7 @@ void blinkThread()
         if (femtoseconds - last >= femtosecondsPerSecond / 2)
         {
             last = femtoseconds;
-            if (!writing)
+            if (!writing && !displayObtained)
             {
                 drawCharacter('_', cursorX * 16, cursorY * 32, blink ? colours[colour] : 0);
                 blink = !blink;
