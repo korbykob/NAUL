@@ -301,6 +301,28 @@
       "-c",
       "-nostdinc",
       "-o",
+      "os/bin/mouse.o",
+      "os/src/mouse.c"
+    ],
+    "directory": "${workspaceFolder}",
+    "file": "${workspaceFolder}/os/src/mouse.c",
+    "output": "${workspaceFolder}/os/bin/mouse.o"
+  },
+  {
+    "arguments": [
+      "/usr/bin/gcc",
+      "-Iinclude",
+      "-ffreestanding",
+      "-fno-stack-protector",
+      "-fno-stack-check",
+      "-mno-red-zone",
+      "-maccumulate-outgoing-args",
+      "-g",
+      "-Ios/include",
+      "-fpic",
+      "-c",
+      "-nostdinc",
+      "-o",
       "os/bin/panic.o",
       "os/src/panic.c"
     ],
@@ -375,6 +397,30 @@
     "directory": "${workspaceFolder}",
     "file": "${workspaceFolder}/programs/src/shell/shell.c",
     "output": "${workspaceFolder}/programs/bin/shell/shell.o"
+  },
+  {
+    "arguments": [
+      "/usr/bin/gcc",
+      "-Iinclude",
+      "-ffreestanding",
+      "-fno-stack-protector",
+      "-fno-stack-check",
+      "-mno-red-zone",
+      "-maccumulate-outgoing-args",
+      "-g",
+      "-Iprograms/include",
+      "-fno-pic",
+      "-fno-pie",
+      "-mcmodel=large",
+      "-c",
+      "-nostdinc",
+      "-o",
+      "programs/bin/desktop/desktop.o",
+      "programs/src/desktop/desktop.c"
+    ],
+    "directory": "${workspaceFolder}",
+    "file": "${workspaceFolder}/programs/src/desktop/desktop.c",
+    "output": "${workspaceFolder}/programs/bin/desktop/desktop.o"
   },
   {
     "arguments": [

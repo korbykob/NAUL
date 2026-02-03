@@ -12,8 +12,8 @@ bool displayObtained = false;
 void initDisplay()
 {
     serialPrint("Setting up display");
-    registerSyscall(23, obtainDisplay);
-    registerSyscall(24, releaseDisplay);
+    registerSyscall(25, obtainDisplay);
+    registerSyscall(26, releaseDisplay);
     serialPrint("Allocating backup display buffer");
     backup = allocate(information.width * information.height * sizeof(uint32_t));
     serialPrint("Set up display");

@@ -28,6 +28,7 @@ gcc $kernelCflags os/src/pic.c -o os/bin/pic.o
 gcc $kernelCflags os/src/hpet.c -o os/bin/hpet.o
 gcc $kernelCflags os/src/scheduler.c -o os/bin/scheduler.o
 gcc $kernelCflags os/src/keyboard.c -o os/bin/keyboard.o
+gcc $kernelCflags os/src/mouse.c -o os/bin/mouse.o
 gcc $kernelCflags os/src/panic.c -o os/bin/panic.o
 gcc $kernelCflags os/src/display.c -o os/bin/display.o
 gcc $kernelCflags os/src/kernel.c -o os/bin/kernel.o
@@ -46,6 +47,7 @@ os/bin/pic.o \
 os/bin/hpet.o \
 os/bin/scheduler.o \
 os/bin/keyboard.o \
+os/bin/mouse.o \
 os/bin/panic.o \
 os/bin/display.o \
 os/bin/kernel.o \

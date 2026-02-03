@@ -13,6 +13,7 @@
 #include <hpet.h>
 #include <scheduler.h>
 #include <keyboard.h>
+#include <mouse.h>
 #include <display.h>
 #include <mem.h>
 
@@ -55,6 +56,7 @@ void kernel()
     initHpet();
     initScheduler();
     initKeyboard();
+    initMouse();
     initDisplay();
     initTerminal();
     serialPrint("Yo puter ready B)");

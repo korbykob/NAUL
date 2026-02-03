@@ -12,10 +12,10 @@ typedef struct
 
 static void obtainDisplay(Display* display)
 {
-    SYSCALL_1(23, display);
+    SYSCALL_1(25, display);
 }
 
 static void releaseDisplay()
 {
-    SYSCALL_0(24);
+    SYSCALL_0(26);
 }
