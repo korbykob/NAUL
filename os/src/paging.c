@@ -8,16 +8,10 @@ uint64_t mainPdpt = 0;
 void initPaging()
 {
     serialPrint("Setting up paging");
-    uint64_t* pml4t = (uint64_t*)allocateAligned(0x1000, 0x1000);
-    serialPrint("Clearing out table");
-    setMemory64(pml4t, 0, 512);
-    serialPrint("Allocating first entry");
     uint64_t* uefiPml4t = 0;
     __asm__ volatile ("mov %%cr3, %0" : "=r"(uefiPml4t));
+    serialPrint("Storing paging");
     mainPdpt = uefiPml4t[0];
-    pml4t[0] = mainPdpt;
-    serialPrint("Applying paging");
-    __asm__ volatile ("mov %0, %%cr3" : : "r"(pml4t));
     serialPrint("Set up paging");
 }
 
