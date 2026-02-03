@@ -8,14 +8,14 @@ My operating system which is my own very Unix unlike OS, kinda the OS analogue o
 - Serial
 - Graphics
 - PSF font parsing
-- Interrupts
 - PS/2 keyboard support
+- PS/2 mouse support
 - Allocator
 - Paging
 - LAPIC timer support
+- HPET timer support
 - Ram filesystem
 - Multithreading (and mutexes)
-- Terminal input and output
 - Symbol tables
 - Processes
 - Terminal
