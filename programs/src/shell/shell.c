@@ -129,7 +129,7 @@ TERM_GREEN "(file)     " TERM_DEFAULT ": Execute or read the file\n");
                     const char* file = (const char*)getFile(buffer, &size);
                     for (uint64_t i = 0; i < size; i++)
                     {
-                        if (*file)
+                        if (*file != '\xff')
                         {
                             put(*file);
                         }

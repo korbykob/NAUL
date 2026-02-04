@@ -221,7 +221,7 @@ void initTerminal()
     serialPrint("Allocating back buffer");
     backBuffer = allocate(terminalWidth * terminalHeight * sizeof(char) * 2);
     serialPrint("Setting up back buffer");
-    setMemory16(backBuffer, '\0', terminalWidth * terminalHeight);
+    setMemory16(backBuffer, 0x00FF, terminalWidth * terminalHeight);
     serialPrint("Creating blink thread");
     createThread(blinkThread);
     serialPrint("Registering keyboard handler");
@@ -239,14 +239,14 @@ void drop()
     char* bufferDrop = backBuffer;
     for (uint64_t i = 0; i < terminalWidth * terminalHeight; i++)
     {
-        if (*buffer != '\0')
+        if (*buffer != '\xff')
         {
             drawCharacter(*buffer, x * 16, y * 32, 0);
         }
         if (i >= terminalWidth)
         {
             *bufferDrop = *buffer;
-            if (*bufferDrop != '\0')
+            if (*bufferDrop != '\xff')
             {
                 *(bufferDrop + 1) = *(buffer + 1);
                 drawCharacter(*bufferDrop, x * 16, (y - 1) * 32, colours[*(bufferDrop + 1)]);
@@ -261,7 +261,7 @@ void drop()
             x = 0;
         }
     }
-    setMemory8(backBuffer + (terminalHeight - 1) * terminalPitch, 0, terminalPitch);
+    setMemory16(backBuffer + (terminalHeight - 1) * terminalPitch, 0x00FF, terminalPitch / 2);
 }
 
 void put(char character)
@@ -281,7 +281,7 @@ void put(char character)
         }
         uint64_t location = cursorY * terminalPitch + cursorX * 2;
         drawCharacter(backBuffer[location], cursorX * 16, cursorY * 32, 0);
-        backBuffer[location] = '\0';
+        backBuffer[location] = '\xff';
     }
     else if (character == '\n')
     {
@@ -302,10 +302,10 @@ void put(char character)
         char* buffer = backBuffer;
         for (uint64_t i = 0; i < terminalWidth * terminalHeight; i++)
         {
-            if (*buffer != '\0')
+            if (*buffer != '\xff')
             {
                 drawCharacter(*buffer, x * 16, y * 32, 0);
-                *buffer = '\0';
+                *buffer = '\xff';
             }
             buffer += 2;
             x++;
