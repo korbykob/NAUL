@@ -2,6 +2,7 @@
 
 #include "syscalls.h"
 #include <definitions.h>
+#include <calls.h>
 
 typedef struct
 {
@@ -15,10 +16,10 @@ typedef struct
 
 static void registerKeyboard(KeyboardBuffer* buffer)
 {
-    SYSCALL_1(21, buffer);
+    SYSCALL_1(REGISTER_KEYBOARD, buffer);
 }
 
 static void unregisterKeyboard(KeyboardBuffer* buffer)
 {
-    SYSCALL_1(22, buffer);
+    SYSCALL_1(UNREGISTER_KEYBOARD, buffer);
 }

@@ -2,13 +2,14 @@
 
 #include "syscalls.h"
 #include <definitions.h>
+#include <calls.h>
 
 static uint64_t execute(const char* filename)
 {
-    SYSCALL_1_RETURN(0, uint64_t, filename);
+    SYSCALL_1_RETURN(EXECUTE, uint64_t, filename);
 }
 
 static void quit()
 {
-    SYSCALL_0(1);
+    SYSCALL_0(QUIT);
 }

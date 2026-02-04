@@ -3,6 +3,7 @@
 #include <syscalls.h>
 #include <bootloader.h>
 #include <allocator.h>
+#include <calls.h>
 #include <cpu.h>
 #include <mem.h>
 
@@ -12,8 +13,8 @@ bool displayObtained = false;
 void initDisplay()
 {
     serialPrint("Setting up display");
-    registerSyscall(25, obtainDisplay);
-    registerSyscall(26, releaseDisplay);
+    registerSyscall(OBTAIN_DISPLAY, obtainDisplay);
+    registerSyscall(RELEASE_DISPLAY, releaseDisplay);
     serialPrint("Allocating backup display buffer");
     backup = allocate(information.width * information.height * sizeof(uint32_t));
     serialPrint("Set up display");

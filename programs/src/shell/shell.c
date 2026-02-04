@@ -51,7 +51,7 @@ TERM_GREEN "(file)     " TERM_DEFAULT ": Execute or read the file\n");
             }
             else if (compareStrings(command, "clear") == 0)
             {
-                clear();
+                put('\xff');
             }
             else if (compareStrings(command, "kys") == 0)
             {

@@ -6,6 +6,7 @@
 #include <pic.h>
 #include <io.h>
 #include <paging.h>
+#include <calls.h>
 #include <cpu.h>
 
 typedef struct
@@ -54,8 +55,8 @@ __attribute__((naked)) void keyboardInterrupt()
 void initKeyboard()
 {
     serialPrint("Setting up PS/2 keyboard");
-    registerSyscall(21, registerKeyboard);
-    registerSyscall(22, unregisterKeyboard);
+    registerSyscall(REGISTER_KEYBOARD, registerKeyboard);
+    registerSyscall(UNREGISTER_KEYBOARD, unregisterKeyboard);
     serialPrint("Allocating keyboard buffers");
     keyboardBuffers = allocate(sizeof(KeyboardBufferElement));
     keyboardBuffers->next = keyboardBuffers;

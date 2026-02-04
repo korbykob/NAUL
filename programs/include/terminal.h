@@ -2,28 +2,25 @@
 
 #include "syscalls.h"
 #include <definitions.h>
+#include <calls.h>
 
-#define TERM_DEFAULT "\xff\x00"
-#define TERM_WHITE "\xff\x01"
-#define TERM_BLUE "\xff\x02"
-#define TERM_GREEN "\xff\x03"
+#define TERM_CLEAR "\xff"
+#define TERM_DEFAULT "\xfe\x00"
+#define TERM_WHITE "\xfe\x01"
+#define TERM_BLUE "\xfe\x02"
+#define TERM_GREEN "\xfe\x03"
 
 static void put(char character)
 {
-    SYSCALL_1(2, character);
+    SYSCALL_1(PUT, character);
 }
 
 static void write(const char* message)
 {
-    SYSCALL_1(3, message);
-}
-
-static void clear()
-{
-    SYSCALL_0(4);
+    SYSCALL_1(WRITE, message);
 }
 
 static void read(char* buffer, uint64_t length)
 {
-    SYSCALL_2(5, buffer, length);
+    SYSCALL_2(READ, buffer, length);
 }

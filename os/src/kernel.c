@@ -15,6 +15,7 @@
 #include <keyboard.h>
 #include <mouse.h>
 #include <display.h>
+#include <calls.h>
 #include <mem.h>
 
 uint64_t execute(const char* filename)
@@ -50,8 +51,8 @@ void kernel()
     initPanic();
     initSymbols();
     initSyscalls();
-    registerSyscall(0, execute);
-    registerSyscall(1, quit);
+    registerSyscall(EXECUTE, execute);
+    registerSyscall(QUIT, quit);
     initPic();
     initHpet();
     initScheduler();

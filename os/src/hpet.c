@@ -2,13 +2,14 @@
 #include <serial.h>
 #include <bootloader.h>
 #include <syscalls.h>
+#include <calls.h>
 
 uint64_t femtosecondsPerTick = 0;
 
 void initHpet()
 {
     serialPrint("Setting up HPET");
-    registerSyscall(16, getFemtoseconds);
+    registerSyscall(GET_FEMTOSECONDS, getFemtoseconds);
     serialPrint("Getting femtoseconds per tick");
     femtosecondsPerTick = (*(uint64_t*)information.hpetAddress >> 32) & 0xFFFFFFFF;
     serialPrint("Enabling timer");

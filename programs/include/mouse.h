@@ -2,6 +2,7 @@
 
 #include "syscalls.h"
 #include <definitions.h>
+#include <calls.h>
 
 typedef struct
 {
@@ -17,10 +18,10 @@ typedef struct
 
 static void registerMouse(MouseBuffer* buffer)
 {
-    SYSCALL_1(23, buffer);
+    SYSCALL_1(REGISTER_MOUSE, buffer);
 }
 
 static void unregisterMouse(MouseBuffer* buffer)
 {
-    SYSCALL_1(24, buffer);
+    SYSCALL_1(UNREGISTER_MOUSE, buffer);
 }

@@ -9,6 +9,7 @@
 #include <paging.h>
 #include <keyboard.h>
 #include <display.h>
+#include <calls.h>
 #include <cpu.h>
 #include <mem.h>
 
@@ -208,10 +209,9 @@ void blinkThread()
 void initTerminal()
 {
     serialPrint("Setting up terminal");
-    registerSyscall(2, put);
-    registerSyscall(3, write);
-    registerSyscall(4, clear);
-    registerSyscall(5, read);
+    registerSyscall(PUT, put);
+    registerSyscall(WRITE, write);
+    registerSyscall(READ, read);
     serialPrint("Loading font");
     font = getFile("/naul/font.psf", 0);
     serialPrint("Setting up terminal graphics");
@@ -283,29 +283,49 @@ void put(char character)
         drawCharacter(backBuffer[location], cursorX * 16, cursorY * 32, 0);
         backBuffer[location] = '\0';
     }
-    else
+    else if (character == '\n')
     {
-        if (character != '\n')
+        cursorX = 0;
+        if (cursorY + 1 != terminalHeight)
         {
-            drawCharacter(character, cursorX * 16, cursorY * 32, colours[colour]);
-            uint64_t location = cursorY * terminalPitch + cursorX * 2;
-            backBuffer[location] = character;
-            backBuffer[location + 1] = colour;
-            cursorX++;
-            if (cursorX == terminalWidth)
-            {
-                cursorX = 0;
-                if (cursorY + 1 != terminalHeight)
-                {
-                    cursorY++;
-                }
-                else
-                {
-                    drop();
-                }
-            }
+            cursorY++;
         }
         else
+        {
+            drop();
+        }
+    }
+    else if (character == '\xff')
+    {
+        uint64_t x = 0;
+        uint64_t y = 0;
+        char* buffer = backBuffer;
+        for (uint64_t i = 0; i < terminalWidth * terminalHeight; i++)
+        {
+            if (*buffer != '\0')
+            {
+                drawCharacter(*buffer, x * 16, y * 32, 0);
+                *buffer = '\0';
+            }
+            buffer += 2;
+            x++;
+            if (x == terminalWidth)
+            {
+                y++;
+                x = 0;
+            }
+        }
+        cursorX = 0;
+        cursorY = 0;
+    }
+    else
+    {
+        drawCharacter(character, cursorX * 16, cursorY * 32, colours[colour]);
+        uint64_t location = cursorY * terminalPitch + cursorX * 2;
+        backBuffer[location] = character;
+        backBuffer[location + 1] = colour;
+        cursorX++;
+        if (cursorX == terminalWidth)
         {
             cursorX = 0;
             if (cursorY + 1 != terminalHeight)
@@ -326,7 +346,7 @@ void write(const char* message)
 {
     while (*message)
     {
-        if (*message == '\xff')
+        if (*message == '\xfe')
         {
             message++;
             colour = *message++;
@@ -337,33 +357,6 @@ void write(const char* message)
             put(*message++);
         }
     }
-}
-
-void clear()
-{
-    lock(&writing);
-    drawCharacter('_', cursorX * 16, cursorY * 32, 0);
-    uint64_t x = 0;
-    uint64_t y = 0;
-    char* buffer = backBuffer;
-    for (uint64_t i = 0; i < terminalWidth * terminalHeight; i++)
-    {
-        if (*buffer != '\0')
-        {
-            drawCharacter(*buffer, x * 16, y * 32, 0);
-            *buffer = '\0';
-        }
-        buffer += 2;
-        x++;
-        if (x == terminalWidth)
-        {
-            y++;
-            x = 0;
-        }
-    }
-    cursorX = 0;
-    cursorY = 0;
-    unlock(&writing);
 }
 
 void read(char* buffer, uint64_t length)

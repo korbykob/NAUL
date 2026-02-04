@@ -1,6 +1,7 @@
 #include <allocator.h>
 #include <serial.h>
 #include <syscalls.h>
+#include <calls.h>
 #include <cpu.h>
 
 typedef struct
@@ -17,9 +18,9 @@ bool allocating = false;
 void initAllocator(uint64_t end)
 {
     serialPrint("Setting up allocator");
-    registerSyscall(6, allocate);
-    registerSyscall(7, allocateAligned);
-    registerSyscall(8, unallocate);
+    registerSyscall(ALLOCATE, allocate);
+    registerSyscall(ALLOCATE_ALIGNED, allocateAligned);
+    registerSyscall(UNALLOCATE, unallocate);
     serialPrint("Storing allocation location");
     allocated = (Allocation*)(end - sizeof(Allocation));
     serialPrint("Set up allocator");

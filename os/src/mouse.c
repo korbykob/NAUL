@@ -6,6 +6,7 @@
 #include <pic.h>
 #include <io.h>
 #include <paging.h>
+#include <calls.h>
 #include <cpu.h>
 
 typedef struct
@@ -62,8 +63,8 @@ __attribute__((naked)) void mouseInterrupt()
 void initMouse()
 {
     serialPrint("Setting up PS/2 mouse");
-    registerSyscall(23, registerMouse);
-    registerSyscall(24, unregisterMouse);
+    registerSyscall(REGISTER_MOUSE, registerMouse);
+    registerSyscall(UNREGISTER_MOUSE, unregisterMouse);
     serialPrint("Allocating mouse buffers");
     mouseBuffers = allocate(sizeof(MouseBufferElement));
     mouseBuffers->next = mouseBuffers;

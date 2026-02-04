@@ -4,6 +4,7 @@
 #include <idt.h>
 #include <allocator.h>
 #include <hpet.h>
+#include <calls.h>
 #include <cpu.h>
 
 typedef struct
@@ -58,10 +59,10 @@ __attribute__((naked)) void updateScheduler()
 void initScheduler()
 {
     serialPrint("Setting up scheduler");
-    registerSyscall(17, createThread);
-    registerSyscall(18, waitForThread);
-    registerSyscall(19, destroyThread);
-    registerSyscall(20, exitThread);
+    registerSyscall(CREATE_THREAD, createThread);
+    registerSyscall(WAIT_FOR_THREAD, waitForThread);
+    registerSyscall(DESTROY_THREAD, destroyThread);
+    registerSyscall(EXIT_THREAD, exitThread);
     installIsr(0x67, skipThread);
     serialPrint("Creating main thread");
     threads = allocate(sizeof(Thread));

@@ -3,6 +3,7 @@
 #include <syscalls.h>
 #include <bootloader.h>
 #include <allocator.h>
+#include <calls.h>
 #include <str.h>
 #include <cpu.h>
 #include <mem.h>
@@ -21,13 +22,13 @@ bool managingFiles = false;
 void initFilesystem()
 {
     serialPrint("Setting up filesystem");
-    registerSyscall(9, checkFolder);
-    registerSyscall(10, checkFile);
-    registerSyscall(11, createFolder);
-    registerSyscall(12, createFile);
-    registerSyscall(13, getFiles);
-    registerSyscall(14, getFile);
-    registerSyscall(15, deleteFile);
+    registerSyscall(CHECK_FOLDER, checkFolder);
+    registerSyscall(CHECK_FILE, checkFile);
+    registerSyscall(CREATE_FOLDER, createFolder);
+    registerSyscall(CREATE_FILE, createFile);
+    registerSyscall(GET_FILES, getFiles);
+    registerSyscall(GET_FILE, getFile);
+    registerSyscall(DELETE_FILE, deleteFile);
     serialPrint("Allocating file list");
     files = allocate(sizeof(File));
     files->next = files;

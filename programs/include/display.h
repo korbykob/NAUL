@@ -2,6 +2,7 @@
 
 #include "syscalls.h"
 #include <definitions.h>
+#include <calls.h>
 
 typedef struct
 {
@@ -12,10 +13,10 @@ typedef struct
 
 static void obtainDisplay(Display* display)
 {
-    SYSCALL_1(25, display);
+    SYSCALL_1(OBTAIN_DISPLAY, display);
 }
 
 static void releaseDisplay()
 {
-    SYSCALL_0(26);
+    SYSCALL_0(RELEASE_DISPLAY);
 }

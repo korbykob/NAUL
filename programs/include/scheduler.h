@@ -2,25 +2,26 @@
 
 #include "syscalls.h"
 #include <definitions.h>
+#include <calls.h>
 
 static uint64_t createThread(void (*function)())
 {
-    SYSCALL_1_RETURN(17, uint64_t, function);
+    SYSCALL_1_RETURN(CREATE_THREAD, uint64_t, function);
 }
 
 static void waitForThread(uint64_t id)
 {
-    SYSCALL_1(18, id);
+    SYSCALL_1(WAIT_FOR_THREAD, id);
 }
 
 static void destroyThread(uint64_t id)
 {
-    SYSCALL_1(19, id);
+    SYSCALL_1(DESTROY_THREAD, id);
 }
 
 static void exitThread()
 {
-    SYSCALL_0(20);
+    SYSCALL_0(EXIT_THREAD);
 }
 
 static void yieldThread()

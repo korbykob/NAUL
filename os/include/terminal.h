@@ -2,17 +2,16 @@
 
 #include <definitions.h>
 
-#define TERM_DEFAULT "\xff\x00"
-#define TERM_WHITE "\xff\x01"
-#define TERM_BLUE "\xff\x02"
-#define TERM_GREEN "\xff\x03"
+#define TERM_CLEAR "\xff"
+#define TERM_DEFAULT "\xfe\x00"
+#define TERM_WHITE "\xfe\x01"
+#define TERM_BLUE "\xfe\x02"
+#define TERM_GREEN "\xfe\x03"
 
 void initTerminal();
 
 void put(char character);
 
 void write(const char* message);
-
-void clear();
 
 void read(char* buffer, uint64_t length);
