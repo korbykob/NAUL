@@ -28,12 +28,12 @@ static uint16_t inw(uint16_t port)
 
 static void outd(uint16_t port, uint32_t value)
 {
-    __asm__ volatile ("outl %d0, %w1" : : "a"(value), "Nd"(port) : "memory");
+    __asm__ volatile ("outl %k0, %w1" : : "a"(value), "Nd"(port) : "memory");
 }
 
 static uint32_t ind(uint16_t port)
 {
     uint32_t value = 0;
-    __asm__ volatile ("inl %w1, %d0" : "=a"(value) : "Nd"(port) : "memory");
+    __asm__ volatile ("inl %w1, %k0" : "=a"(value) : "Nd"(port) : "memory");
     return value;
 }
