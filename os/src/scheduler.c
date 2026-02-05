@@ -31,27 +31,27 @@ Thread* currentThread = 0;
 __attribute__((naked)) void skipThread()
 {
     pushRegisters();
-    pushSseRegisters();
+    pushAvxRegisters();
     __asm__ volatile ("movq %cr3, %rax; pushq %rax");
     __asm__ volatile ("movq %%rsp, %0" : "=g"(currentThread->sp));
-    __asm__ volatile ("movq %1, %0" : "=g"(currentThread) : "g"(currentThread->next));
+    __asm__ volatile ("movq %1, %0" : "=m"(currentThread) : "r"(currentThread->next));
     __asm__ volatile ("jmp nextThread");
 }
 
 __attribute__((naked)) void updateScheduler()
 {
     pushRegisters();
-    pushSseRegisters();
+    pushAvxRegisters();
     __asm__ volatile ("movq %cr3, %rax; pushq %rax");
     __asm__ volatile ("movq %%rsp, %0" : "=g"(currentThread->sp));
     __asm__ volatile ("movl $0xfee000B0, %eax; movl $0, (%eax)");
     __asm__ volatile ("tryNext:");
-    __asm__ volatile ("movq %1, %0" : "=g"(currentThread) : "g"(currentThread->next));
+    __asm__ volatile ("movq %1, %0" : "=m"(currentThread) : "r"(currentThread->next));
     __asm__ volatile ("nextThread:");
-    __asm__ volatile ("testq %0, %0; jnz tryNext" : : "g"(currentThread->waiting));
+    __asm__ volatile ("testq %0, %0; jnz tryNext" : : "r"(currentThread->waiting));
     __asm__ volatile ("movq %0, %%rsp" : : "g"(currentThread->sp));
     __asm__ volatile ("popq %rax; movq %rax, %cr3");
-    popSseRegisters();
+    popAvxRegisters();
     popRegisters();
     __asm__ volatile ("iretq");
 }
@@ -129,10 +129,10 @@ uint64_t createThread(void (*function)())
     currentThread = thread;
     __asm__ volatile ("movq %0, %%rsp" : : "g"(currentThread->sp));
     __asm__ volatile ("pushq %rax; pushq %rbx; pushq %rcx; pushq %rdx; pushq %rsi; pushq %rdi; pushq $0; pushq %rsp; pushq %r8; pushq %r9; pushq %r10; pushq %r11; pushq %r12; pushq %r13; pushq %r14; pushq %r15");
-    pushSseRegisters();
+    pushAvxRegisters();
     __asm__ volatile ("movq %%cr3, %%rax; pushq %%rax" : : : "%rax");
     __asm__ volatile ("movq %%rsp, %0" : "=g"(currentThread->sp));
-    __asm__ volatile ("movq %1, %0" : "=g"(currentThread) : "g"(currentThread->next));
+    __asm__ volatile ("movq %1, %0" : "=m"(currentThread) : "r"(currentThread->next));
     __asm__ volatile ("movq %0, %%rsp" : : "g"(currentThread->sp));
     ((Thread*)threads->prev)->next = thread;
     thread->next = threads;
