@@ -78,15 +78,9 @@ void parseFolder(EFI_FILE_HANDLE fs, const CHAR16* name, void (*found)(EFI_FILE_
             UINTN pathLength = StrLen(name);
             UINTN nameLength = StrLen(info->FileName);
             CHAR16* fullName = AllocatePool((pathLength + nameLength + 2) * sizeof(CHAR16));
-            for (UINTN i = 0; i < pathLength; i++)
-            {
-                fullName[i] = name[i];
-            }
+            RtCopyMem(fullName, name, pathLength * 2);
             fullName[pathLength] = u'\\';
-            for (UINTN i = 0; i < nameLength; i++)
-            {
-                fullName[i + pathLength + 1] = info->FileName[i];
-            }
+            RtCopyMem(fullName + pathLength + 1, info->FileName, nameLength * 2);
             fullName[pathLength + nameLength + 1] = u'\0';
             if (info->Attribute & EFI_FILE_DIRECTORY)
             {
@@ -133,6 +127,7 @@ void addFiles(EFI_FILE_HANDLE fs, const CHAR16* name)
 
 EFI_STATUS efi_main(EFI_HANDLE ImageHandle, EFI_SYSTEM_TABLE* SystemTable)
 {
+    __asm__ volatile ("movq %%cr4, %%rax; xorq $0x40000, %%rax; movq %%rax, %%cr4; xorq %%rcx, %%rcx; xgetbv; orl $7, %%eax; xsetbv" : : : "%rdx", "%rcx", "%rax");
     InitializeLib(ImageHandle, SystemTable);
     serialPrint("Locating GOP protocol");
     EFI_GRAPHICS_OUTPUT_PROTOCOL* GOP = NULL;
@@ -244,8 +239,6 @@ EFI_STATUS efi_main(EFI_HANDLE ImageHandle, EFI_SYSTEM_TABLE* SystemTable)
     }
     serialPrint("Exiting boot services");
     uefi_call_wrapper(BS->ExitBootServices, 2, ImageHandle, key);
-    serialPrint("Enabling AVX");
-    __asm__ volatile ("movq %%cr4, %%rax; xorq $0x40000, %%rax; movq %%rax, %%cr4; xorq %%rcx, %%rcx; xgetbv; orl $7, %%eax; xsetbv" : : : "%rdx", "%rcx", "%rax");
     serialPrint("Setting up information");
     information.framebuffer = (uint32_t*)GOP->Mode->FrameBufferBase;
     information.width = GOP->Mode->Info->HorizontalResolution;
