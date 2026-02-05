@@ -16,12 +16,12 @@ typedef struct
     uint8_t current;
 } MouseBuffer;
 
-static void registerMouse(MouseBuffer* buffer)
+static inline void registerMouse(MouseBuffer* buffer)
 {
     SYSCALL_1(REGISTER_MOUSE, buffer);
 }
 
-static void unregisterMouse(MouseBuffer* buffer)
+static inline void unregisterMouse(MouseBuffer* buffer)
 {
     SYSCALL_1(UNREGISTER_MOUSE, buffer);
 }

@@ -5,12 +5,12 @@
 #define popRegisters() __asm__ volatile ("popq %r15; popq %r14; popq %r13; popq %r12; popq %r11; popq %r10; popq %r9; popq %r8; popq %rsp; popq %rbp; popq %rdi; popq %rsi; popq %rdx; popq %rcx; popq %rbx; popq %rax")
 #define popAvxRegisters() __asm__ volatile ("vmovdqu (%rsp), %ymm15; vmovdqu 32(%rsp), %ymm14; vmovdqu 64(%rsp), %ymm13; vmovdqu 96(%rsp), %ymm12; vmovdqu 128(%rsp), %ymm11; vmovdqu 160(%rsp), %ymm10; vmovdqu 192(%rsp), %ymm9; vmovdqu 224(%rsp), %ymm8; vmovdqu 256(%rsp), %ymm7; vmovdqu 288(%rsp), %ymm6; vmovdqu 320(%rsp), %ymm5; vmovdqu 352(%rsp), %ymm4; vmovdqu 384(%rsp), %ymm3; vmovdqu 416(%rsp), %ymm2; vmovdqu 448(%rsp), %ymm1; vmovdqu 480(%rsp), %ymm0; addq $512, %rsp")
 
-static void lock(bool* mutex)
+static inline void lock(bool* mutex)
 {
     __asm__ volatile ("movb $1, %%bl; mutexCheck%=:; xorb %%al, %%al; lock cmpxchgb %%bl, %0; je mutexLocked%=; int $0x67; jmp mutexCheck%=; mutexLocked%=:" : "+m"(*mutex) : : "%al", "%bl", "memory");
 }
 
-static void unlock(bool* mutex)
+static inline void unlock(bool* mutex)
 {
     __asm__ volatile ("lock andb $0, %0" : "+m"(*mutex) : : "memory");
 }

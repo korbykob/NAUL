@@ -4,27 +4,24 @@
 #include <definitions.h>
 #include <calls.h>
 
-static uint64_t createThread(void (*function)())
+#define yieldThread() __asm__ volatile ("int $0x67")
+
+static inline uint64_t createThread(void (*function)())
 {
     SYSCALL_1_RETURN(CREATE_THREAD, uint64_t, function);
 }
 
-static void waitForThread(uint64_t id)
+static inline void waitForThread(uint64_t id)
 {
     SYSCALL_1(WAIT_FOR_THREAD, id);
 }
 
-static void destroyThread(uint64_t id)
+static inline void destroyThread(uint64_t id)
 {
     SYSCALL_1(DESTROY_THREAD, id);
 }
 
-static void exitThread()
+static inline void exitThread()
 {
     SYSCALL_0(EXIT_THREAD);
-}
-
-static void yieldThread()
-{
-    __asm__ volatile ("int $0x67");
 }

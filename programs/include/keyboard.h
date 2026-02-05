@@ -14,12 +14,12 @@ typedef struct
     uint8_t current;
 } KeyboardBuffer;
 
-static void registerKeyboard(KeyboardBuffer* buffer)
+static inline void registerKeyboard(KeyboardBuffer* buffer)
 {
     SYSCALL_1(REGISTER_KEYBOARD, buffer);
 }
 
-static void unregisterKeyboard(KeyboardBuffer* buffer)
+static inline void unregisterKeyboard(KeyboardBuffer* buffer)
 {
     SYSCALL_1(UNREGISTER_KEYBOARD, buffer);
 }

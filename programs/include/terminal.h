@@ -10,17 +10,17 @@
 #define TERM_BLUE "\xfe\x02"
 #define TERM_GREEN "\xfe\x03"
 
-static void put(char character)
+static inline void put(char character)
 {
     SYSCALL_1(PUT, character);
 }
 
-static void write(const char* message)
+static inline void write(const char* message)
 {
     SYSCALL_1(WRITE, message);
 }
 
-static void read(char* buffer, uint64_t length)
+static inline void read(char* buffer, uint64_t length)
 {
     SYSCALL_2(READ, buffer, length);
 }

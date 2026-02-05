@@ -11,12 +11,12 @@ typedef struct
     uint32_t height;
 } Display;
 
-static void obtainDisplay(Display* display)
+static inline void obtainDisplay(Display* display)
 {
     SYSCALL_1(OBTAIN_DISPLAY, display);
 }
 
-static void releaseDisplay()
+static inline void releaseDisplay()
 {
     SYSCALL_0(RELEASE_DISPLAY);
 }

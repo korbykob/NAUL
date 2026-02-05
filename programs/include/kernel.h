@@ -4,12 +4,12 @@
 #include <definitions.h>
 #include <calls.h>
 
-static uint64_t execute(const char* filename)
+static inline uint64_t execute(const char* filename)
 {
     SYSCALL_1_RETURN(EXECUTE, uint64_t, filename);
 }
 
-static void quit()
+static inline void quit()
 {
     SYSCALL_0(QUIT);
 }
