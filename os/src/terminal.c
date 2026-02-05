@@ -364,5 +364,8 @@ void read(char* buffer, uint64_t length)
     typingCursor = 0;
     typingBuffer = getAddress(buffer);
     typingLength = length;
-    while (typingBuffer);
+    while (typingBuffer)
+    {
+        yieldThread();
+    }
 }
