@@ -28,13 +28,24 @@ typedef struct
 Thread* threads = 0;
 Thread* currentThread = 0;
 
+__attribute__((naked)) void nextThread()
+{
+    __asm__ volatile ("tryNext:");
+    __asm__ volatile ("movq %1, %0" : "=m"(currentThread) : "r"(currentThread->next));
+    __asm__ volatile ("testq %0, %0; jnz tryNext" : : "r"(currentThread->waiting));
+    __asm__ volatile ("movq %0, %%rsp" : : "g"(currentThread->sp));
+    popCr3();
+    popAvxRegisters();
+    popRegisters();
+    __asm__ volatile ("iretq");
+}
+
 __attribute__((naked)) void skipThread()
 {
     pushRegisters();
     pushAvxRegisters();
-    __asm__ volatile ("movq %cr3, %rax; pushq %rax");
+    pushCr3();
     __asm__ volatile ("movq %%rsp, %0" : "=g"(currentThread->sp));
-    __asm__ volatile ("movq %1, %0" : "=m"(currentThread) : "r"(currentThread->next));
     __asm__ volatile ("jmp nextThread");
 }
 
@@ -42,18 +53,10 @@ __attribute__((naked)) void updateScheduler()
 {
     pushRegisters();
     pushAvxRegisters();
-    __asm__ volatile ("movq %cr3, %rax; pushq %rax");
+    pushCr3();
     __asm__ volatile ("movq %%rsp, %0" : "=g"(currentThread->sp));
     __asm__ volatile ("movl $0, %0" : "=m"(*(uint32_t*)0xfee000B0));
-    __asm__ volatile ("tryNext:");
-    __asm__ volatile ("movq %1, %0" : "=m"(currentThread) : "r"(currentThread->next));
-    __asm__ volatile ("nextThread:");
-    __asm__ volatile ("testq %0, %0; jnz tryNext" : : "r"(currentThread->waiting));
-    __asm__ volatile ("movq %0, %%rsp" : : "g"(currentThread->sp));
-    __asm__ volatile ("popq %rax; movq %rax, %cr3");
-    popAvxRegisters();
-    popRegisters();
-    __asm__ volatile ("iretq");
+    __asm__ volatile ("jmp nextThread");
 }
 
 void initScheduler()
@@ -130,7 +133,7 @@ uint64_t createThread(void (*function)())
     __asm__ volatile ("movq %0, %%rsp" : : "g"(currentThread->sp));
     __asm__ volatile ("pushq %rax; pushq %rbx; pushq %rcx; pushq %rdx; pushq %rsi; pushq %rdi; pushq $0; pushq %rsp; pushq %r8; pushq %r9; pushq %r10; pushq %r11; pushq %r12; pushq %r13; pushq %r14; pushq %r15");
     pushAvxRegisters();
-    __asm__ volatile ("movq %%cr3, %%rax; pushq %%rax" : : : "%rax");
+    pushCr3();
     __asm__ volatile ("movq %%rsp, %0" : "=g"(currentThread->sp));
     __asm__ volatile ("movq %1, %0" : "=m"(currentThread) : "r"(currentThread->next));
     __asm__ volatile ("movq %0, %%rsp" : : "g"(currentThread->sp));
@@ -191,10 +194,10 @@ void exitThread()
             break;
         }
     }
-    Thread* next = currentThread->next;
-    ((Thread*)currentThread->prev)->next = next;
-    next->prev = currentThread->prev;
+    Thread* prev = currentThread->prev;
+    prev->next = currentThread->next;
+    ((Thread*)currentThread->next)->prev = prev;
     unallocate(currentThread);
-    currentThread = next;
+    currentThread = prev;
     __asm__ volatile ("jmp nextThread");
 }

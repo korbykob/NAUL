@@ -2,7 +2,7 @@
 
 #include <definitions.h>
 
-#define yieldThread() __asm__ volatile ("int $0x67")
+#define yieldThread() __asm__ volatile ("int $0x67" : : : "memory")
 
 void initScheduler();
 
