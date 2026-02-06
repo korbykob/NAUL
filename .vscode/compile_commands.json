@@ -68,56 +68,6 @@
       "-c",
       "-nostdinc",
       "-o",
-      "os/bin/filesystem.o",
-      "os/src/filesystem.c"
-    ],
-    "directory": "${workspaceFolder}",
-    "file": "${workspaceFolder}/os/src/filesystem.c",
-    "output": "${workspaceFolder}/os/bin/filesystem.o"
-  },
-  {
-    "arguments": [
-      "/usr/bin/gcc",
-      "-Iinclude",
-      "-ffreestanding",
-      "-fno-stack-protector",
-      "-fno-stack-check",
-      "-mno-red-zone",
-      "-maccumulate-outgoing-args",
-      "-g",
-      "-mavx2",
-      "-O3",
-      "-fno-omit-frame-pointer",
-      "-Ios/include",
-      "-fpic",
-      "-c",
-      "-nostdinc",
-      "-o",
-      "os/bin/symbols.o",
-      "os/src/symbols.c"
-    ],
-    "directory": "${workspaceFolder}",
-    "file": "${workspaceFolder}/os/src/symbols.c",
-    "output": "${workspaceFolder}/os/bin/symbols.o"
-  },
-  {
-    "arguments": [
-      "/usr/bin/gcc",
-      "-Iinclude",
-      "-ffreestanding",
-      "-fno-stack-protector",
-      "-fno-stack-check",
-      "-mno-red-zone",
-      "-maccumulate-outgoing-args",
-      "-g",
-      "-mavx2",
-      "-O3",
-      "-fno-omit-frame-pointer",
-      "-Ios/include",
-      "-fpic",
-      "-c",
-      "-nostdinc",
-      "-o",
       "os/bin/gdt.o",
       "os/src/gdt.c"
     ],
@@ -168,12 +118,62 @@
       "-c",
       "-nostdinc",
       "-o",
-      "os/bin/terminal.o",
-      "os/src/terminal.c"
+      "os/bin/filesystem.o",
+      "os/src/filesystem.c"
     ],
     "directory": "${workspaceFolder}",
-    "file": "${workspaceFolder}/os/src/terminal.c",
-    "output": "${workspaceFolder}/os/bin/terminal.o"
+    "file": "${workspaceFolder}/os/src/filesystem.c",
+    "output": "${workspaceFolder}/os/bin/filesystem.o"
+  },
+  {
+    "arguments": [
+      "/usr/bin/gcc",
+      "-Iinclude",
+      "-ffreestanding",
+      "-fno-stack-protector",
+      "-fno-stack-check",
+      "-mno-red-zone",
+      "-maccumulate-outgoing-args",
+      "-g",
+      "-mavx2",
+      "-O3",
+      "-fno-omit-frame-pointer",
+      "-Ios/include",
+      "-fpic",
+      "-c",
+      "-nostdinc",
+      "-o",
+      "os/bin/symbols.o",
+      "os/src/symbols.c"
+    ],
+    "directory": "${workspaceFolder}",
+    "file": "${workspaceFolder}/os/src/symbols.c",
+    "output": "${workspaceFolder}/os/bin/symbols.o"
+  },
+  {
+    "arguments": [
+      "/usr/bin/gcc",
+      "-Iinclude",
+      "-ffreestanding",
+      "-fno-stack-protector",
+      "-fno-stack-check",
+      "-mno-red-zone",
+      "-maccumulate-outgoing-args",
+      "-g",
+      "-mavx2",
+      "-O3",
+      "-fno-omit-frame-pointer",
+      "-Ios/include",
+      "-fpic",
+      "-c",
+      "-nostdinc",
+      "-o",
+      "os/bin/panic.o",
+      "os/src/panic.c"
+    ],
+    "directory": "${workspaceFolder}",
+    "file": "${workspaceFolder}/os/src/panic.c",
+    "output": "${workspaceFolder}/os/bin/panic.o"
   },
   {
     "arguments": [
@@ -368,12 +368,12 @@
       "-c",
       "-nostdinc",
       "-o",
-      "os/bin/panic.o",
-      "os/src/panic.c"
+      "os/bin/display.o",
+      "os/src/display.c"
     ],
     "directory": "${workspaceFolder}",
-    "file": "${workspaceFolder}/os/src/panic.c",
-    "output": "${workspaceFolder}/os/bin/panic.o"
+    "file": "${workspaceFolder}/os/src/display.c",
+    "output": "${workspaceFolder}/os/bin/display.o"
   },
   {
     "arguments": [
@@ -393,12 +393,12 @@
       "-c",
       "-nostdinc",
       "-o",
-      "os/bin/display.o",
-      "os/src/display.c"
+      "os/bin/terminal.o",
+      "os/src/terminal.c"
     ],
     "directory": "${workspaceFolder}",
-    "file": "${workspaceFolder}/os/src/display.c",
-    "output": "${workspaceFolder}/os/bin/display.o"
+    "file": "${workspaceFolder}/os/src/terminal.c",
+    "output": "${workspaceFolder}/os/bin/terminal.o"
   },
   {
     "arguments": [
