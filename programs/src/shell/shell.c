@@ -1,7 +1,7 @@
 #include <definitions.h>
 #include <allocator.h>
 #include <terminal.h>
-#include <kernel.h>
+#include <processes.h>
 #include <scheduler.h>
 #include <filesystem.h>
 #include <str.h>
@@ -51,7 +51,7 @@ TERM_GREEN "(file)     " TERM_DEFAULT ": Execute or read the file\n");
             }
             else if (compareStrings(command, "clear") == 0)
             {
-                put('\xff');
+                put(TERM_CLEAR);
             }
             else if (compareStrings(command, "kys") == 0)
             {
@@ -129,7 +129,7 @@ TERM_GREEN "(file)     " TERM_DEFAULT ": Execute or read the file\n");
                     const char* file = (const char*)getFile(buffer, &size);
                     for (uint64_t i = 0; i < size; i++)
                     {
-                        if (*file != '\xff')
+                        if (*file != TERM_CLEAR)
                         {
                             put(*file);
                         }

@@ -2,13 +2,6 @@
 
 enum Syscalls
 {
-    EXECUTE,
-    QUIT,
-
-    PUT,
-    WRITE,
-    READ,
-
     ALLOCATE,
     ALLOCATE_ALIGNED,
     UNALLOCATE,
@@ -35,5 +28,12 @@ enum Syscalls
     UNREGISTER_MOUSE,
 
     OBTAIN_DISPLAY,
-    RELEASE_DISPLAY
+    RELEASE_DISPLAY,
+
+    PUT,
+    WRITE,
+    READ,
+
+    EXECUTE,
+    QUIT
 };

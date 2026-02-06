@@ -9,6 +9,20 @@
 #include <calls.h>
 #include <cpu.h>
 
+#define MOUSE_COMMAND 0x64
+#define MOUSE_DATA 0x60
+#define MOUSE_OVERFLOW_MASK 0x100
+#define MOUSE_LEFT_MASK 0b1
+#define MOUSE_RIGHT_MASK 0b10
+#define MOUSE_INTERRUPT 12
+#define PS2_ENABLE_SECOND 0xA8
+#define PS2_GET_CONFIG 0x20
+#define PS2_SECOND_INTERRUPT 0x2
+#define PS2_SET_CONFIG 0x60
+#define MOUSE_PS2_PORT 0xD4
+#define MOUSE_DEFAULTS 0xF6
+#define MOUSE_STREAMING 0xF4
+
 typedef struct
 {
     void* next;
@@ -22,15 +36,15 @@ MouseBufferElement* mouseBuffers = 0;
 
 void mouse()
 {
-    mouseBytes[mouseCycle] = inb(0x60);
+    mouseBytes[mouseCycle] = inb(MOUSE_DATA);
     mouseCycle++;
     if (mouseCycle == 3)
     {
         mouseCycle = 0;
-        int16_t x = mouseBytes[1] - ((mouseBytes[0] << 4) & 0x100);
-        int16_t y = mouseBytes[2] - ((mouseBytes[0] << 3) & 0x100);
-        bool left = mouseBytes[0] & 0b00000001;
-        bool right = mouseBytes[0] & 0b00000010;
+        int16_t x = mouseBytes[1] - ((mouseBytes[0] << 4) & MOUSE_OVERFLOW_MASK);
+        int16_t y = mouseBytes[2] - ((mouseBytes[0] << 3) & MOUSE_OVERFLOW_MASK);
+        bool left = mouseBytes[0] & MOUSE_LEFT_MASK;
+        bool right = mouseBytes[0] & MOUSE_RIGHT_MASK;
         MouseBufferElement* element = mouseBuffers;
         while (true)
         {
@@ -49,7 +63,7 @@ void mouse()
             }
         }
     }
-    picAck(12);
+    picAck(MOUSE_INTERRUPT);
 }
 
 __attribute__((naked)) void mouseInterrupt()
@@ -71,21 +85,24 @@ void initMouse()
     mouseBuffers->prev = mouseBuffers;
     mouseBuffers->buffer = 0;
     serialPrint("Installing mouse IRQ");
-    installIrq(12, mouseInterrupt);
+    installIrq(MOUSE_INTERRUPT, mouseInterrupt);
     serialPrint("Unmasking interrupt");
-    unmaskPic(12);
-    serialPrint("Enabling interrupts for mouse");
-    outb(0x64, 0xA8);
-    outb(0x64, 0x20);
-    uint8_t status = inb(0x60) | 2;
-    outb(0x64, 0x60);
-    outb(0x60, status);
-    outb(0x64, 0xD4);
-    outb(0x60, 0xF6);
-    inb(0x60);
-    outb(0x64, 0xD4);
-    outb(0x60, 0xF4);
-    inb(0x60);
+    unmaskPic(MOUSE_INTERRUPT);
+    serialPrint("Enabling second PS/2 port");
+    outb(MOUSE_COMMAND, PS2_ENABLE_SECOND);
+    serialPrint("Enabling second PS/2 interrupt");
+    outb(MOUSE_COMMAND, PS2_GET_CONFIG);
+    uint8_t status = inb(MOUSE_DATA) | PS2_SECOND_INTERRUPT;
+    outb(MOUSE_COMMAND, PS2_SET_CONFIG);
+    outb(MOUSE_DATA, status);
+    serialPrint("Setting mouse to defaults");
+    outb(MOUSE_COMMAND, MOUSE_PS2_PORT);
+    outb(MOUSE_DATA, MOUSE_DEFAULTS);
+    inb(MOUSE_DATA);
+    serialPrint("Enabling mouse interrupts");
+    outb(MOUSE_COMMAND, MOUSE_PS2_PORT);
+    outb(MOUSE_DATA, MOUSE_STREAMING);
+    inb(MOUSE_DATA);
     serialPrint("Set up PS/2 mouse");
 }
 

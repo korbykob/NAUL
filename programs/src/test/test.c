@@ -1,6 +1,6 @@
 #include <definitions.h>
 #include <terminal.h>
-#include <kernel.h>
+#include <processes.h>
 
 void entry()
 {

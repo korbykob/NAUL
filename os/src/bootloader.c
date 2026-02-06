@@ -22,6 +22,18 @@ typedef struct
     AcpiSdtHeader header;
     AcpiSdtHeader* entries[];
 } __attribute__ ((packed)) Xsdt;
+typedef struct
+{
+    char signature[8];
+    uint8_t checksum;
+    char oemId[6];
+    uint8_t revision;
+    uint32_t rsdtAddress;
+    uint32_t length;
+    Xsdt* xsdt;
+    uint8_t extendedChecksum;
+    uint8_t reserved[3];
+} __attribute__ ((packed)) Xsdp;
 typedef struct 
 {
     AcpiSdtHeader header;
@@ -80,7 +92,7 @@ void parseFolder(EFI_FILE_HANDLE fs, const CHAR16* name, void (*found)(EFI_FILE_
             CHAR16* fullName = AllocatePool((pathLength + nameLength + 2) * sizeof(CHAR16));
             RtCopyMem(fullName, name, pathLength * 2);
             fullName[pathLength] = u'\\';
-            RtCopyMem(fullName + pathLength + 1, info->FileName, nameLength * 2);
+            RtCopyMem(fullName + pathLength + 1, info->FileName, nameLength * sizeof(CHAR16));
             fullName[pathLength + nameLength + 1] = u'\0';
             if (info->Attribute & EFI_FILE_DIRECTORY)
             {
@@ -148,9 +160,7 @@ EFI_STATUS efi_main(EFI_HANDLE ImageHandle, EFI_SYSTEM_TABLE* SystemTable)
     }
     serialPrint("Waiting for user to choose resolution");
     UINT32 selected = 0;
-    EFI_INPUT_KEY pressed;
-    pressed.ScanCode = 1;
-    pressed.UnicodeChar = '\0';
+    EFI_INPUT_KEY pressed = { 1, u'\0' };
     while (pressed.UnicodeChar != '\r')
     {
         if (pressed.ScanCode == 1 || pressed.ScanCode == 2)
@@ -180,7 +190,7 @@ EFI_STATUS efi_main(EFI_HANDLE ImageHandle, EFI_SYSTEM_TABLE* SystemTable)
         if (CompareGuid(&ST->ConfigurationTable[i].VendorGuid, &guid) == 0)
         {
             serialPrint("Found ACPI 2.0 table");
-            Xsdt* xsdt = *(Xsdt**)(ST->ConfigurationTable[i].VendorTable + 24);
+            Xsdt* xsdt = ((Xsdp*)ST->ConfigurationTable[i].VendorTable)->xsdt;
             serialPrint("Searching ACPI table");
             for (uint32_t table = 0; table < (xsdt->header.length - sizeof(AcpiSdtHeader)) / sizeof(AcpiSdtHeader*); table++)
             {

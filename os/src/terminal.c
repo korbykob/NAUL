@@ -12,15 +12,30 @@
 #include <calls.h>
 #include <cpu.h>
 #include <mem.h>
+#include <psf.h>
 
-uint8_t* font = 0;
+#define TERMINAL_DEFAULT 0x989898
+#define TERMINAL_WHITE 0xFFFFFF
+#define TERMINAL_BLUE 0x0080FF
+#define TERMINAL_GREEN 0x008000
+#define TERMINAL_NO_CHAR '\xff'
+#define TERMINAL_COLOUR '\xfe'
+#define KEY_LEFT_SHIFT 42
+#define KEY_RIGHT_SHIFT 54
+#define KEY_CAPS_LOCK 58
+#define KEY_BACKSPACE 14
+#define KEY_ENTER 28
+
+PsfFile* font = 0;
+uint32_t fontWidth = 0;
+uint32_t fontHeight = 0;
 char* backBuffer = 0;
 uint32_t terminalWidth = 0;
 uint32_t terminalHeight = 0;
 uint32_t terminalPitch = 0;
 uint32_t cursorX = 0;
 uint32_t cursorY = 0;
-const uint32_t colours[] = { 0x989898, 0xFFFFFF, 0x0080FF, 0x008000 };
+const uint32_t colours[] = { TERMINAL_DEFAULT, TERMINAL_WHITE, TERMINAL_BLUE, TERMINAL_GREEN };
 uint8_t colour = 0;
 bool writing = false;
 const char scancodes[256] = {
@@ -99,26 +114,28 @@ uint64_t typingLength = 0;
 void drawCharacter(char character, uint32_t x, uint32_t y, uint32_t colour)
 {
     uint32_t* address = information.framebuffer + y * information.width + x;
-    uint8_t* glyph = font + 32 + 64 * character;
-    for (uint8_t y = 0; y < 64; y += 2)
+    uint8_t* glyph = font->data + font->glyphSize * character;
+    for (uint8_t y = 0; y < font->height; y++)
     {
         for (uint8_t x = 0; x < 8; x++)
         {
-            if (glyph[y] & (0b10000000 >> x))
+            if (*glyph & (0b10000000 >> x))
             {
                 *address = colour;
             }
             address++;
         }
+        glyph++;
         for (uint8_t x = 0; x < 8; x++)
         {
-            if (glyph[y + 1] & (0b10000000 >> x))
+            if (*glyph & (0b10000000 >> x))
             {
                 *address = colour;
             }
             address++;
         }
-        address += information.width - 16;
+        glyph++;
+        address += information.width - font->width;
     }
 }
 
@@ -132,15 +149,15 @@ void terminalKeyboard()
             {
                 switch (keyboardBuffer.buffer[i].scancode)
                 {
-                    case 42:
+                    case KEY_LEFT_SHIFT:
                         leftShift = keyboardBuffer.buffer[i].pressed;
                         shift = leftShift || rightShift;
                         break;
-                    case 54:
+                    case KEY_RIGHT_SHIFT:
                         rightShift = keyboardBuffer.buffer[i].pressed;
                         shift = leftShift || rightShift;
                         break;
-                    case 58:
+                    case KEY_CAPS_LOCK:
                         if (keyboardBuffer.buffer[i].pressed)
                         {
                             caps = !caps;
@@ -151,14 +168,14 @@ void terminalKeyboard()
                 {
                     switch (keyboardBuffer.buffer[i].scancode)
                     {
-                        case 14:
+                        case KEY_BACKSPACE:
                             if (keyboardBuffer.buffer[i].pressed && typingCursor > 0)
                             {
                                 typingCursor--;
                                 put('\b');
                             }
                             break;
-                        case 28:
+                        case KEY_ENTER:
                             if (keyboardBuffer.buffer[i].pressed)
                             {
                                 typingBuffer[typingCursor] = '\0';
@@ -193,12 +210,12 @@ void blinkThread()
     while (true)
     {
         uint64_t femtoseconds = getFemtoseconds();
-        if (femtoseconds - last >= femtosecondsPerSecond / 2)
+        if (femtoseconds - last >= FEMTOSECONDS_PER_SECOND / 2)
         {
             last = femtoseconds;
             if (!writing && !displayObtained)
             {
-                drawCharacter('_', cursorX * 16, cursorY * 32, blink ? colours[colour] : 0);
+                drawCharacter('_', cursorX * fontWidth, cursorY * fontHeight, blink ? colours[colour] : 0);
                 blink = !blink;
             }
         }
@@ -213,10 +230,12 @@ void initTerminal()
     registerSyscall(WRITE, write);
     registerSyscall(READ, read);
     serialPrint("Loading font");
-    font = getFile("/naul/font.psf", 0);
+    font = (PsfFile*)getFile("/naul/font.psf", 0);
+    fontWidth = font->width + 1;
+    fontHeight = font->height;
     serialPrint("Setting up terminal graphics");
-    terminalWidth = information.width / 16;
-    terminalHeight = information.height / 32;
+    terminalWidth = information.width / fontWidth;
+    terminalHeight = information.height / fontHeight;
     terminalPitch = terminalWidth * 2;
     serialPrint("Allocating back buffer");
     backBuffer = allocate(terminalWidth * terminalHeight * sizeof(char) * 2);
@@ -239,17 +258,17 @@ void drop()
     char* bufferDrop = backBuffer;
     for (uint64_t i = 0; i < terminalWidth * terminalHeight; i++)
     {
-        if (*buffer != '\xff')
+        if (*buffer != TERMINAL_NO_CHAR)
         {
-            drawCharacter(*buffer, x * 16, y * 32, 0);
+            drawCharacter(*buffer, x * fontWidth, y * fontHeight, 0);
         }
         if (i >= terminalWidth)
         {
             *bufferDrop = *buffer;
-            if (*bufferDrop != '\xff')
+            if (*bufferDrop != TERMINAL_NO_CHAR)
             {
                 *(bufferDrop + 1) = *(buffer + 1);
-                drawCharacter(*bufferDrop, x * 16, (y - 1) * 32, colours[*(bufferDrop + 1)]);
+                drawCharacter(*bufferDrop, x * fontWidth, (y - 1) * fontHeight, colours[*(bufferDrop + 1)]);
             }
             bufferDrop += 2;
         }
@@ -267,7 +286,7 @@ void drop()
 void put(char character)
 {
     lock(&writing);
-    drawCharacter('_', cursorX * 16, cursorY * 32, 0);
+    drawCharacter('_', cursorX * fontWidth, cursorY * fontHeight, 0);
     if (character == '\b')
     {
         if (cursorX > 0)
@@ -280,8 +299,8 @@ void put(char character)
             cursorX = terminalWidth - 1;
         }
         uint64_t location = cursorY * terminalPitch + cursorX * 2;
-        drawCharacter(backBuffer[location], cursorX * 16, cursorY * 32, 0);
-        backBuffer[location] = '\xff';
+        drawCharacter(backBuffer[location], cursorX * fontWidth, cursorY * fontHeight, 0);
+        backBuffer[location] = TERMINAL_NO_CHAR;
     }
     else if (character == '\n')
     {
@@ -295,17 +314,17 @@ void put(char character)
             drop();
         }
     }
-    else if (character == '\xff')
+    else if (character == TERM_CLEAR)
     {
         uint64_t x = 0;
         uint64_t y = 0;
         char* buffer = backBuffer;
         for (uint64_t i = 0; i < terminalWidth * terminalHeight; i++)
         {
-            if (*buffer != '\xff')
+            if (*buffer != TERMINAL_NO_CHAR)
             {
-                drawCharacter(*buffer, x * 16, y * 32, 0);
-                *buffer = '\xff';
+                drawCharacter(*buffer, x * fontWidth, y * fontHeight, 0);
+                *buffer = TERMINAL_NO_CHAR;
             }
             buffer += 2;
             x++;
@@ -320,7 +339,7 @@ void put(char character)
     }
     else
     {
-        drawCharacter(character, cursorX * 16, cursorY * 32, colours[colour]);
+        drawCharacter(character, cursorX * fontWidth, cursorY * fontHeight, colours[colour]);
         uint64_t location = cursorY * terminalPitch + cursorX * 2;
         backBuffer[location] = character;
         backBuffer[location + 1] = colour;
@@ -338,7 +357,7 @@ void put(char character)
             }
         }
     }
-    drawCharacter('_', cursorX * 16, cursorY * 32, colours[colour]);
+    drawCharacter('_', cursorX * fontWidth, cursorY * fontHeight, colours[colour]);
     unlock(&writing);
 }
 
@@ -346,11 +365,11 @@ void write(const char* message)
 {
     while (*message)
     {
-        if (*message == '\xfe')
+        if (*message == TERMINAL_COLOUR)
         {
             message++;
             colour = *message++;
-            drawCharacter('_', cursorX * 16, cursorY * 32, colours[colour]);
+            drawCharacter('_', cursorX * fontWidth, cursorY * fontHeight, colours[colour]);
         }
         else
         {

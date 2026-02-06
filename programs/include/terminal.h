@@ -4,7 +4,7 @@
 #include <definitions.h>
 #include <calls.h>
 
-#define TERM_CLEAR "\xff"
+#define TERM_CLEAR '\xff'
 #define TERM_DEFAULT "\xfe\x00"
 #define TERM_WHITE "\xfe\x01"
 #define TERM_BLUE "\xfe\x02"

@@ -4,6 +4,8 @@
 #include <calls.h>
 #include <cpu.h>
 
+#define MEMORY_START 0x1000000
+
 typedef struct
 {
     bool present;
@@ -44,7 +46,7 @@ void markUnusable(uint64_t start, uint64_t end)
 void* allocate(uint64_t amount)
 {
     lock(&allocating);
-    uint64_t value = 0x1000000;
+    uint64_t value = MEMORY_START;
     Allocation* allocation = allocated;
     uint64_t count = 0;
     while (count != allocations)
@@ -86,7 +88,7 @@ void* allocate(uint64_t amount)
 void* allocateAligned(uint64_t amount, uint64_t alignment)
 {
     lock(&allocating);
-    uint64_t value = 0x1000000 + (alignment - (0x1000000 % alignment));
+    uint64_t value = MEMORY_START + (alignment - (MEMORY_START % alignment));
     Allocation* allocation = allocated;
     uint64_t count = 0;
     while (count != allocations)

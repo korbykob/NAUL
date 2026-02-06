@@ -9,6 +9,12 @@
 #include <calls.h>
 #include <cpu.h>
 
+#define KEYBOARD_COMMAND 0x64
+#define KEYBOARD_DATA 0x60
+#define KEYBOARD_PRESSED_MASK 0b10000000
+#define KEYBOARD_BUFFER_FULL 0x01
+#define KEYBOARD_INTERRUPT 1
+
 typedef struct
 {
     void* next;
@@ -20,11 +26,11 @@ KeyboardBufferElement* keyboardBuffers = 0;
 
 void keyboard()
 {
-    uint8_t scancode = inb(0x60);
-    bool unpressed = scancode & 0b10000000;
+    uint8_t scancode = inb(KEYBOARD_DATA);
+    bool unpressed = scancode & KEYBOARD_PRESSED_MASK;
     if (unpressed)
     {
-        scancode &= 0b01111111;
+        scancode &= ~KEYBOARD_PRESSED_MASK;
     }
     KeyboardBufferElement* element = keyboardBuffers;
     while (true)
@@ -41,7 +47,7 @@ void keyboard()
             break;
         }
     }
-    picAck(1);
+    picAck(KEYBOARD_INTERRUPT);
 }
 
 __attribute__((naked)) void keyboardInterrupt()
@@ -63,13 +69,13 @@ void initKeyboard()
     keyboardBuffers->prev = keyboardBuffers;
     keyboardBuffers->buffer = 0;
     serialPrint("Installing keyboard IRQ");
-    installIrq(1, keyboardInterrupt);
+    installIrq(KEYBOARD_INTERRUPT, keyboardInterrupt);
     serialPrint("Unmasking interrupt");
-    unmaskPic(1);
+    unmaskPic(KEYBOARD_INTERRUPT);
     serialPrint("Flushing PS/2 input buffer");
-    if (inb(0x64) & 0x01)
+    if (inb(KEYBOARD_COMMAND) & KEYBOARD_BUFFER_FULL)
     {
-        inb(0x60);
+        inb(KEYBOARD_DATA);
     }
     serialPrint("Set up PS/2 keyboard");
 }

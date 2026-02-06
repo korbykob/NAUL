@@ -2,9 +2,13 @@
 #include <serial.h>
 #include <filesystem.h>
 #include <bootloader.h>
+#include <processes.h>
 #include <symbols.h>
 #include <str.h>
 #include <mem.h>
+#include <psf.h>
+
+#define PANIC_COLOUR 0xFF5050
 
 typedef struct
 {
@@ -12,7 +16,7 @@ typedef struct
     uint64_t address;
 } FramePointer;
 
-const Exception exceptions[32] = {
+const Exception exceptions[EXCEPTION_COUNT] = {
     { "Division error", false },
     { "Debug", false },
     { "Non-maskable interrupt", false },
@@ -46,14 +50,14 @@ const Exception exceptions[32] = {
     { "Security exception", true },
     { "", false }
 };
-uint8_t* panicFont = 0;
+PsfFile* panicFont = 0;
 uint32_t panicX = 0;
 uint32_t panicY = 0;
 
 void initPanic()
 {
     serialPrint("Setting up panic screen");
-    panicFont = getFile("/naul/font.psf", 0);
+    panicFont = (PsfFile*)getFile("/naul/font.psf", 0);
     serialPrint("Set up panic screen");
 }
 
@@ -65,33 +69,35 @@ void panicWrite(const char* string)
         if (*string != '\n')
         {
             uint32_t* address = information.framebuffer + panicY * information.width + panicX;
-            uint8_t* glyph = panicFont + 32 + 64 * *string;
-            for (uint8_t y = 0; y < 64; y += 2)
+            uint8_t* glyph = panicFont->data + panicFont->glyphSize * *string;
+            for (uint8_t y = 0; y < panicFont->height; y++)
             {
                 for (uint8_t x = 0; x < 8; x++)
                 {
-                    if (glyph[y] & (0b10000000 >> x))
+                    if (*glyph & (0b10000000 >> x))
                     {
-                        *address = 0xFF5050;
+                        *address = PANIC_COLOUR;
                     }
                     address++;
                 }
+                glyph++;
                 for (uint8_t x = 0; x < 8; x++)
                 {
-                    if (glyph[y + 1] & (0b10000000 >> x))
+                    if (*glyph & (0b10000000 >> x))
                     {
-                        *address = 0xFF5050;
+                        *address = PANIC_COLOUR;
                     }
                     address++;
                 }
-                address += information.width - 16;
+                glyph++;
+                address += information.width - panicFont->width;
             }
-            panicX += 16;
+            panicX += panicFont->width + 1;
         }
         else
         {
             panicX = 0;
-            panicY += 32;
+            panicY += panicFont->height;
         }
         string++;
     }
@@ -117,10 +123,10 @@ void panic(uint8_t exception, uint32_t code)
     __asm__ volatile ("movq %%rbp, %0" : "=g"(frame));
     while (frame)
     {
-        uint64_t address = frame->address - 5;
-        if (address >= 0x8000000000)
+        uint64_t address = frame->address - JMP_SIZE;
+        if (address >= PROCESS_ADDRESS)
         {
-            address -= 0x8000000000;
+            address -= PROCESS_ADDRESS;
             panicWrite("Within a process");
         }
         else if (address >= getOffset())

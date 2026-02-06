@@ -418,6 +418,31 @@
       "-c",
       "-nostdinc",
       "-o",
+      "os/bin/processes.o",
+      "os/src/processes.c"
+    ],
+    "directory": "${workspaceFolder}",
+    "file": "${workspaceFolder}/os/src/processes.c",
+    "output": "${workspaceFolder}/os/bin/processes.o"
+  },
+  {
+    "arguments": [
+      "/usr/bin/gcc",
+      "-Iinclude",
+      "-ffreestanding",
+      "-fno-stack-protector",
+      "-fno-stack-check",
+      "-mno-red-zone",
+      "-maccumulate-outgoing-args",
+      "-g",
+      "-mavx2",
+      "-O3",
+      "-fno-omit-frame-pointer",
+      "-Ios/include",
+      "-fpic",
+      "-c",
+      "-nostdinc",
+      "-o",
       "os/bin/kernel.o",
       "os/src/kernel.c"
     ],
