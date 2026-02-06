@@ -21,8 +21,8 @@ typedef struct
     void* prev;
     uint64_t id;
     uint64_t waiting;
-    uint8_t stack[0x100000];
     uint64_t sp;
+    uint8_t stack[0x100000];
 } Thread;
 
 Thread* threads = 0;

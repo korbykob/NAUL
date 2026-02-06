@@ -221,7 +221,7 @@ void initTerminal()
     serialPrint("Allocating back buffer");
     backBuffer = allocate(terminalWidth * terminalHeight * sizeof(char) * 2);
     serialPrint("Setting up back buffer");
-    setMemory16(backBuffer, 0x00FF, terminalWidth * terminalHeight);
+    setMemory16((uint16_t*)backBuffer, 0x00FF, terminalWidth * terminalHeight);
     serialPrint("Creating blink thread");
     createThread(blinkThread);
     serialPrint("Registering keyboard handler");
@@ -261,7 +261,7 @@ void drop()
             x = 0;
         }
     }
-    setMemory16(backBuffer + (terminalHeight - 1) * terminalPitch, 0x00FF, terminalPitch / 2);
+    setMemory16((uint16_t*)(backBuffer + (terminalHeight - 1) * terminalPitch), 0x00FF, terminalPitch / 2);
 }
 
 void put(char character)
