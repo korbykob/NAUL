@@ -70,26 +70,23 @@ void panicWrite(const char* string)
         {
             uint32_t* address = information.framebuffer + panicY * information.width + panicX;
             uint8_t* glyph = panicFont->data + panicFont->glyphSize * *string;
-            for (uint8_t y = 0; y < panicFont->height; y++)
+            for (uint32_t y = 0; y < panicFont->height; y++)
             {
-                for (uint8_t x = 0; x < 8; x++)
+                uint32_t width = panicFont->width;
+                while (width)
                 {
-                    if (*glyph & (0b10000000 >> x))
+                    uint32_t amount = min(8, width);
+                    for (uint8_t x = 0; x < amount; x++)
                     {
-                        *address = PANIC_COLOUR;
+                        if (*glyph & (0b10000000 >> x))
+                        {
+                            *address = PANIC_COLOUR;
+                        }
+                        address++;
                     }
-                    address++;
+                    glyph++;
+                    width -= amount;
                 }
-                glyph++;
-                for (uint8_t x = 0; x < 8; x++)
-                {
-                    if (*glyph & (0b10000000 >> x))
-                    {
-                        *address = PANIC_COLOUR;
-                    }
-                    address++;
-                }
-                glyph++;
                 address += information.width - panicFont->width;
             }
             panicX += panicFont->width + 1;

@@ -115,26 +115,23 @@ void drawCharacter(char character, uint32_t x, uint32_t y, uint32_t colour)
 {
     uint32_t* address = information.framebuffer + y * information.width + x;
     uint8_t* glyph = font->data + font->glyphSize * character;
-    for (uint8_t y = 0; y < font->height; y++)
+    for (uint32_t y = 0; y < font->height; y++)
     {
-        for (uint8_t x = 0; x < 8; x++)
+        uint32_t width = font->width;
+        while (width)
         {
-            if (*glyph & (0b10000000 >> x))
+            uint32_t amount = min(8, width);
+            for (uint8_t x = 0; x < amount; x++)
             {
-                *address = colour;
+                if (*glyph & (0b10000000 >> x))
+                {
+                    *address = colour;
+                }
+                address++;
             }
-            address++;
+            glyph++;
+            width -= amount;
         }
-        glyph++;
-        for (uint8_t x = 0; x < 8; x++)
-        {
-            if (*glyph & (0b10000000 >> x))
-            {
-                *address = colour;
-            }
-            address++;
-        }
-        glyph++;
         address += information.width - font->width;
     }
 }
