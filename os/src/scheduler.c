@@ -44,7 +44,7 @@ __attribute__((naked)) void updateScheduler()
     pushAvxRegisters();
     __asm__ volatile ("movq %cr3, %rax; pushq %rax");
     __asm__ volatile ("movq %%rsp, %0" : "=g"(currentThread->sp));
-    __asm__ volatile ("movl $0xfee000B0, %eax; movl $0, (%eax)");
+    __asm__ volatile ("movl $0, %0" : "=m"(*(uint32_t*)0xfee000B0));
     __asm__ volatile ("tryNext:");
     __asm__ volatile ("movq %1, %0" : "=m"(currentThread) : "r"(currentThread->next));
     __asm__ volatile ("nextThread:");

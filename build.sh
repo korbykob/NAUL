@@ -5,7 +5,7 @@ if [ ! -f "os/gnu-efi/x86_64/gnuefi/crt0-efi-x86_64.o" ]; then
     make -C os/gnu-efi
 fi
 
-cflags="-Iinclude -ffreestanding -fno-stack-protector -fno-stack-check -mno-red-zone -maccumulate-outgoing-args -g -mavx2"
+cflags="-Iinclude -ffreestanding -fno-stack-protector -fno-stack-check -mno-red-zone -maccumulate-outgoing-args -g -mavx2 -O3 -fno-omit-frame-pointer"
 bootloaderCflags="$cflags -Ios/include -fpic -c -fshort-wchar -Ios/gnu-efi/inc"
 kernelCflags="$cflags -Ios/include -fpic -c -nostdinc"
 programCflags="$cflags -Iprograms/include -static -fno-pic -fno-pie -mcmodel=large -c -nostdinc"
