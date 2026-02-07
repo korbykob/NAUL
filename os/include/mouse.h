@@ -4,6 +4,8 @@
 
 typedef struct
 {
+    uint8_t head;
+    uint8_t tail;
     struct
     {
         int16_t x;
@@ -11,7 +13,6 @@ typedef struct
         bool left;
         bool right;
     } buffer[256];
-    uint8_t current;
 } MouseBuffer;
 
 void initMouse();

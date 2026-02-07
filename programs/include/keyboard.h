@@ -6,12 +6,13 @@
 
 typedef struct
 {
+    uint8_t head;
+    uint8_t tail;
     struct
     {
         uint8_t scancode;
         bool pressed;
     } buffer[256];
-    uint8_t current;
 } KeyboardBuffer;
 
 static inline void registerKeyboard(KeyboardBuffer* buffer)

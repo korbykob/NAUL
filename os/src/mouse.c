@@ -50,11 +50,11 @@ void mouse()
         {
             if (element->buffer)
             {
-                element->buffer->buffer[element->buffer->current].x = x;
-                element->buffer->buffer[element->buffer->current].y = y;
-                element->buffer->buffer[element->buffer->current].left = left;
-                element->buffer->buffer[element->buffer->current].right = right;
-                element->buffer->current++;
+                element->buffer->buffer[element->buffer->head].x = x;
+                element->buffer->buffer[element->buffer->head].y = y;
+                element->buffer->buffer[element->buffer->head].left = left;
+                element->buffer->buffer[element->buffer->head].right = right;
+                element->buffer->head++;
             }
             element = element->next;
             if (element == mouseBuffers)

@@ -37,9 +37,9 @@ void keyboard()
     {
         if (element->buffer)
         {
-            element->buffer->buffer[element->buffer->current].scancode = scancode;
-            element->buffer->buffer[element->buffer->current].pressed = !unpressed;
-            element->buffer->current++;
+            element->buffer->buffer[element->buffer->head].scancode = scancode;
+            element->buffer->buffer[element->buffer->head].pressed = !unpressed;
+            element->buffer->head++;
         }
         element = element->next;
         if (element == keyboardBuffers)

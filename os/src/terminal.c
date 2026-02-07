@@ -102,7 +102,7 @@ const char capsScancodes[256] = {
     0, /* F12 Key */
     0 /* All other keys are undefined */
 };
-KeyboardBuffer keyboardBuffer;
+KeyboardBuffer keyboardBuffer = { 0, 0 };
 bool leftShift = false;
 bool rightShift = false;
 bool shift = false;
@@ -140,61 +140,58 @@ void terminalKeyboard()
 {
     while (true)
     {
-        if (keyboardBuffer.current > 0)
+        while (keyboardBuffer.tail != keyboardBuffer.head)
         {
-            for (uint8_t i = 0; i < keyboardBuffer.current; i++)
+            switch (keyboardBuffer.buffer[keyboardBuffer.tail].scancode)
             {
-                switch (keyboardBuffer.buffer[i].scancode)
+                case KEY_LEFT_SHIFT:
+                    leftShift = keyboardBuffer.buffer[keyboardBuffer.tail].pressed;
+                    shift = leftShift || rightShift;
+                    break;
+                case KEY_RIGHT_SHIFT:
+                    rightShift = keyboardBuffer.buffer[keyboardBuffer.tail].pressed;
+                    shift = leftShift || rightShift;
+                    break;
+                case KEY_CAPS_LOCK:
+                    if (keyboardBuffer.buffer[keyboardBuffer.tail].pressed)
+                    {
+                        caps = !caps;
+                    }
+                    break;
+            }
+            if (typingBuffer)
+            {
+                switch (keyboardBuffer.buffer[keyboardBuffer.tail].scancode)
                 {
-                    case KEY_LEFT_SHIFT:
-                        leftShift = keyboardBuffer.buffer[i].pressed;
-                        shift = leftShift || rightShift;
-                        break;
-                    case KEY_RIGHT_SHIFT:
-                        rightShift = keyboardBuffer.buffer[i].pressed;
-                        shift = leftShift || rightShift;
-                        break;
-                    case KEY_CAPS_LOCK:
-                        if (keyboardBuffer.buffer[i].pressed)
+                    case KEY_BACKSPACE:
+                        if (keyboardBuffer.buffer[keyboardBuffer.tail].pressed && typingCursor > 0)
                         {
-                            caps = !caps;
+                            typingCursor--;
+                            put('\b');
+                        }
+                        break;
+                    case KEY_ENTER:
+                        if (keyboardBuffer.buffer[keyboardBuffer.tail].pressed)
+                        {
+                            typingBuffer[typingCursor] = '\0';
+                            put('\n');
+                            typingBuffer = 0;
+                        }
+                        break;
+                    default:
+                        if (keyboardBuffer.buffer[keyboardBuffer.tail].pressed && typingCursor < typingLength)
+                        {
+                            char character = (caps ? !shift : shift) ? capsScancodes[keyboardBuffer.buffer[keyboardBuffer.tail].scancode] : scancodes[keyboardBuffer.buffer[keyboardBuffer.tail].scancode];
+                            if (character)
+                            {
+                                typingBuffer[typingCursor++] = character;
+                                put(character);
+                            }
                         }
                         break;
                 }
-                if (typingBuffer)
-                {
-                    switch (keyboardBuffer.buffer[i].scancode)
-                    {
-                        case KEY_BACKSPACE:
-                            if (keyboardBuffer.buffer[i].pressed && typingCursor > 0)
-                            {
-                                typingCursor--;
-                                put('\b');
-                            }
-                            break;
-                        case KEY_ENTER:
-                            if (keyboardBuffer.buffer[i].pressed)
-                            {
-                                typingBuffer[typingCursor] = '\0';
-                                put('\n');
-                                typingBuffer = 0;
-                            }
-                            break;
-                        default:
-                            if (keyboardBuffer.buffer[i].pressed && typingCursor < typingLength)
-                            {
-                                char character = (caps ? !shift : shift) ? capsScancodes[keyboardBuffer.buffer[i].scancode] : scancodes[keyboardBuffer.buffer[i].scancode];
-                                if (character)
-                                {
-                                    typingBuffer[typingCursor++] = character;
-                                    put(character);
-                                }
-                            }
-                            break;
-                    }
-                }
             }
-            keyboardBuffer.current = 0;
+            keyboardBuffer.tail++;
         }
         yieldThread();
     }
@@ -241,7 +238,6 @@ void initTerminal()
     serialPrint("Creating blink thread");
     createThread(blinkThread);
     serialPrint("Registering keyboard handler");
-    keyboardBuffer.current = 0;
     registerKeyboard(&keyboardBuffer);
     createThread(terminalKeyboard);
     serialPrint("Set up terminal");
