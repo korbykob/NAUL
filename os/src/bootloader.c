@@ -256,6 +256,5 @@ EFI_STATUS efi_main(EFI_HANDLE ImageHandle, EFI_SYSTEM_TABLE* SystemTable)
     serialPrint("Entering kernel");
     __asm__ volatile ("xorq %rbp, %rbp");
     kernel();
-    while (TRUE);
     return EFI_SUCCESS;
 }
