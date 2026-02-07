@@ -108,7 +108,7 @@ uint64_t createThread(void (*function)())
     __asm__ volatile ("cli");
     Thread* thread = allocate(sizeof(Thread));
     thread->next = currentThread;
-    uint64_t id = 1;
+    uint64_t id = 0;
     Thread* current = threads;
     while (true)
     {

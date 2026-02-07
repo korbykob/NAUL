@@ -35,6 +35,9 @@ void kernel()
     initProcesses();
     serialPrint("Yo puter ready B)");
     write("Welcome to " TERM_WHITE "NAUL" TERM_DEFAULT " (Not A Unix Like)!\n\nStarting shell, use \"" TERM_GREEN "help" TERM_DEFAULT "\" for more information:\n");
-    execute("/programs/shell.bin");
-    exitThread();
+    while (true)
+    {
+        waitForThread(execute("/programs/shell.bin"));
+        write("\nShell process died, restarting:\n");
+    }
 }
