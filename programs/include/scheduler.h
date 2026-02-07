@@ -4,7 +4,7 @@
 #include <definitions.h>
 #include <calls.h>
 
-#define yieldThread() __asm__ volatile ("int $0x67")
+#define yieldThread() __asm__ volatile ("int $0x67" : : : "memory")
 
 static inline uint64_t createThread(void (*function)())
 {
