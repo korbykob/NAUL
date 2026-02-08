@@ -10,6 +10,8 @@
 
 void initTerminal();
 
+void redrawTerminal();
+
 void put(char character);
 
 void write(const char* message);

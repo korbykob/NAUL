@@ -243,6 +243,28 @@ void initTerminal()
     serialPrint("Set up terminal");
 }
 
+void redrawTerminal()
+{
+    setMemory32(information.framebuffer, 0, information.width * information.height);
+    uint64_t x = 0;
+    uint64_t y = 0;
+    char* buffer = backBuffer;
+    for (uint64_t i = 0; i < terminalWidth * terminalHeight; i++)
+    {
+        if (*buffer != TERMINAL_NO_CHAR)
+        {
+            drawCharacter(*buffer, x * fontWidth, y * fontHeight, colours[*(buffer + 1)]);
+        }
+        buffer += 2;
+        x++;
+        if (x == terminalWidth)
+        {
+            y++;
+            x = 0;
+        }
+    }
+}
+
 void drop()
 {
     uint64_t x = 0;

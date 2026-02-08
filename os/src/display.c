@@ -4,10 +4,10 @@
 #include <bootloader.h>
 #include <allocator.h>
 #include <calls.h>
+#include <terminal.h>
 #include <cpu.h>
 #include <mem.h>
 
-uint32_t* backup = 0;
 bool displayObtained = false;
 
 void initDisplay()
@@ -15,15 +15,12 @@ void initDisplay()
     serialPrint("Setting up display");
     registerSyscall(OBTAIN_DISPLAY, obtainDisplay);
     registerSyscall(RELEASE_DISPLAY, releaseDisplay);
-    serialPrint("Allocating backup display buffer");
-    backup = allocate(information.width * information.height * sizeof(uint32_t));
     serialPrint("Set up display");
 }
 
 void obtainDisplay(Display* display)
 {
     lock(&displayObtained);
-    copyMemory32(information.framebuffer, backup, information.width * information.height);
     display->buffer = information.framebuffer;
     display->width = information.width;
     display->height = information.height;
@@ -31,6 +28,6 @@ void obtainDisplay(Display* display)
 
 void releaseDisplay()
 {
-    copyMemory32(backup, information.framebuffer, information.width * information.height);
+    redrawTerminal();
     unlock(&displayObtained);
 }
