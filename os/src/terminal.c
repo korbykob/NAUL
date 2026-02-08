@@ -136,6 +136,14 @@ void drawCharacter(char character, uint32_t x, uint32_t y, uint32_t colour)
     }
 }
 
+void tryDrawCharacter(char character, uint32_t x, uint32_t y, uint32_t colour)
+{
+    if (!displayObtained)
+    {
+        drawCharacter(character, x, y, colour);
+    }
+}
+
 void terminalKeyboard()
 {
     while (true)
@@ -207,7 +215,7 @@ void blinkThread()
         if (femtoseconds - last >= FEMTOSECONDS_PER_SECOND / 2)
         {
             last = femtoseconds;
-            if (!writing && !displayObtained)
+            if (!writing)
             {
                 drawCharacter('_', cursorX * fontWidth, cursorY * fontHeight, blink ? colours[colour] : 0);
                 blink = !blink;
@@ -275,7 +283,7 @@ void drop()
     {
         if (*buffer != TERMINAL_NO_CHAR)
         {
-            drawCharacter(*buffer, x * fontWidth, y * fontHeight, 0);
+            tryDrawCharacter(*buffer, x * fontWidth, y * fontHeight, 0);
         }
         if (i >= terminalWidth)
         {
@@ -283,7 +291,7 @@ void drop()
             if (*bufferDrop != TERMINAL_NO_CHAR)
             {
                 *(bufferDrop + 1) = *(buffer + 1);
-                drawCharacter(*bufferDrop, x * fontWidth, (y - 1) * fontHeight, colours[*(bufferDrop + 1)]);
+                tryDrawCharacter(*bufferDrop, x * fontWidth, (y - 1) * fontHeight, colours[*(bufferDrop + 1)]);
             }
             bufferDrop += 2;
         }
@@ -301,7 +309,7 @@ void drop()
 void put(char character)
 {
     lock(&writing);
-    drawCharacter('_', cursorX * fontWidth, cursorY * fontHeight, 0);
+    tryDrawCharacter('_', cursorX * fontWidth, cursorY * fontHeight, 0);
     if (character == '\b')
     {
         if (cursorX > 0)
@@ -314,7 +322,7 @@ void put(char character)
             cursorX = terminalWidth - 1;
         }
         uint64_t location = cursorY * terminalPitch + cursorX * 2;
-        drawCharacter(backBuffer[location], cursorX * fontWidth, cursorY * fontHeight, 0);
+        tryDrawCharacter(backBuffer[location], cursorX * fontWidth, cursorY * fontHeight, 0);
         backBuffer[location] = TERMINAL_NO_CHAR;
     }
     else if (character == '\n')
@@ -338,7 +346,7 @@ void put(char character)
         {
             if (*buffer != TERMINAL_NO_CHAR)
             {
-                drawCharacter(*buffer, x * fontWidth, y * fontHeight, 0);
+                tryDrawCharacter(*buffer, x * fontWidth, y * fontHeight, 0);
                 *buffer = TERMINAL_NO_CHAR;
             }
             buffer += 2;
@@ -354,7 +362,7 @@ void put(char character)
     }
     else
     {
-        drawCharacter(character, cursorX * fontWidth, cursorY * fontHeight, colours[colour]);
+        tryDrawCharacter(character, cursorX * fontWidth, cursorY * fontHeight, colours[colour]);
         uint64_t location = cursorY * terminalPitch + cursorX * 2;
         backBuffer[location] = character;
         backBuffer[location + 1] = colour;
@@ -372,7 +380,7 @@ void put(char character)
             }
         }
     }
-    drawCharacter('_', cursorX * fontWidth, cursorY * fontHeight, colours[colour]);
+    tryDrawCharacter('_', cursorX * fontWidth, cursorY * fontHeight, colours[colour]);
     unlock(&writing);
 }
 
@@ -384,7 +392,7 @@ void write(const char* message)
         {
             message++;
             colour = *message++;
-            drawCharacter('_', cursorX * fontWidth, cursorY * fontHeight, colours[colour]);
+            tryDrawCharacter('_', cursorX * fontWidth, cursorY * fontHeight, colours[colour]);
         }
         else
         {
