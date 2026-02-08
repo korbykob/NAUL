@@ -8,11 +8,12 @@
 #include <cpu.h>
 
 #define SCHEDULER_INTERRUPT 32
-#define LAPIC_BASE_ADDRESS 0xfee00000
-#define LAPIC_DIVISOR_REGISTER 0x3E0
-#define LAPIC_RELOAD_COUNT 0x380
-#define LAPIC_COUNTER 0x390
-#define LAPIC_CONFIG_REGISTER 0x320
+#define APIC_BASE_ADDRESS 0xfee00000
+#define LAPIC_EOI_REGISTER 0xB0
+#define LAPIC_DIVISOR_REGISTER (APIC_BASE_ADDRESS + 0x3E0)
+#define LAPIC_RELOAD_COUNT (APIC_BASE_ADDRESS + 0x380)
+#define LAPIC_COUNTER (APIC_BASE_ADDRESS + 0x390)
+#define LAPIC_CONFIG_REGISTER (APIC_BASE_ADDRESS + 0x320)
 #define LAPIC_PERIODIC_MODE 0x20000
 
 typedef struct
@@ -63,7 +64,7 @@ __attribute__((naked)) void updateScheduler()
     pushAvxRegisters();
     pushCr3();
     __asm__ volatile ("movq %%rsp, %0" : "=g"(currentThread->sp));
-    __asm__ volatile ("movl $0, %0" : "=m"(*(uint32_t*)(LAPIC_BASE_ADDRESS + 0xB0)));
+    __asm__ volatile ("movl $0, %0" : "=m"(*(uint32_t*)(APIC_BASE_ADDRESS + LAPIC_EOI_REGISTER)));
     __asm__ volatile ("jmp nextThread");
 }
 
@@ -86,16 +87,16 @@ void initScheduler()
     serialPrint("Configuring timer");
     installIsr(SCHEDULER_INTERRUPT, updateScheduler);
     serialPrint("Setting timer divisor");
-    *(uint32_t*)(LAPIC_BASE_ADDRESS + LAPIC_DIVISOR_REGISTER) = 3;
+    *(uint32_t*)LAPIC_DIVISOR_REGISTER = 3;
     serialPrint("Calibrating timer");
-    *(uint32_t*)(LAPIC_BASE_ADDRESS + LAPIC_RELOAD_COUNT) = __UINT32_MAX__;
+    *(uint32_t*)LAPIC_RELOAD_COUNT = __UINT32_MAX__;
     uint64_t start = getFemtoseconds();
     while (getFemtoseconds() - start < FEMTOSECONDS_PER_MILLISECOND);
-    uint32_t ticks = __UINT32_MAX__ - *(uint32_t*)(LAPIC_BASE_ADDRESS + LAPIC_COUNTER);
+    uint32_t ticks = __UINT32_MAX__ - *(uint32_t*)LAPIC_COUNTER;
     serialPrint("Setting initial timer count");
-    *(uint32_t*)(LAPIC_BASE_ADDRESS + LAPIC_RELOAD_COUNT) = ticks;
+    *(uint32_t*)LAPIC_RELOAD_COUNT = ticks;
     serialPrint("Setting interrupt vector");
-    *(uint32_t*)(LAPIC_BASE_ADDRESS + LAPIC_CONFIG_REGISTER) = SCHEDULER_INTERRUPT | LAPIC_PERIODIC_MODE;
+    *(uint32_t*)LAPIC_CONFIG_REGISTER = SCHEDULER_INTERRUPT | LAPIC_PERIODIC_MODE;
     serialPrint("Set up scheduler");
 }
 
