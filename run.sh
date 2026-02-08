@@ -2,11 +2,7 @@
 set -e
 
 ./build.sh
+./iso.sh
 clear
 
-uefi-run -b OVMF-pure-efi.fd -d \
--f os/bin/symbols.txt:naul/symbols.txt \
--f os/font.psf:naul/font.psf \
--f programs/bin/shell/shell.bin:programs/shell.bin \
--f programs/bin/test/test.bin:programs/test.bin \
-os/bin/os.efi -- -enable-kvm -m 4G -cpu host -serial null -serial null -serial stdio -display sdl
+qemu-system-x86_64 -enable-kvm -bios OVMF-pure-efi.fd -cdrom naul.iso -m 4G -cpu host -serial null -serial null -serial stdio -display sdl

@@ -27,7 +27,7 @@ First clone the repo and its submodules:
 ```
 git clone --recursive https://github.com/korbykob/NAUL.git
 ```
-Ensure you have QEMU, build essentials, and [uefi-run](https://github.com/richard-w/uefi-run) installed and run:
+Ensure you have QEMU, build essentials, and mtools installed and run:
 ```
 cd NAUL
 ./run.sh
