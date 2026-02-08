@@ -7,8 +7,8 @@
 #define PAGE_ENTRY_SIZE 0x1000
 #define PAGE_ALIGNMENT 0x1000
 #define PAGE_ENTRY_COUNT 512
-#define PAGE_PRESENT 0b11
-#define PAGE_SIZED 0b10000011
+#define PAGE_PRESENT 0x3
+#define PAGE_SIZED 0x80
 #define PAGE_ADDRESS_MASK ~0xFFFUL
 
 uint64_t mainPdpt = 0;
@@ -39,7 +39,7 @@ uint64_t createTable(void* start, uint64_t pages)
         uint16_t count = min(pages, PAGE_ENTRY_COUNT);
         for (uint16_t i = 0; i < count; i++)
         {
-            pdt[i] = address | PAGE_SIZED;
+            pdt[i] = address | PAGE_PRESENT | PAGE_SIZED;
             address += PAGE_SIZE;
             pages--;
         }
