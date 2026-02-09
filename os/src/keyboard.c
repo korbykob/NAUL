@@ -70,13 +70,13 @@ void initKeyboard()
     keyboardBuffers->buffer = 0;
     serialPrint("Installing keyboard IRQ");
     installIrq(KEYBOARD_INTERRUPT, keyboardInterrupt);
-    serialPrint("Unmasking interrupt");
-    unmaskPic(KEYBOARD_INTERRUPT);
     serialPrint("Flushing PS/2 input buffer");
     if (inb(KEYBOARD_COMMAND) & KEYBOARD_BUFFER_FULL)
     {
         inb(KEYBOARD_DATA);
     }
+    serialPrint("Unmasking interrupt");
+    unmaskPic(KEYBOARD_INTERRUPT);
     serialPrint("Set up PS/2 keyboard");
 }
 
