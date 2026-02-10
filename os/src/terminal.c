@@ -17,6 +17,7 @@
 #define TERMINAL_WHITE 0xFFFFFF
 #define TERMINAL_BLUE 0x0080FF
 #define TERMINAL_GREEN 0x008000
+#define TERMINAL_RED 0xFF5050
 #define TERMINAL_NO_CHAR '\xff'
 #define TERMINAL_COLOUR '\xfe'
 #define KEY_LEFT_SHIFT 42
@@ -34,7 +35,7 @@ uint32_t terminalHeight = 0;
 uint32_t terminalPitch = 0;
 uint32_t cursorX = 0;
 uint32_t cursorY = 0;
-const uint32_t colours[256] = { 0, TERMINAL_DEFAULT, TERMINAL_WHITE, TERMINAL_BLUE, TERMINAL_GREEN };
+const uint32_t colours[256] = { 0, TERMINAL_DEFAULT, TERMINAL_WHITE, TERMINAL_BLUE, TERMINAL_GREEN, TERMINAL_RED };
 uint8_t colour = 1;
 const char scancodes[256] = {
     0, 0, '1', '2', '3', '4', '5', '6', '7', '8', /* 9 */

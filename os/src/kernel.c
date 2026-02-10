@@ -40,6 +40,6 @@ void kernel()
     while (true)
     {
         waitForThread(execute("/programs/shell.bin"));
-        write("\nShell process died, restarting:\n");
+        write(TTY_RED "\nShell process died, restarting:\n" TTY_DEFAULT);
     }
 }

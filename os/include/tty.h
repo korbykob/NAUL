@@ -7,6 +7,7 @@
 #define TTY_WHITE "\xfe\x02"
 #define TTY_BLUE "\xfe\x03"
 #define TTY_GREEN "\xfe\x04"
+#define TTY_RED "\xfe\x05"
 
 typedef struct
 {
