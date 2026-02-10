@@ -30,6 +30,7 @@ gcc $kernelCflags os/src/scheduler.c -o os/bin/scheduler.o
 gcc $kernelCflags os/src/keyboard.c -o os/bin/keyboard.o
 gcc $kernelCflags os/src/mouse.c -o os/bin/mouse.o
 gcc $kernelCflags os/src/display.c -o os/bin/display.o
+gcc $kernelCflags os/src/tty.c -o os/bin/tty.o
 gcc $kernelCflags os/src/terminal.c -o os/bin/terminal.o
 gcc $kernelCflags os/src/processes.c -o os/bin/processes.o
 gcc $kernelCflags os/src/kernel.c -o os/bin/kernel.o
@@ -50,6 +51,7 @@ os/bin/scheduler.o \
 os/bin/keyboard.o \
 os/bin/mouse.o \
 os/bin/display.o \
+os/bin/tty.o \
 os/bin/terminal.o \
 os/bin/processes.o \
 os/bin/kernel.o \

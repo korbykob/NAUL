@@ -1,5 +1,5 @@
 #include <definitions.h>
-#include <terminal.h>
+#include <tty.h>
 #include <processes.h>
 
 void entry()

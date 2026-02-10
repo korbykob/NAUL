@@ -30,6 +30,8 @@ enum Syscalls
     OBTAIN_DISPLAY,
     RELEASE_DISPLAY,
 
+    REGISTER_TTY,
+    UNREGISTER_TTY,
     PUT,
     WRITE,
     READ,

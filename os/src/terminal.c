@@ -5,11 +5,10 @@
 #include <allocator.h>
 #include <hpet.h>
 #include <scheduler.h>
-#include <syscalls.h>
 #include <paging.h>
 #include <keyboard.h>
 #include <display.h>
-#include <calls.h>
+#include <tty.h>
 #include <cpu.h>
 #include <mem.h>
 #include <psf.h>
@@ -35,9 +34,8 @@ uint32_t terminalHeight = 0;
 uint32_t terminalPitch = 0;
 uint32_t cursorX = 0;
 uint32_t cursorY = 0;
-const uint32_t colours[] = { TERMINAL_DEFAULT, TERMINAL_WHITE, TERMINAL_BLUE, TERMINAL_GREEN };
-uint8_t colour = 0;
-bool writing = false;
+const uint32_t colours[256] = { 0, TERMINAL_DEFAULT, TERMINAL_WHITE, TERMINAL_BLUE, TERMINAL_GREEN };
+uint8_t colour = 1;
 const char scancodes[256] = {
     0, 0, '1', '2', '3', '4', '5', '6', '7', '8', /* 9 */
     '9', '0', '-', '=', 0, /* Backspace */
@@ -107,9 +105,8 @@ bool leftShift = false;
 bool rightShift = false;
 bool shift = false;
 bool caps = false;
-char* typingBuffer = 0;
-uint64_t typingCursor = 0;
-uint64_t typingLength = 0;
+TtyBuffer ttyBuffer = { 0, 0, 0, 0, 0 };
+bool waitingColour = false;
 
 void drawCharacter(char character, uint32_t x, uint32_t y, uint32_t colour)
 {
@@ -140,118 +137,6 @@ void drawCharacter(char character, uint32_t x, uint32_t y, uint32_t colour)
     }
 }
 
-void terminalKeyboard()
-{
-    while (true)
-    {
-        while (keyboardBuffer.tail != keyboardBuffer.head)
-        {
-            switch (keyboardBuffer.buffer[keyboardBuffer.tail].scancode)
-            {
-                case KEY_LEFT_SHIFT:
-                    leftShift = keyboardBuffer.buffer[keyboardBuffer.tail].pressed;
-                    shift = leftShift || rightShift;
-                    break;
-                case KEY_RIGHT_SHIFT:
-                    rightShift = keyboardBuffer.buffer[keyboardBuffer.tail].pressed;
-                    shift = leftShift || rightShift;
-                    break;
-                case KEY_CAPS_LOCK:
-                    if (keyboardBuffer.buffer[keyboardBuffer.tail].pressed)
-                    {
-                        caps = !caps;
-                    }
-                    break;
-            }
-            if (typingBuffer)
-            {
-                switch (keyboardBuffer.buffer[keyboardBuffer.tail].scancode)
-                {
-                    case KEY_BACKSPACE:
-                        if (keyboardBuffer.buffer[keyboardBuffer.tail].pressed && typingCursor > 0)
-                        {
-                            typingCursor--;
-                            put('\b');
-                        }
-                        break;
-                    case KEY_ENTER:
-                        if (keyboardBuffer.buffer[keyboardBuffer.tail].pressed)
-                        {
-                            typingBuffer[typingCursor] = '\0';
-                            put('\n');
-                            typingBuffer = 0;
-                        }
-                        break;
-                    default:
-                        if (keyboardBuffer.buffer[keyboardBuffer.tail].pressed && typingCursor < typingLength)
-                        {
-                            char character = (caps ? !shift : shift) ? capsScancodes[keyboardBuffer.buffer[keyboardBuffer.tail].scancode] : scancodes[keyboardBuffer.buffer[keyboardBuffer.tail].scancode];
-                            if (character)
-                            {
-                                typingBuffer[typingCursor++] = character;
-                                put(character);
-                            }
-                        }
-                        break;
-                }
-            }
-            keyboardBuffer.tail++;
-        }
-        yieldThread();
-    }
-}
-
-void blinkThread()
-{
-    bool blink = false;
-    uint64_t last = getFemtoseconds();
-    while (true)
-    {
-        uint64_t femtoseconds = getFemtoseconds();
-        if (femtoseconds - last >= FEMTOSECONDS_PER_SECOND / 2)
-        {
-            last = femtoseconds;
-            if (!writing && !displayObtained)
-            {
-                drawCharacter('_', cursorX * fontWidth, cursorY * fontHeight, blink ? colours[colour] : 0);
-                blink = !blink;
-            }
-        }
-        yieldThread();
-    }
-}
-
-void initTerminal()
-{
-    serialPrint("Setting up terminal");
-    registerSyscall(PUT, put);
-    registerSyscall(WRITE, write);
-    registerSyscall(READ, read);
-    serialPrint("Loading font");
-    font = (PsfFile*)getFile("/naul/font.psf", 0);
-    fontWidth = font->width + 1;
-    fontHeight = font->height;
-    serialPrint("Setting up terminal graphics");
-    terminalWidth = information.width / fontWidth;
-    terminalHeight = information.height / fontHeight;
-    terminalPitch = terminalWidth * 2;
-    serialPrint("Allocating back buffer");
-    backBuffer = allocate(information.width * information.height * sizeof(uint32_t));
-    serialPrint("Clearing out back buffer");
-    setMemory32(backBuffer, 0, information.width * information.height);
-    serialPrint("Creating blink thread");
-    createThread(blinkThread);
-    serialPrint("Registering keyboard handler");
-    registerKeyboard(&keyboardBuffer);
-    createThread(terminalKeyboard);
-    serialPrint("Set up terminal");
-}
-
-void redrawTerminal()
-{
-    copyMemory32(backBuffer, information.framebuffer, information.width * information.height);
-}
-
 void drop()
 {
     copyMemory32(backBuffer + information.width * 32, backBuffer, information.width * (information.height - 32));
@@ -259,11 +144,15 @@ void drop()
     copyMemory32(backBuffer, information.framebuffer, information.width * information.height);
 }
 
-void put(char character)
+void terminalPut(char character)
 {
-    lock(&writing);
     drawCharacter('_', cursorX * fontWidth, cursorY * fontHeight, 0);
-    if (character == '\b')
+    if (waitingColour)
+    {
+        waitingColour = false;
+        colour = character;
+    }
+    else if (character == '\b')
     {
         if (cursorX > 0)
         {
@@ -301,12 +190,16 @@ void put(char character)
             drop();
         }
     }
-    else if (character == TERM_CLEAR)
+    else if (character == TTY_CLEAR)
     {
         setMemory32(information.framebuffer, 0, information.width * information.height);
         setMemory32(backBuffer, 0, information.width * information.height);
         cursorX = 0;
         cursorY = 0;
+    }
+    else if (character == TERMINAL_COLOUR)
+    {
+        waitingColour = true;
     }
     else
     {
@@ -326,33 +219,120 @@ void put(char character)
         }
     }
     drawCharacter('_', cursorX * fontWidth, cursorY * fontHeight, colours[colour]);
-    unlock(&writing);
 }
 
-void write(const char* message)
+void blinkThread()
 {
-    while (*message)
+    bool blink = false;
+    uint64_t last = getFemtoseconds();
+    while (true)
     {
-        if (*message == TERMINAL_COLOUR)
+        uint64_t femtoseconds = getFemtoseconds();
+        if (femtoseconds - last >= FEMTOSECONDS_PER_SECOND / 2)
         {
-            message++;
-            colour = *message++;
-            drawCharacter('_', cursorX * fontWidth, cursorY * fontHeight, colours[colour]);
+            last = femtoseconds;
+            if (!displayObtained)
+            {
+                drawCharacter('_', cursorX * fontWidth, cursorY * fontHeight, blink ? colours[colour] : 0);
+                blink = !blink;
+            }
         }
-        else
-        {
-            put(*message++);
-        }
-    }
-}
-
-void read(char* buffer, uint64_t length)
-{
-    typingCursor = 0;
-    typingBuffer = getAddress(buffer);
-    typingLength = length;
-    while (typingBuffer)
-    {
         yieldThread();
     }
+}
+
+void terminalThread()
+{
+    while (true)
+    {
+        while (ttyBuffer.writeTail != ttyBuffer.writeHead)
+        {
+            terminalPut(ttyBuffer.writeBuffer[ttyBuffer.writeTail]);
+            ttyBuffer.writeTail++;
+        }
+        while (keyboardBuffer.tail != keyboardBuffer.head)
+        {
+            switch (keyboardBuffer.buffer[keyboardBuffer.tail].scancode)
+            {
+                case KEY_LEFT_SHIFT:
+                    leftShift = keyboardBuffer.buffer[keyboardBuffer.tail].pressed;
+                    shift = leftShift || rightShift;
+                    break;
+                case KEY_RIGHT_SHIFT:
+                    rightShift = keyboardBuffer.buffer[keyboardBuffer.tail].pressed;
+                    shift = leftShift || rightShift;
+                    break;
+                case KEY_CAPS_LOCK:
+                    if (keyboardBuffer.buffer[keyboardBuffer.tail].pressed)
+                    {
+                        caps = !caps;
+                    }
+                    break;
+            }
+            if (ttyBuffer.readBuffer)
+            {
+                switch (keyboardBuffer.buffer[keyboardBuffer.tail].scancode)
+                {
+                    case KEY_BACKSPACE:
+                        if (keyboardBuffer.buffer[keyboardBuffer.tail].pressed && ttyBuffer.readCursor > 0)
+                        {
+                            ttyBuffer.readCursor--;
+                            terminalPut('\b');
+                        }
+                        break;
+                    case KEY_ENTER:
+                        if (keyboardBuffer.buffer[keyboardBuffer.tail].pressed)
+                        {
+                            ttyBuffer.readBuffer[ttyBuffer.readCursor] = '\0';
+                            terminalPut('\n');
+                            ttyBuffer.readBuffer = 0;
+                        }
+                        break;
+                    default:
+                        if (keyboardBuffer.buffer[keyboardBuffer.tail].pressed && ttyBuffer.readCursor < ttyBuffer.readLength)
+                        {
+                            char character = (caps ? !shift : shift) ? capsScancodes[keyboardBuffer.buffer[keyboardBuffer.tail].scancode] : scancodes[keyboardBuffer.buffer[keyboardBuffer.tail].scancode];
+                            if (character)
+                            {
+                                ttyBuffer.readBuffer[ttyBuffer.readCursor++] = character;
+                                terminalPut(character);
+                            }
+                        }
+                        break;
+                }
+            }
+            keyboardBuffer.tail++;
+        }
+        yieldThread();
+    }
+}
+
+void initTerminal()
+{
+    serialPrint("Setting up terminal");
+    registerTty(&ttyBuffer);
+    serialPrint("Loading font");
+    font = (PsfFile*)getFile("/naul/font.psf", 0);
+    fontWidth = font->width + 1;
+    fontHeight = font->height;
+    serialPrint("Setting up terminal graphics");
+    terminalWidth = information.width / fontWidth;
+    terminalHeight = information.height / fontHeight;
+    terminalPitch = terminalWidth * 2;
+    serialPrint("Allocating back buffer");
+    backBuffer = allocate(information.width * information.height * sizeof(uint32_t));
+    serialPrint("Clearing out back buffer");
+    setMemory32(backBuffer, 0, information.width * information.height);
+    serialPrint("Creating blink thread");
+    createThread(blinkThread);
+    serialPrint("Registering keyboard handler");
+    registerKeyboard(&keyboardBuffer);
+    serialPrint("Creating terminal thread");
+    createThread(terminalThread);
+    serialPrint("Set up terminal");
+}
+
+void redrawTerminal()
+{
+    copyMemory32(backBuffer, information.framebuffer, information.width * information.height);
 }

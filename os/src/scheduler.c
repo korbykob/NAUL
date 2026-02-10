@@ -24,15 +24,6 @@ typedef struct
     uint64_t sp;
     uint64_t ss;
 } __attribute__((packed)) InterruptFrame;
-typedef struct
-{
-    void* next;
-    void* prev;
-    uint64_t id;
-    uint64_t waiting;
-    uint64_t sp;
-    uint8_t stack[0x100000];
-} Thread;
 
 Thread* threads = 0;
 Thread* currentThread = 0;
@@ -82,6 +73,7 @@ void initScheduler()
     threads->prev = threads;
     threads->id = 0;
     threads->waiting = 0;
+    threads->ttyId = 0;
     __asm__ volatile ("movq %%rsp, %0" : "=g"(threads->sp));
     currentThread = threads;
     serialPrint("Configuring timer");
@@ -129,6 +121,7 @@ uint64_t createThread(void (*function)())
     }
     thread->id = id;
     thread->waiting = 0;
+    thread->ttyId = currentThread->ttyId;
     thread->sp = (uint64_t)&thread->stack + sizeof(thread->stack) - sizeof(InterruptFrame) - sizeof(void (**)());
     InterruptFrame* frame = (InterruptFrame*)thread->sp;
     frame->ip = (uint64_t)function;

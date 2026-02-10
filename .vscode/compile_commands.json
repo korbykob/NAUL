@@ -409,6 +409,32 @@
       "-c",
       "-nostdinc",
       "-o",
+      "os/bin/tty.o",
+      "os/src/tty.c"
+    ],
+    "directory": "${workspaceFolder}",
+    "file": "${workspaceFolder}/os/src/tty.c",
+    "output": "${workspaceFolder}/os/bin/tty.o"
+  },
+  {
+    "arguments": [
+      "/usr/bin/gcc",
+      "-Iinclude",
+      "-ffreestanding",
+      "-fno-stack-protector",
+      "-fno-stack-check",
+      "-mno-red-zone",
+      "-maccumulate-outgoing-args",
+      "-g",
+      "-mavx2",
+      "-O2",
+      "-fvect-cost-model=dynamic",
+      "-fno-omit-frame-pointer",
+      "-Ios/include",
+      "-fpic",
+      "-c",
+      "-nostdinc",
+      "-o",
       "os/bin/terminal.o",
       "os/src/terminal.c"
     ],

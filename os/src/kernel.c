@@ -13,6 +13,7 @@
 #include <keyboard.h>
 #include <mouse.h>
 #include <display.h>
+#include <tty.h>
 #include <terminal.h>
 #include <processes.h>
 
@@ -31,10 +32,11 @@ void kernel()
     initKeyboard();
     initMouse();
     initDisplay();
+    initTty();
     initTerminal();
     initProcesses();
     serialPrint("Yo puter ready B)");
-    write("Welcome to " TERM_WHITE "NAUL" TERM_DEFAULT " (Not A Unix Like)!\n\nStarting shell, use \"" TERM_GREEN "help" TERM_DEFAULT "\" for more information:\n");
+    write("Welcome to " TTY_WHITE "NAUL" TTY_DEFAULT " (Not A Unix Like)!\n\nStarting shell, use \"" TTY_GREEN "help" TTY_DEFAULT "\" for more information:\n");
     while (true)
     {
         waitForThread(execute("/programs/shell.bin"));

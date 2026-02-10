@@ -1,6 +1,6 @@
 #include <definitions.h>
 #include <allocator.h>
-#include <terminal.h>
+#include <tty.h>
 #include <processes.h>
 #include <scheduler.h>
 #include <filesystem.h>
@@ -15,9 +15,9 @@ void entry()
     char command[256];
     while (true)
     {
-        write(TERM_BLUE);
+        write(TTY_BLUE);
         write(directory);
-        write(TERM_DEFAULT);
+        write(TTY_DEFAULT);
         read(command, 255);
         uint64_t commandLength = stringLength(command);
         if (commandLength)
@@ -29,15 +29,15 @@ void entry()
             if (compareStrings(command, "help") == 0)
             {
                 write(
-TERM_GREEN "help       " TERM_DEFAULT ": Shows this info screen\n"
-TERM_GREEN "exit       " TERM_DEFAULT ": Exit the shell\n"
-TERM_GREEN "ping       " TERM_DEFAULT ": Reply with \"Pong!\"\n"
-TERM_GREEN "clear      " TERM_DEFAULT ": Clear the terminal\n"
-TERM_GREEN "kys        " TERM_DEFAULT ": Panic the system\n"
-TERM_GREEN "(folder)/* " TERM_DEFAULT ": List files in the folder\n"
-TERM_GREEN "(folder)/  " TERM_DEFAULT ": Enter the folder\n"
-TERM_GREEN "..         " TERM_DEFAULT ": Go back a folder\n"
-TERM_GREEN "(file)     " TERM_DEFAULT ": Execute or read the file\n");
+TTY_GREEN "help       " TTY_DEFAULT ": Shows this info screen\n"
+TTY_GREEN "exit       " TTY_DEFAULT ": Exit the shell\n"
+TTY_GREEN "ping       " TTY_DEFAULT ": Reply with \"Pong!\"\n"
+TTY_GREEN "clear      " TTY_DEFAULT ": Clear the terminal\n"
+TTY_GREEN "kys        " TTY_DEFAULT ": Panic the system\n"
+TTY_GREEN "(folder)/* " TTY_DEFAULT ": List files in the folder\n"
+TTY_GREEN "(folder)/  " TTY_DEFAULT ": Enter the folder\n"
+TTY_GREEN "..         " TTY_DEFAULT ": Go back a folder\n"
+TTY_GREEN "(file)     " TTY_DEFAULT ": Execute or read the file\n");
             }
             else if (compareStrings(command, "exit") == 0)
             {
@@ -51,7 +51,7 @@ TERM_GREEN "(file)     " TERM_DEFAULT ": Execute or read the file\n");
             }
             else if (compareStrings(command, "clear") == 0)
             {
-                put(TERM_CLEAR);
+                put(TTY_CLEAR);
             }
             else if (compareStrings(command, "kys") == 0)
             {
@@ -70,12 +70,12 @@ TERM_GREEN "(file)     " TERM_DEFAULT ": Execute or read the file\n");
                         bool folder = checkFolder(files[i]);
                         if (folder)
                         {
-                            write(TERM_BLUE);
+                            write(TTY_BLUE);
                         }
                         write(files[i] + bufferLength - 1);
                         if (folder)
                         {
-                            write("/" TERM_DEFAULT);
+                            write("/" TTY_DEFAULT);
                         }
                         put('\n');
                     }
@@ -129,7 +129,7 @@ TERM_GREEN "(file)     " TERM_DEFAULT ": Execute or read the file\n");
                     const char* file = (const char*)getFile(buffer, &size);
                     for (uint64_t i = 0; i < size; i++)
                     {
-                        if (*file != TERM_CLEAR)
+                        if (*file != TTY_CLEAR)
                         {
                             put(*file);
                         }
