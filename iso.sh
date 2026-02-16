@@ -6,10 +6,10 @@ mformat -i naul.iso ::
 
 mmd -i naul.iso ::/efi
 mmd -i naul.iso ::/efi/boot
-mcopy -i naul.iso os/bin/os.efi ::/efi/boot/bootx64.efi
+mcopy -i naul.iso os/bin/naul.efi ::/efi/boot/bootx64.efi
 
 mmd -i naul.iso ::/naul
-mcopy -i naul.iso os/bin/symbols.txt ::/naul/symbols.txt
+mcopy -i naul.iso os/bin/naul.sym ::/naul/naul.sym
 mcopy -i naul.iso os/font.psf ::/naul/font.psf
 
 mmd -i naul.iso ::/programs

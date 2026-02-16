@@ -55,10 +55,10 @@ os/bin/tty.o \
 os/bin/terminal.o \
 os/bin/processes.o \
 os/bin/kernel.o \
--o os/bin/os.so -lgnuefi -lefi
-objcopy -j .text -j .sdata -j .data -j .rodata -j .dynamic -j .dynsym  -j .rel -j .rela -j .rel.* -j .rela.* -j .reloc --target efi-app-x86_64 --subsystem=10 os/bin/os.so os/bin/os.efi
+-o os/bin/naul.so -lgnuefi -lefi
+objcopy -j .text -j .sdata -j .data -j .rodata -j .dynamic -j .dynsym  -j .rel -j .rela -j .rel.* -j .rela.* -j .reloc --target efi-app-x86_64 --subsystem=10 os/bin/naul.so os/bin/naul.efi
 
-nm os/bin/os.so > os/bin/symbols.txt
+nm os/bin/naul.so > os/bin/naul.sym
 
 mkdir -p programs/bin/shell
 gcc $programCflags programs/src/shell/shell.c -o programs/bin/shell/shell.o
