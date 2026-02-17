@@ -5,45 +5,48 @@
 #include <str.h>
 #include <mem.h>
 
+typedef struct
+{
+    uint64_t address;
+    char name[256];
+} Symbol;
+
 uint64_t loadedOffset = 0;
 uint64_t symbolCount = 0;
-uint64_t* symbolAddresses = 0;
-char** symbolNames = 0;
+Symbol* symbols = 0;
 
 void initSymbols()
 {
     serialPrint("Setting up symbols");
     uint64_t symbolsSize = 0;
-    char* symbols = (char*)getFile("/naul/naul.sym", &symbolsSize);
+    char* file = (char*)getFile("/naul/naul.sym", &symbolsSize);
     serialPrint("Getting symbol count");
     symbolCount = 1;
     for (uint64_t i = 0; i < symbolsSize - 1; i++)
     {
-        if (symbols[i] == '\n')
+        if (file[i] == '\n')
         {
             symbolCount++;
         }
     }
     serialPrint("Allocating symbols");
-    symbolAddresses = allocate(symbolCount * sizeof(uint64_t));
-    symbolNames = allocate(symbolCount * sizeof(char**));
+    symbols = allocate(symbolCount * sizeof(Symbol));
     serialPrint("Reading symbols file");
     char name[17];
     name[16] = '\0';
     for (uint64_t i = 0; i < symbolCount; i++)
     {
-        copyMemory8((uint8_t*)symbols, (uint8_t*)name, 16);
-        symbolAddresses[i] = fromHex(name);
-        symbols += 19;
-        uint64_t length = 0;
-        while (symbols[length] != '\n')
+        copyMemory8((uint8_t*)file, (uint8_t*)name, 16);
+        symbols[i].address = fromHex(name);
+        file += 19;
+        uint8_t length = 0;
+        while (file[length] != '\n')
         {
             length++;
         }
-        symbolNames[i] = allocate(length + 1);
-        copyMemory8((uint8_t*)symbols, (uint8_t*)symbolNames[i], length);
-        symbolNames[i][length] = '\0';
-        symbols += length + 1;
+        copyMemory8((uint8_t*)file, (uint8_t*)symbols[i].name, length);
+        symbols[i].name[length] = '\0';
+        file += length + 1;
     }
     serialPrint("Calculating loaded offset");
     uint64_t offset = 0;
@@ -51,13 +54,13 @@ void initSymbols()
     uint64_t offsetId = 0;
     while (true)
     {
-        if (compareStrings(symbolNames[offsetId], "startOffset") == 0)
+        if (compareStrings(symbols[offsetId].name, "startOffset") == 0)
         {
             break;
         }
         offsetId++;
     }
-    loadedOffset = offset - symbolAddresses[offsetId];
+    loadedOffset = offset - symbols[offsetId].address;
     serialPrint("Set up symbols");
 }
 
@@ -72,7 +75,7 @@ const char* getSymbol(uint64_t address, uint64_t* offset)
     uint64_t smallestDifference = __UINT64_MAX__;
     for (uint64_t i = 0; i < symbolCount; i++)
     {
-        uint64_t difference = address - symbolAddresses[i];
+        uint64_t difference = address - symbols[i].address;
         if (difference < smallestDifference)
         {
             closestId = i;
@@ -80,5 +83,5 @@ const char* getSymbol(uint64_t address, uint64_t* offset)
         }
     }
     *offset = smallestDifference;
-    return symbolNames[closestId];
+    return symbols[closestId].name;
 }
