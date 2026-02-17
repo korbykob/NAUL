@@ -2,8 +2,18 @@
 
 #include <definitions.h>
 
+typedef struct
+{
+    uint64_t address;
+    char name[256];
+} Symbol;
+
 void initSymbols();
 
-uint64_t getOffset();
+uint64_t getKernelOffset();
 
-const char* getSymbol(uint64_t address, uint64_t* offset);
+Symbol* parseSymbols(const char* file, uint64_t* count);
+
+const char* getKernelSymbol(uint64_t address, uint64_t* offset);
+
+const char* getSymbol(Symbol* symbols, uint64_t count, uint64_t address, uint64_t* offset);

@@ -62,8 +62,10 @@ nm os/bin/naul.so > os/bin/naul.sym
 
 mkdir -p programs/bin/shell
 gcc $programCflags programs/src/shell/shell.c -o programs/bin/shell/shell.o
+nm programs/bin/shell/shell.o > programs/bin/shell/shell.sym
 ld $programLflags programs/bin/shell/shell.o -o programs/bin/shell/shell.bin
 
 mkdir -p programs/bin/test
 gcc $programCflags programs/src/test/test.c -o programs/bin/test/test.o
+nm programs/bin/test/test.o > programs/bin/test/test.sym
 ld $programLflags programs/bin/test/test.o -o programs/bin/test/test.bin

@@ -1,6 +1,7 @@
 #pragma once
 
 #include <definitions.h>
+#include <symbols.h>
 
 #define yieldThread() __asm__ volatile ("int $0x67" : : : "memory")
 
@@ -10,6 +11,8 @@ typedef struct
     void* prev;
     uint64_t id;
     uint64_t waiting;
+    Symbol* symbols;
+    uint64_t symbolCount;
     uint8_t ttyId;
     uint64_t sp;
     uint8_t stack[0x100000];

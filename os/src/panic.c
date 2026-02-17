@@ -4,6 +4,7 @@
 #include <bootloader.h>
 #include <processes.h>
 #include <symbols.h>
+#include <scheduler.h>
 #include <str.h>
 #include <mem.h>
 #include <psf.h>
@@ -124,13 +125,25 @@ void panic(uint8_t exception, uint32_t code)
         if (address >= PROCESS_ADDRESS)
         {
             address -= PROCESS_ADDRESS;
-            panicWrite("Within a process");
+            if (currentThread->symbols)
+            {
+                uint64_t offset = 0;
+                panicWrite(getSymbol(currentThread->symbols, currentThread->symbolCount, address, &offset));
+                panicWrite("+0x");
+                char offsetString[17];
+                toHex(offsetString, offset);
+                panicWrite(offsetString);
+            }
+            else
+            {
+                panicWrite("Within a process");
+            }
         }
-        else if (address >= getOffset())
+        else if (address >= getKernelOffset())
         {
-            address -= getOffset();
+            address -= getKernelOffset();
             uint64_t offset = 0;
-            panicWrite(getSymbol(address, &offset));
+            panicWrite(getKernelSymbol(address, &offset));
             panicWrite("+0x");
             char offsetString[17];
             toHex(offsetString, offset);

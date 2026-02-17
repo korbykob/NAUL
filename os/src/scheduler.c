@@ -73,6 +73,8 @@ void initScheduler()
     threads->prev = threads;
     threads->id = 0;
     threads->waiting = 0;
+    threads->symbols = 0;
+    threads->symbolCount = 0;
     threads->ttyId = 0;
     __asm__ volatile ("movq %%rsp, %0" : "=g"(threads->sp));
     currentThread = threads;
@@ -121,6 +123,8 @@ uint64_t createThread(void (*function)())
     }
     thread->id = id;
     thread->waiting = 0;
+    thread->symbols = currentThread->symbols;
+    thread->symbolCount = currentThread->symbolCount;
     thread->ttyId = currentThread->ttyId;
     thread->sp = (uint64_t)&thread->stack + sizeof(thread->stack) - sizeof(InterruptFrame) - sizeof(void (**)());
     InterruptFrame* frame = (InterruptFrame*)thread->sp;

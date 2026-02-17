@@ -39,7 +39,7 @@ void kernel()
     write("Welcome to " TTY_WHITE "NAUL" TTY_DEFAULT " (Not A Unix Like)!\n\nStarting shell, use \"" TTY_GREEN "help" TTY_DEFAULT "\" for more information:\n");
     while (true)
     {
-        waitForThread(execute("/programs/shell.bin"));
+        waitForThread(execute("/programs/shell/shell.bin"));
         write(TTY_RED "\nShell process died, restarting:\n" TTY_DEFAULT);
     }
 }
