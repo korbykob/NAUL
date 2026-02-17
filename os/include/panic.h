@@ -3,7 +3,7 @@
 #include <definitions.h>
 
 #define EXCEPTION_COUNT 32
-#define JMP_SIZE 5
+#define CALL_SIZE 5
 
 typedef struct 
 {

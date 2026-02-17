@@ -121,7 +121,7 @@ void panic(uint8_t exception, uint32_t code)
     __asm__ volatile ("movq %%rbp, %0" : "=g"(frame));
     while (frame)
     {
-        uint64_t address = frame->address - JMP_SIZE;
+        uint64_t address = frame->address - CALL_SIZE;
         if (address >= PROCESS_ADDRESS)
         {
             address -= PROCESS_ADDRESS;
