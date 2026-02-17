@@ -1,5 +1,6 @@
 {
     "C_Cpp.codeAnalysis.clangTidy.checks.disabled": [
         "clang-analyzer-core.FixedAddressDereference"
-    ]
+    ],
+    "C_Cpp.codeAnalysis.clangTidy.headerFilter": "*/PureDOOM.h"
 }
