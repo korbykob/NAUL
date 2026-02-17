@@ -20,8 +20,3 @@ mcopy -i naul.iso programs/bin/shell/shell.sym ::/programs/shell/shell.sym
 mmd -i naul.iso ::/programs/test
 mcopy -i naul.iso programs/bin/test/test.bin ::/programs/test/test.bin
 mcopy -i naul.iso programs/bin/test/test.sym ::/programs/test/test.sym
-
-mmd -i naul.iso ::/programs/doom
-mcopy -i naul.iso programs/bin/doom/doom.bin ::/programs/doom/doom.bin
-mcopy -i naul.iso programs/bin/doom/doom.sym ::/programs/doom/doom.sym
-mcopy -i naul.iso programs/src/doom/doom1.wad ::/programs/doom/doom1.wad

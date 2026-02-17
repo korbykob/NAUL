@@ -33,11 +33,11 @@ void isr()
     __asm__ volatile ("isrStart:");
     if (exceptions[exceptionNumber].code)
     {
-        __asm__ volatile ("pushq %0; jmp panic" : : "g"(codeB + CALL_SIZE), "D"((uint64_t)exceptionNumber), "S"(codeA));
+        __asm__ volatile ("pushq %0; jmp panic" : : "g"(codeB + JMP_SIZE), "D"((uint64_t)exceptionNumber), "S"(codeA));
     }
     else
     {
-        __asm__ volatile ("pushq %0; jmp panic" : : "g"(codeA + CALL_SIZE), "D"((uint64_t)exceptionNumber));
+        __asm__ volatile ("pushq %0; jmp panic" : : "g"(codeA + JMP_SIZE), "D"((uint64_t)exceptionNumber));
     }
 }
 

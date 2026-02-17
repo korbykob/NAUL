@@ -65,11 +65,6 @@ gcc $programCflags programs/src/shell/shell.c -o programs/bin/shell/shell.o
 nm programs/bin/shell/shell.o > programs/bin/shell/shell.sym
 ld $programLflags programs/bin/shell/shell.o -o programs/bin/shell/shell.bin
 
-mkdir -p programs/bin/doom
-gcc $programCflags programs/src/doom/doom.c -o programs/bin/doom/doom.o
-nm programs/bin/doom/doom.o > programs/bin/doom/doom.sym
-ld $programLflags programs/bin/doom/doom.o -o programs/bin/doom/doom.bin
-
 mkdir -p programs/bin/test
 gcc $programCflags programs/src/test/test.c -o programs/bin/test/test.o
 nm programs/bin/test/test.o > programs/bin/test/test.sym
