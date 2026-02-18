@@ -15,11 +15,11 @@ void initSymbols()
     kernelSymbols = parseSymbols("/naul/naul.sym", &symbolCount);
     serialPrint("Calculating loaded offset");
     uint64_t offset = 0;
-    __asm__ volatile ("startOffset: leaq startOffset(%%rip), %0;" : "=g"(offset));
+    __asm__ volatile ("leaq initSymbols(%%rip), %0;" : "=g"(offset));
     uint64_t offsetId = 0;
     while (true)
     {
-        if (compareStrings(kernelSymbols[offsetId].name, "startOffset") == 0)
+        if (compareStrings(kernelSymbols[offsetId].name, "initSymbols") == 0)
         {
             break;
         }
@@ -39,11 +39,18 @@ Symbol* parseSymbols(const char* file, uint64_t* count)
     uint64_t symbolsSize = 0;
     char* data = (char*)getFile(file, &symbolsSize);
     uint64_t amount = 0;
-    for (uint64_t i = 0; i < symbolsSize; i++)
+    uint64_t current = 0;
+    while (current < symbolsSize)
     {
-        if (data[i] == '\n')
+        current += 17;
+        if (data[current] == 'T')
         {
             amount++;
+        }
+        current += 2;
+        while (data[current - 1] != '\n')
+        {
+            current++;
         }
     }
     Symbol* symbols = allocate(amount * sizeof(Symbol));
@@ -51,17 +58,29 @@ Symbol* parseSymbols(const char* file, uint64_t* count)
     name[16] = '\0';
     for (uint64_t i = 0; i < amount; i++)
     {
-        copyMemory8((uint8_t*)data, (uint8_t*)name, 16);
-        symbols[i].address = fromHex(name);
-        data += 19;
-        uint8_t length = 0;
-        while (data[length] != '\n')
+        if (data[17] == 'T')
         {
-            length++;
+            copyMemory8((uint8_t*)data, (uint8_t*)name, 16);
+            symbols[i].address = fromHex(name);
+            data += 19;
+            uint8_t length = 0;
+            while (data[length] != '\n')
+            {
+                length++;
+            }
+            copyMemory8((uint8_t*)data, (uint8_t*)symbols[i].name, length);
+            symbols[i].name[length] = '\0';
+            data += length + 1;
         }
-        copyMemory8((uint8_t*)data, (uint8_t*)symbols[i].name, length);
-        symbols[i].name[length] = '\0';
-        data += length + 1;
+        else
+        {
+            while (*data != '\n')
+            {
+                data++;
+            }
+            data++;
+            i--;
+        }
     }
     *count = amount;
     return symbols;
