@@ -22,9 +22,9 @@ uint64_t execute(const char* filename)
 {
     uint64_t size = 0;
     uint8_t* data = getFile(filename, &size);
-    size -= sizeof(uint32_t);
+    size -= sizeof(uint64_t);
     uint8_t* program = allocateAligned(size, PAGE_SIZE);
-    copyMemory8(data + sizeof(uint32_t), program, size);
+    copyMemory8(data + sizeof(uint64_t), program, size);
     uint64_t nameLength = stringLength(filename);
     char* symbolsFile = allocate(nameLength + 1);
     copyString(filename, symbolsFile);
@@ -45,7 +45,7 @@ uint64_t execute(const char* filename)
     uint64_t table = 0;
     __asm__ volatile ("mov %%cr3, %0" : "=r"(table));
     __asm__ volatile ("mov %0, %%cr3" : : "r"(createTable(program, (size - 1) / PAGE_SIZE + 1)));
-    uint64_t thread = createThread((void (*)())(PROCESS_ADDRESS + *(uint32_t*)data - 4));
+    uint64_t thread = createThread((void (*)())(PROCESS_ADDRESS + *(uint64_t*)data - sizeof(uint64_t)));
     __asm__ volatile ("mov %0, %%cr3" : : "r"(table));
     currentThread->symbols = oldSymbols;
     currentThread->symbolCount = oldCount;

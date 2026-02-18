@@ -7,7 +7,7 @@ SECTIONS
     __header_start = .;
     .header :
     {
-        LONG(entry - ADDR(.header));
+        QUAD(entry - ADDR(.header));
     }
     __header_end = .;
 
