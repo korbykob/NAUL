@@ -8,6 +8,7 @@
 #include <cpu.h>
 
 #define SCHEDULER_INTERRUPT 32
+#define STACK_SIZE 0x100000
 #define APIC_BASE_ADDRESS 0xfee00000
 #define LAPIC_EOI_REGISTER 0xB0
 #define LAPIC_DIVISOR_REGISTER (APIC_BASE_ADDRESS + 0x3E0)
@@ -126,7 +127,8 @@ uint64_t createThread(void (*function)())
     thread->symbols = currentThread->symbols;
     thread->symbolCount = currentThread->symbolCount;
     thread->ttyId = currentThread->ttyId;
-    thread->sp = (uint64_t)&thread->stack + sizeof(thread->stack) - sizeof(InterruptFrame) - sizeof(void (**)());
+    thread->stack = allocateAligned(STACK_SIZE, 16);
+    thread->sp = (uint64_t)thread->stack + STACK_SIZE - sizeof(InterruptFrame) - sizeof(void (**)());
     InterruptFrame* frame = (InterruptFrame*)thread->sp;
     frame->ip = (uint64_t)function;
     frame->cs = cs;
@@ -167,6 +169,7 @@ void destroyThread(uint64_t id)
     }
     ((Thread*)current->prev)->next = current->next;
     ((Thread*)current->next)->prev = current->prev;
+    unallocate(current->stack);
     unallocate(current);
     current = threads;
     while (true)
@@ -203,6 +206,7 @@ void exitThread()
     Thread* prev = currentThread->prev;
     prev->next = currentThread->next;
     ((Thread*)currentThread->next)->prev = prev;
+    unallocate(currentThread->stack);
     unallocate(currentThread);
     currentThread = prev;
     __asm__ volatile ("jmp nextThread");

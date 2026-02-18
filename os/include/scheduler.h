@@ -14,8 +14,8 @@ typedef struct
     Symbol* symbols;
     uint64_t symbolCount;
     uint8_t ttyId;
+    uint8_t* stack;
     uint64_t sp;
-    uint8_t stack[0x100000];
 } Thread;
 
 extern Thread* currentThread;
