@@ -10,7 +10,7 @@
 #define SCHEDULER_INTERRUPT 32
 #define STACK_SIZE 0x100000
 #define APIC_BASE_ADDRESS 0xfee00000
-#define LAPIC_EOI_REGISTER 0xB0
+#define LAPIC_EOI_REGISTER (APIC_BASE_ADDRESS + 0xB0)
 #define LAPIC_DIVISOR_REGISTER (APIC_BASE_ADDRESS + 0x3E0)
 #define LAPIC_RELOAD_COUNT (APIC_BASE_ADDRESS + 0x380)
 #define LAPIC_COUNTER (APIC_BASE_ADDRESS + 0x390)
@@ -56,7 +56,7 @@ __attribute__((naked)) void updateScheduler()
     pushAvxRegisters();
     pushCr3();
     __asm__ volatile ("movq %%rsp, %0" : "=g"(currentThread->sp));
-    __asm__ volatile ("movl $0, %0" : "=m"(*(uint32_t*)(APIC_BASE_ADDRESS + LAPIC_EOI_REGISTER)));
+    __asm__ volatile ("movl $0, %0" : "=m"(*(uint32_t*)LAPIC_EOI_REGISTER));
     __asm__ volatile ("jmp nextThread");
 }
 
