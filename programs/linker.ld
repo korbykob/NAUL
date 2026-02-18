@@ -11,20 +11,23 @@ SECTIONS
     }
     __header_end = .;
 
-    .text :
+    .text ALIGN(16) :
     {
         *(.text*)
     }
 
-    .rodata :
+    .rodata ALIGN(16) :
     {
         *(.rodata*)
     }
 
-    .data :
+    .data ALIGN(16) :
     {
         *(.data*)
-        *(COMMON)
+        
+        . = ALIGN(16);
+        
         *(.bss*)
+        *(COMMON)
     }
 }
