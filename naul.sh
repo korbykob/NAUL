@@ -5,7 +5,6 @@ clean()
 {
     rm -r os/bin
     rm -r programs/programs/shell/bin
-    rm -r programs/programs/doom/bin
     rm -r programs/programs/test/bin
     rm naul.iso
 }
@@ -77,11 +76,6 @@ build()
     nm programs/programs/shell/bin/shell.o > programs/programs/shell/bin/shell.sym
     ld $programLflags programs/programs/shell/bin/shell.o -o programs/programs/shell/bin/shell.bin
 
-    mkdir -p programs/programs/doom/bin
-    gcc $programCflags programs/programs/doom/src/doom.c -o programs/programs/doom/bin/doom.o
-    nm programs/programs/doom/bin/doom.o > programs/programs/doom/bin/doom.sym
-    ld $programLflags programs/programs/doom/bin/doom.o -o programs/programs/doom/bin/doom.bin
-
     mkdir -p programs/programs/test/bin
     gcc $programCflags programs/programs/test/src/test.c -o programs/programs/test/bin/test.o
     nm programs/programs/test/bin/test.o > programs/programs/test/bin/test.sym
@@ -111,11 +105,6 @@ iso()
     mmd -i naul.iso ::/programs/shell
     mcopy -i naul.iso programs/programs/shell/bin/shell.bin ::/programs/shell/shell.bin
     mcopy -i naul.iso programs/programs/shell/bin/shell.sym ::/programs/shell/shell.sym
-
-    mmd -i naul.iso ::/programs/doom
-    mcopy -i naul.iso programs/programs/doom/bin/doom.bin ::/programs/doom/doom.bin
-    mcopy -i naul.iso programs/programs/doom/bin/doom.sym ::/programs/doom/doom.sym
-    mcopy -i naul.iso programs/programs/doom/doom1.wad ::/programs/doom/doom1.wad
 
     mmd -i naul.iso ::/programs/test
     mcopy -i naul.iso programs/programs/test/bin/test.bin ::/programs/test/test.bin
