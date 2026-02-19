@@ -2,6 +2,7 @@
   {
     "arguments": [
       "/usr/bin/gcc",
+      "-std=gnu17",
       "-Iinclude",
       "-ffreestanding",
       "-fno-stack-protector",
@@ -29,6 +30,7 @@
   {
     "arguments": [
       "/usr/bin/gcc",
+      "-std=gnu17",
       "-Iinclude",
       "-ffreestanding",
       "-fno-stack-protector",
@@ -55,6 +57,7 @@
   {
     "arguments": [
       "/usr/bin/gcc",
+      "-std=gnu17",
       "-Iinclude",
       "-ffreestanding",
       "-fno-stack-protector",
@@ -81,6 +84,7 @@
   {
     "arguments": [
       "/usr/bin/gcc",
+      "-std=gnu17",
       "-Iinclude",
       "-ffreestanding",
       "-fno-stack-protector",
@@ -107,6 +111,7 @@
   {
     "arguments": [
       "/usr/bin/gcc",
+      "-std=gnu17",
       "-Iinclude",
       "-ffreestanding",
       "-fno-stack-protector",
@@ -133,6 +138,7 @@
   {
     "arguments": [
       "/usr/bin/gcc",
+      "-std=gnu17",
       "-Iinclude",
       "-ffreestanding",
       "-fno-stack-protector",
@@ -159,6 +165,7 @@
   {
     "arguments": [
       "/usr/bin/gcc",
+      "-std=gnu17",
       "-Iinclude",
       "-ffreestanding",
       "-fno-stack-protector",
@@ -185,6 +192,7 @@
   {
     "arguments": [
       "/usr/bin/gcc",
+      "-std=gnu17",
       "-Iinclude",
       "-ffreestanding",
       "-fno-stack-protector",
@@ -211,6 +219,7 @@
   {
     "arguments": [
       "/usr/bin/gcc",
+      "-std=gnu17",
       "-Iinclude",
       "-ffreestanding",
       "-fno-stack-protector",
@@ -237,6 +246,7 @@
   {
     "arguments": [
       "/usr/bin/gcc",
+      "-std=gnu17",
       "-Iinclude",
       "-ffreestanding",
       "-fno-stack-protector",
@@ -263,6 +273,7 @@
   {
     "arguments": [
       "/usr/bin/gcc",
+      "-std=gnu17",
       "-Iinclude",
       "-ffreestanding",
       "-fno-stack-protector",
@@ -289,6 +300,7 @@
   {
     "arguments": [
       "/usr/bin/gcc",
+      "-std=gnu17",
       "-Iinclude",
       "-ffreestanding",
       "-fno-stack-protector",
@@ -315,6 +327,7 @@
   {
     "arguments": [
       "/usr/bin/gcc",
+      "-std=gnu17",
       "-Iinclude",
       "-ffreestanding",
       "-fno-stack-protector",
@@ -341,6 +354,7 @@
   {
     "arguments": [
       "/usr/bin/gcc",
+      "-std=gnu17",
       "-Iinclude",
       "-ffreestanding",
       "-fno-stack-protector",
@@ -367,6 +381,7 @@
   {
     "arguments": [
       "/usr/bin/gcc",
+      "-std=gnu17",
       "-Iinclude",
       "-ffreestanding",
       "-fno-stack-protector",
@@ -393,6 +408,7 @@
   {
     "arguments": [
       "/usr/bin/gcc",
+      "-std=gnu17",
       "-Iinclude",
       "-ffreestanding",
       "-fno-stack-protector",
@@ -419,6 +435,7 @@
   {
     "arguments": [
       "/usr/bin/gcc",
+      "-std=gnu17",
       "-Iinclude",
       "-ffreestanding",
       "-fno-stack-protector",
@@ -445,6 +462,7 @@
   {
     "arguments": [
       "/usr/bin/gcc",
+      "-std=gnu17",
       "-Iinclude",
       "-ffreestanding",
       "-fno-stack-protector",
@@ -471,6 +489,7 @@
   {
     "arguments": [
       "/usr/bin/gcc",
+      "-std=gnu17",
       "-Iinclude",
       "-ffreestanding",
       "-fno-stack-protector",
@@ -497,6 +516,7 @@
   {
     "arguments": [
       "/usr/bin/gcc",
+      "-std=gnu17",
       "-Iinclude",
       "-ffreestanding",
       "-fno-stack-protector",
@@ -525,6 +545,7 @@
   {
     "arguments": [
       "/usr/bin/gcc",
+      "-std=gnu17",
       "-Iinclude",
       "-ffreestanding",
       "-fno-stack-protector",
