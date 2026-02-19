@@ -17,6 +17,7 @@
 #define MOUSE_INTERRUPT 12
 #define PS2_ENABLE_SECOND 0xA8
 #define PS2_GET_CONFIG 0x20
+#define PS2_SECOND_CLOCK 0x20
 #define PS2_SECOND_INTERRUPT 0x2
 #define PS2_SET_CONFIG 0x60
 #define MOUSE_PS2_PORT 0xD4
@@ -30,7 +31,7 @@ typedef struct
     MouseBuffer* buffer;
 } MouseBufferElement;
 
-uint8_t mouseCycle = 1;
+uint8_t mouseCycle = 0;
 uint8_t mouseBytes[3];
 MouseBufferElement* mouseBuffers = 0;
 
@@ -66,6 +67,11 @@ void mouse()
     picAck(MOUSE_INTERRUPT);
 }
 
+__attribute__((naked)) void mouseDummy()
+{
+    __asm__ volatile ("pushw %ax; movb $0x20, %al; outb %al, $0x20; outb %al, $0xA0; popw %ax; iretq");
+}
+
 __attribute__((naked)) void mouseInterrupt()
 {
     pushRegisters();
@@ -84,25 +90,31 @@ void initMouse()
     mouseBuffers->next = mouseBuffers;
     mouseBuffers->prev = mouseBuffers;
     mouseBuffers->buffer = 0;
-    serialPrint("Installing mouse IRQ");
-    installIrq(MOUSE_INTERRUPT, mouseInterrupt);
-    serialPrint("Unmasking interrupt");
-    unmaskPic(MOUSE_INTERRUPT);
     serialPrint("Enabling second PS/2 port");
     outb(MOUSE_COMMAND, PS2_ENABLE_SECOND);
-    serialPrint("Enabling second PS/2 interrupt");
+    serialPrint("Checking second PS/2 port");
     outb(MOUSE_COMMAND, PS2_GET_CONFIG);
-    uint8_t status = inb(MOUSE_DATA) | PS2_SECOND_INTERRUPT;
-    outb(MOUSE_COMMAND, PS2_SET_CONFIG);
-    outb(MOUSE_DATA, status);
-    serialPrint("Setting mouse to defaults");
-    outb(MOUSE_COMMAND, MOUSE_PS2_PORT);
-    outb(MOUSE_DATA, MOUSE_DEFAULTS);
-    inb(MOUSE_DATA);
-    serialPrint("Enabling mouse interrupts");
-    outb(MOUSE_COMMAND, MOUSE_PS2_PORT);
-    outb(MOUSE_DATA, MOUSE_STREAMING);
-    inb(MOUSE_DATA);
+    uint8_t config = inb(MOUSE_DATA);
+    if (!(config & PS2_SECOND_CLOCK))
+    {
+        serialPrint("Installing mouse dummy IRQ");
+        installIrq(MOUSE_INTERRUPT, mouseDummy);
+        serialPrint("Unmasking interrupt");
+        unmaskPic(MOUSE_INTERRUPT);
+        serialPrint("Enabling second PS/2 interrupt");
+        outb(MOUSE_COMMAND, PS2_SET_CONFIG);
+        outb(MOUSE_DATA, config | PS2_SECOND_INTERRUPT);
+        serialPrint("Setting mouse to defaults");
+        outb(MOUSE_COMMAND, MOUSE_PS2_PORT);
+        outb(MOUSE_DATA, MOUSE_DEFAULTS);
+        inb(MOUSE_DATA);
+        serialPrint("Enabling mouse interrupts");
+        outb(MOUSE_COMMAND, MOUSE_PS2_PORT);
+        outb(MOUSE_DATA, MOUSE_STREAMING);
+        inb(MOUSE_DATA);
+        serialPrint("Installing mouse IRQ");
+        installIrq(MOUSE_INTERRUPT, mouseInterrupt);
+    }
     serialPrint("Set up PS/2 mouse");
 }
 
