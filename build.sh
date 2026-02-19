@@ -56,16 +56,16 @@ os/bin/terminal.o \
 os/bin/processes.o \
 os/bin/kernel.o \
 -o os/bin/naul.so -lgnuefi -lefi
-objcopy -j .text -j .sdata -j .data -j .rodata -j .dynamic -j .dynsym  -j .rel -j .rela -j .rel.* -j .rela.* -j .reloc --target efi-app-x86_64 --subsystem=10 os/bin/naul.so os/bin/naul.efi
+objcopy -j .text -j .sdata -j .data -j .rodata -j .dynamic -j .dynsym -j .rel -j .rela -j .rel.* -j .rela.* -j .reloc --target efi-app-x86_64 --subsystem=10 os/bin/naul.so os/bin/naul.efi
 
 nm os/bin/naul.so > os/bin/naul.sym
 
-mkdir -p programs/bin/shell
-gcc $programCflags programs/src/shell/shell.c -o programs/bin/shell/shell.o
-nm programs/bin/shell/shell.o > programs/bin/shell/shell.sym
-ld $programLflags programs/bin/shell/shell.o -o programs/bin/shell/shell.bin
+mkdir -p programs/programs/shell/bin
+gcc $programCflags programs/programs/shell/src/shell.c -o programs/programs/shell/bin/shell.o
+nm programs/programs/shell/bin/shell.o > programs/programs/shell/bin/shell.sym
+ld $programLflags programs/programs/shell/bin/shell.o -o programs/programs/shell/bin/shell.bin
 
-mkdir -p programs/bin/test
-gcc $programCflags programs/src/test/test.c -o programs/bin/test/test.o
-nm programs/bin/test/test.o > programs/bin/test/test.sym
-ld $programLflags programs/bin/test/test.o -o programs/bin/test/test.bin
+mkdir -p programs/programs/test/bin
+gcc $programCflags programs/programs/test/src/test.c -o programs/programs/test/bin/test.o
+nm programs/programs/test/bin/test.o > programs/programs/test/bin/test.sym
+ld $programLflags programs/programs/test/bin/test.o -o programs/programs/test/bin/test.bin

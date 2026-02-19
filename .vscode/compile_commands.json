@@ -515,12 +515,12 @@
       "-c",
       "-nostdinc",
       "-o",
-      "programs/bin/shell/shell.o",
-      "programs/src/shell/shell.c"
+      "programs/programs/shell/bin/shell.o",
+      "programs/programs/shell/src/shell.c"
     ],
     "directory": "${workspaceFolder}",
-    "file": "${workspaceFolder}/programs/src/shell/shell.c",
-    "output": "${workspaceFolder}/programs/bin/shell/shell.o"
+    "file": "${workspaceFolder}/programs/programs/shell/src/shell.c",
+    "output": "${workspaceFolder}/programs/programs/shell/bin/shell.o"
   },
   {
     "arguments": [
@@ -543,11 +543,11 @@
       "-c",
       "-nostdinc",
       "-o",
-      "programs/bin/test/test.o",
-      "programs/src/test/test.c"
+      "programs/programs/test/bin/test.o",
+      "programs/programs/test/src/test.c"
     ],
     "directory": "${workspaceFolder}",
-    "file": "${workspaceFolder}/programs/src/test/test.c",
-    "output": "${workspaceFolder}/programs/bin/test/test.o"
+    "file": "${workspaceFolder}/programs/programs/test/src/test.c",
+    "output": "${workspaceFolder}/programs/programs/test/bin/test.o"
   }
 ]

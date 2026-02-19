@@ -14,9 +14,9 @@ mcopy -i naul.iso os/font.psf ::/naul/font.psf
 
 mmd -i naul.iso ::/programs
 mmd -i naul.iso ::/programs/shell
-mcopy -i naul.iso programs/bin/shell/shell.bin ::/programs/shell/shell.bin
-mcopy -i naul.iso programs/bin/shell/shell.sym ::/programs/shell/shell.sym
+mcopy -i naul.iso programs/programs/shell/bin/shell.bin ::/programs/shell/shell.bin
+mcopy -i naul.iso programs/programs/shell/bin/shell.sym ::/programs/shell/shell.sym
 
 mmd -i naul.iso ::/programs/test
-mcopy -i naul.iso programs/bin/test/test.bin ::/programs/test/test.bin
-mcopy -i naul.iso programs/bin/test/test.sym ::/programs/test/test.sym
+mcopy -i naul.iso programs/programs/test/bin/test.bin ::/programs/test/test.bin
+mcopy -i naul.iso programs/programs/test/bin/test.sym ::/programs/test/test.sym
