@@ -5,6 +5,7 @@ My operating system which is my own very Unix unlike OS, kinda the OS analogue o
 ## Features
 - UEFI bootloader
 - Long (64 bit) mode
+- AVX2
 - Serial
 - Graphics
 - PSF font parsing
@@ -30,5 +31,5 @@ git clone --recursive https://github.com/korbykob/NAUL.git
 Ensure you have QEMU, build essentials, and mtools installed and run:
 ```
 cd NAUL
-./run.sh
+./naul.sh run
 ```
