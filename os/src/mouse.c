@@ -30,7 +30,7 @@ typedef struct
     MouseBuffer* buffer;
 } MouseBufferElement;
 
-uint8_t mouseCycle = 2;
+uint8_t mouseCycle = 1;
 uint8_t mouseBytes[3];
 MouseBufferElement* mouseBuffers = 0;
 
@@ -86,6 +86,8 @@ void initMouse()
     mouseBuffers->buffer = 0;
     serialPrint("Installing mouse IRQ");
     installIrq(MOUSE_INTERRUPT, mouseInterrupt);
+    serialPrint("Unmasking interrupt");
+    unmaskPic(MOUSE_INTERRUPT);
     serialPrint("Enabling second PS/2 port");
     outb(MOUSE_COMMAND, PS2_ENABLE_SECOND);
     serialPrint("Enabling second PS/2 interrupt");
@@ -101,8 +103,6 @@ void initMouse()
     outb(MOUSE_COMMAND, MOUSE_PS2_PORT);
     outb(MOUSE_DATA, MOUSE_STREAMING);
     inb(MOUSE_DATA);
-    serialPrint("Unmasking interrupt");
-    unmaskPic(MOUSE_INTERRUPT);
     serialPrint("Set up PS/2 mouse");
 }
 
