@@ -23,13 +23,19 @@ My operating system which is my own very Unix unlike OS, kinda the OS analogue o
 - Syscalls
 ## Plans
 You think I have plans? Pfft. Everything I say I'll never do, I end up doing anyways.
-## Emulating
+## Building
 First clone the repo and its submodules:
 ```
 git clone --recursive https://github.com/korbykob/NAUL.git
 ```
-Ensure you have QEMU, build essentials, and mtools installed and run:
+After cloning ensure you have build essentials and mtools installed and run:
 ```
 cd NAUL
+./naul.sh iso
+```
+Now you will see a file called "naul.iso" in the root directory.
+## Emulating
+To try this in QEMU run:
+```
 ./naul.sh run
 ```
