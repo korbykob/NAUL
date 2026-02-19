@@ -21,7 +21,7 @@ build()
     programCflags="$cflags -Iprograms/include -static -fno-pic -fno-pie -mcmodel=large -c -nostdinc"
 
     lflags="-znoexecstack"
-    kernellLflags="$lflags -shared -Bsymbolic -Los/gnu-efi/x86_64/lib -Los/gnu-efi/x86_64/gnuefi -Tos/gnu-efi/gnuefi/elf_x86_64_efi.lds os/gnu-efi/x86_64/gnuefi/crt0-efi-x86_64.o"
+    kernelLflags="$lflags -shared -Bsymbolic -Los/gnu-efi/x86_64/lib -Los/gnu-efi/x86_64/gnuefi -Tos/gnu-efi/gnuefi/elf_x86_64_efi.lds os/gnu-efi/x86_64/gnuefi/crt0-efi-x86_64.o"
     programLflags="$lflags -Tprograms/linker.ld -no-pie"
 
     mkdir -p os/bin
@@ -45,7 +45,7 @@ build()
     gcc $kernelCflags os/src/processes.c -o os/bin/processes.o
     gcc $kernelCflags os/src/kernel.c -o os/bin/kernel.o
 
-    ld $kernellLflags \
+    ld $kernelLflags \
     os/bin/bootloader.o \
     os/bin/allocator.o \
     os/bin/gdt.o \
