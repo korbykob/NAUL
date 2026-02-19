@@ -15,7 +15,7 @@ build()
         make -C os/gnu-efi
     fi
 
-    cflags="-Iinclude -ffreestanding -fno-stack-protector -fno-stack-check -mno-red-zone -maccumulate-outgoing-args -g -mavx2 -O2 -fvect-cost-model=dynamic -fno-omit-frame-pointer"
+    cflags="-std=gnu17 -Iinclude -ffreestanding -fno-stack-protector -fno-stack-check -mno-red-zone -maccumulate-outgoing-args -g -mavx2 -O2 -fvect-cost-model=dynamic -fno-omit-frame-pointer"
     bootloaderCflags="$cflags -Ios/include -fpic -c -fshort-wchar -Ios/gnu-efi/inc"
     kernelCflags="$cflags -Ios/include -fpic -c -nostdinc"
     programCflags="$cflags -Iprograms/include -static -fno-pic -fno-pie -mcmodel=large -c -nostdinc"
