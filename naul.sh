@@ -14,14 +14,14 @@ clean()
 
 build()
 {
-    export COMPILER_FLAGS="-std=gnu17 -I$(pwd)/include -ffreestanding -fno-stack-protector -fno-stack-check -mno-red-zone -maccumulate-outgoing-args -g -mavx2 -O2 -fvect-cost-model=dynamic -fno-omit-frame-pointer"
+    export COMPILER_FLAGS="-std=gnu17 -I${PWD}/include -ffreestanding -fno-stack-protector -fno-stack-check -mno-red-zone -maccumulate-outgoing-args -g -mavx2 -O2 -fvect-cost-model=dynamic -fno-omit-frame-pointer"
     export BOOTLOADER_COMPILER_FLAGS="$COMPILER_FLAGS -Ios/include -fpic -c -fshort-wchar -Ios/gnu-efi/inc"
     export KERNEL_COMPILER_FLAGS="$COMPILER_FLAGS -Ios/include -fpic -c -nostdinc"
-    export PROGRAM_COMPILER_FLAGS="$COMPILER_FLAGS -I$(pwd)/programs/include -static -fno-pic -fno-pie -mcmodel=large -c -nostdinc"
+    export PROGRAM_COMPILER_FLAGS="$COMPILER_FLAGS -I${PWD}/programs/include -static -fno-pic -fno-pie -mcmodel=large -c -nostdinc"
 
     export LINKER_FLAGS="-znoexecstack"
     export KERNEL_LINKER_FLAGS="$LINKER_FLAGS -shared -Bsymbolic -Los/gnu-efi/x86_64/lib -Los/gnu-efi/x86_64/gnuefi -Tos/gnu-efi/gnuefi/elf_x86_64_efi.lds os/gnu-efi/x86_64/gnuefi/crt0-efi-x86_64.o"
-    export PROGRAM_LINKER_FLAGS="$LINKER_FLAGS -T$(pwd)/programs/linker.ld -no-pie"
+    export PROGRAM_LINKER_FLAGS="$LINKER_FLAGS -T${PWD}/programs/linker.ld -no-pie"
 
     if [ ! -f "os/gnu-efi/x86_64/gnuefi/crt0-efi-x86_64.o" ]; then
         make -C os/gnu-efi
