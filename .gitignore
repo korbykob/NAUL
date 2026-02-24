@@ -1,4 +1,3 @@
 os/bin
-programs/programs/shell/bin
-programs/programs/test/bin
+programs/programs/*/bin
 naul.iso
