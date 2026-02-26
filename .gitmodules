@@ -2,3 +2,6 @@
 	path = os/gnu-efi
 	url = https://github.com/rhboot/gnu-efi
 	ignore = dirty
+[submodule "programs/programs/shell"]
+	path = programs/programs/shell
+	url = https://github.com/korbykob/NAULShell.git
