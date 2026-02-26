@@ -5,4 +5,4 @@
 [submodule "programs/programs/shell"]
 	path = programs/programs/shell
 	url = https://github.com/korbykob/NAULShell.git
-	ignore = dirty
+	branch = main
