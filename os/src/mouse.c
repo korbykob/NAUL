@@ -135,16 +135,12 @@ void unregisterMouse(MouseBuffer* buffer)
     __asm__ volatile ("cli");
     MouseBuffer* address = getAddress(buffer);
     MouseBufferElement* element = mouseBuffers;
-    while (element)
+    while (element->buffer != address)
     {
-        if (element->buffer == address)
-        {
-            ((MouseBufferElement*)element->prev)->next = element->next;
-            ((MouseBufferElement*)element->next)->prev = element->prev;
-            unallocate(element);
-            break;
-        }
         element = element->next;
     }
+    ((MouseBufferElement*)element->prev)->next = element->next;
+    ((MouseBufferElement*)element->next)->prev = element->prev;
+    unallocate(element);
     __asm__ volatile ("sti");
 }

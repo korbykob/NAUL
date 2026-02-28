@@ -97,16 +97,12 @@ void unregisterKeyboard(KeyboardBuffer* buffer)
     __asm__ volatile ("cli");
     KeyboardBuffer* address = getAddress(buffer);
     KeyboardBufferElement* element = keyboardBuffers;
-    while (element)
+    while (element->buffer != address)
     {
-        if (element->buffer == address)
-        {
-            ((KeyboardBufferElement*)element->prev)->next = element->next;
-            ((KeyboardBufferElement*)element->next)->prev = element->prev;
-            unallocate(element);
-            break;
-        }
         element = element->next;
     }
+    ((KeyboardBufferElement*)element->prev)->next = element->next;
+    ((KeyboardBufferElement*)element->next)->prev = element->prev;
+    unallocate(element);
     __asm__ volatile ("sti");
 }
