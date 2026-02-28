@@ -37,5 +37,9 @@ enum Syscalls
     READ,
 
     EXECUTE,
-    QUIT
+    QUIT,
+
+    REGISTER_LISTENER,
+    UNREGISTER_LISTENER,
+    SEND_MESSAGE
 };

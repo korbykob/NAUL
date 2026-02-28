@@ -46,6 +46,7 @@ build()
     gcc $KERNEL_COMPILER_FLAGS os/src/tty.c -o os/bin/tty.o
     gcc $KERNEL_COMPILER_FLAGS os/src/terminal.c -o os/bin/terminal.o
     gcc $KERNEL_COMPILER_FLAGS os/src/processes.c -o os/bin/processes.o
+    gcc $KERNEL_COMPILER_FLAGS os/src/ipc.c -o os/bin/ipc.o
     gcc $KERNEL_COMPILER_FLAGS os/src/kernel.c -o os/bin/kernel.o
 
     ld $KERNEL_LINKER_FLAGS \
@@ -67,6 +68,7 @@ build()
     os/bin/tty.o \
     os/bin/terminal.o \
     os/bin/processes.o \
+    os/bin/ipc.o \
     os/bin/kernel.o \
     -o os/bin/naul.so -lgnuefi -lefi
 

@@ -506,6 +506,33 @@
       "-c",
       "-nostdinc",
       "-o",
+      "os/bin/ipc.o",
+      "os/src/ipc.c"
+    ],
+    "directory": "${workspaceFolder}",
+    "file": "${workspaceFolder}/os/src/ipc.c",
+    "output": "${workspaceFolder}/os/bin/ipc.o"
+  },
+  {
+    "arguments": [
+      "/usr/bin/gcc",
+      "-std=gnu17",
+      "-I${workspaceFolder}/include",
+      "-ffreestanding",
+      "-fno-stack-protector",
+      "-fno-stack-check",
+      "-mno-red-zone",
+      "-maccumulate-outgoing-args",
+      "-g",
+      "-mavx2",
+      "-O2",
+      "-fvect-cost-model=dynamic",
+      "-fno-omit-frame-pointer",
+      "-Ios/include",
+      "-fpic",
+      "-c",
+      "-nostdinc",
+      "-o",
       "os/bin/kernel.o",
       "os/src/kernel.c"
     ],

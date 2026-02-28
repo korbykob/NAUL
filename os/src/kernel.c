@@ -16,6 +16,7 @@
 #include <tty.h>
 #include <terminal.h>
 #include <processes.h>
+#include <ipc.h>
 
 void kernel()
 {
@@ -35,6 +36,7 @@ void kernel()
     initTty();
     initTerminal();
     initProcesses();
+    initIpc();
     serialPrint("Yo puter ready B)");
     write("Welcome to " TTY_WHITE "NAUL" TTY_DEFAULT " (Not A Unix Like)!\n\nStarting shell, use \"" TTY_GREEN "help" TTY_DEFAULT "\" for more information:\n");
     while (true)
