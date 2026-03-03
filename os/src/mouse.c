@@ -8,6 +8,7 @@
 #include <paging.h>
 #include <calls.h>
 #include <cpu.h>
+#include <mem.h>
 
 #define MOUSE_COMMAND 0x64
 #define MOUSE_DATA 0x60

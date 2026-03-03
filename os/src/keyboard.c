@@ -8,6 +8,7 @@
 #include <paging.h>
 #include <calls.h>
 #include <cpu.h>
+#include <mem.h>
 
 #define KEYBOARD_COMMAND 0x64
 #define KEYBOARD_DATA 0x60

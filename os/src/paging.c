@@ -9,7 +9,6 @@
 #define PAGE_ENTRY_COUNT 512
 #define PAGE_PRESENT 0x3
 #define PAGE_SIZED 0x80
-#define PAGE_ADDRESS_MASK ~0xFFFUL
 
 uint64_t mainPdpt = 0;
 
@@ -48,15 +47,4 @@ uint64_t createTable(void* start, uint64_t pages)
     }
     pml4t[1] = (uint64_t)pdpt | PAGE_PRESENT;
     return (uint64_t)pml4t;
-}
-
-void* getAddress(void* address)
-{
-    if ((uint64_t)address >= PROCESS_ADDRESS)
-    {
-        uint64_t* pml4t = 0;
-        __asm__ volatile ("mov %%cr3, %0" : "=r"(pml4t));
-        return (void*)((*(uint64_t*)(*(uint64_t*)(pml4t[1] & PAGE_ADDRESS_MASK) & PAGE_ADDRESS_MASK) & PAGE_ADDRESS_MASK) + (uint64_t)address - PROCESS_ADDRESS);
-    }
-    return address;
 }
