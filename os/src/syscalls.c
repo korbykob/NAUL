@@ -2,11 +2,11 @@
 #include <serial.h>
 #include <idt.h>
 
-uint64_t (*syscallHandlers[256])(uint64_t arg1, uint64_t arg2, uint64_t arg3);
+uint64_t (*syscallHandlers[256])(uint64_t arg1, uint64_t arg2, uint64_t arg3, uint64_t arg4, uint64_t arg5);
 
-uint64_t syscallHandler(uint64_t code, uint64_t arg1, uint64_t arg2, uint64_t arg3)
+uint64_t syscallHandler(uint64_t code, uint64_t arg1, uint64_t arg2, uint64_t arg3, uint64_t arg4, uint64_t arg5)
 {
-    return syscallHandlers[code](arg1, arg2, arg3);
+    return syscallHandlers[code](arg1, arg2, arg3, arg4, arg5);
 }
 
 __attribute__((naked)) void syscallTrampoline()
@@ -26,5 +26,5 @@ void initSyscalls()
 
 void registerSyscall(uint64_t code, void *handler)
 {
-    syscallHandlers[code] = (uint64_t (*)(uint64_t arg1, uint64_t arg2, uint64_t arg3))handler;
+    syscallHandlers[code] = (uint64_t (*)(uint64_t arg1, uint64_t arg2, uint64_t arg3, uint64_t arg4, uint64_t arg5))handler;
 }
