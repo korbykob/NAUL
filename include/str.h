@@ -196,6 +196,15 @@ static void copyString(const char* source, char* destination)
     *destination = '\0';
 }
 
+static void addString(const char* source, char* destination)
+{
+    while (*destination)
+    {
+        destination++;
+    }
+    copyString(source, destination);
+}
+
 static bool stringContains(const char* string, char character)
 {
     while (*string)
