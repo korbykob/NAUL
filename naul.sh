@@ -91,6 +91,8 @@ commands()
 
 iso()
 {
+    build
+
     dd if=/dev/zero of=naul.iso bs=1M count=8 status=none
     mformat -i naul.iso ::
 
@@ -120,7 +122,6 @@ iso()
 
 run()
 {
-    build
     iso
     clear
 
@@ -136,7 +137,7 @@ usage()
     echo "    clean: Remove the build files"
     echo "    build: Generate the build files"
     echo "    commands: Generate compile_commands.json"
-    echo "    iso: Create an iso from build"
+    echo "    iso: Build and create an iso"
     echo "    run: Build, create iso and run in QEMU"
 }
 
