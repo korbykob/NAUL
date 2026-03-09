@@ -22,12 +22,12 @@ void kernel()
 {
     initGdt();
     initIdt();
+    initPic();
     initFilesystem();
     initSymbols();
     initPanic();
     initPaging();
     initSyscalls();
-    initPic();
     initHpet();
     initScheduler();
     initKeyboard();

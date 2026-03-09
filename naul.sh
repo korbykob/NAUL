@@ -32,12 +32,12 @@ build()
     gcc $KERNEL_COMPILER_FLAGS os/src/allocator.c -o os/bin/allocator.o
     gcc $KERNEL_COMPILER_FLAGS os/src/gdt.c -o os/bin/gdt.o
     gcc $KERNEL_COMPILER_FLAGS os/src/idt.c -o os/bin/idt.o
+    gcc $KERNEL_COMPILER_FLAGS os/src/pic.c -o os/bin/pic.o
     gcc $KERNEL_COMPILER_FLAGS os/src/filesystem.c -o os/bin/filesystem.o
     gcc $KERNEL_COMPILER_FLAGS os/src/symbols.c -o os/bin/symbols.o
     gcc $KERNEL_COMPILER_FLAGS os/src/panic.c -o os/bin/panic.o
     gcc $KERNEL_COMPILER_FLAGS os/src/paging.c -o os/bin/paging.o
     gcc $KERNEL_COMPILER_FLAGS os/src/syscalls.c -o os/bin/syscalls.o
-    gcc $KERNEL_COMPILER_FLAGS os/src/pic.c -o os/bin/pic.o
     gcc $KERNEL_COMPILER_FLAGS os/src/hpet.c -o os/bin/hpet.o
     gcc $KERNEL_COMPILER_FLAGS os/src/scheduler.c -o os/bin/scheduler.o
     gcc $KERNEL_COMPILER_FLAGS os/src/keyboard.c -o os/bin/keyboard.o
@@ -54,12 +54,12 @@ build()
     os/bin/allocator.o \
     os/bin/gdt.o \
     os/bin/idt.o \
+    os/bin/pic.o \
     os/bin/filesystem.o \
     os/bin/symbols.o \
     os/bin/panic.o \
     os/bin/paging.o \
     os/bin/syscalls.o \
-    os/bin/pic.o \
     os/bin/hpet.o \
     os/bin/scheduler.o \
     os/bin/keyboard.o \

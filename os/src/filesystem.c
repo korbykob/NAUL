@@ -17,7 +17,6 @@ typedef struct {
 } File;
 
 File* files = 0;
-bool managingFiles = false;
 
 void initFilesystem()
 {
@@ -53,13 +52,13 @@ void initFilesystem()
 
 bool checkFolder(const char* name)
 {
-    lock(&managingFiles);
+    __asm__ volatile ("cli");
     File* file = files;
     while (file)
     {
         if (compareStrings(name, file->name) == 0 && file->data == 0)
         {
-            unlock(&managingFiles);
+            __asm__ volatile ("sti");
             return true;
         }
         file = file->next;
@@ -68,19 +67,19 @@ bool checkFolder(const char* name)
             break;
         }
     }
-    unlock(&managingFiles);
+    __asm__ volatile ("sti");
     return false;
 }
 
 bool checkFile(const char* name)
 {
-    lock(&managingFiles);
+    __asm__ volatile ("cli");
     File* file = files;
     while (file)
     {
         if (compareStrings(name, file->name) == 0 && file->data)
         {
-            unlock(&managingFiles);
+            __asm__ volatile ("sti");
             return true;
         }
         file = file->next;
@@ -89,13 +88,13 @@ bool checkFile(const char* name)
             break;
         }
     }
-    unlock(&managingFiles);
+    __asm__ volatile ("sti");
     return false;
 }
 
 void createFolder(const char* name)
 {
-    lock(&managingFiles);
+    __asm__ volatile ("cli");
     File* file = allocate(sizeof(File));
     ((File*)files->prev)->next = file;
     file->next = files;
@@ -106,12 +105,12 @@ void createFolder(const char* name)
     copyString(name, file->name);
     file->size = 0;
     file->data = 0;
-    unlock(&managingFiles);
+    __asm__ volatile ("sti");
 }
 
 void* createFile(const char* name, uint64_t size)
 {
-    lock(&managingFiles);
+    __asm__ volatile ("cli");
     File* file = allocate(sizeof(File));
     ((File*)files->prev)->next = file;
     file->next = files;
@@ -122,13 +121,13 @@ void* createFile(const char* name, uint64_t size)
     copyString(name, file->name);
     file->size = size;
     file->data = allocate(size);
-    unlock(&managingFiles);
+    __asm__ volatile ("sti");
     return file->data;
 }
 
 const char** getFiles(const char* root, uint64_t* count)
 {
-    lock(&managingFiles);
+    __asm__ volatile ("cli");
     *count = 0;
     uint64_t length = stringLength(root);
     File* file = files;
@@ -160,13 +159,13 @@ const char** getFiles(const char* root, uint64_t* count)
             break;
         }
     }
-    unlock(&managingFiles);
+    __asm__ volatile ("sti");
     return items;
 }
 
 uint8_t* getFile(const char* name, uint64_t* size)
 {
-    lock(&managingFiles);
+    __asm__ volatile ("cli");
     File* file = files;
     while (file)
     {
@@ -176,18 +175,18 @@ uint8_t* getFile(const char* name, uint64_t* size)
             {
                 *size = file->size;
             }
-            unlock(&managingFiles);
+            __asm__ volatile ("sti");
             return file->data;
         }
         file = file->next;
     }
-    unlock(&managingFiles);
+    __asm__ volatile ("sti");
     return 0;
 }
 
 void deleteFile(const char* name)
 {
-    lock(&managingFiles);
+    __asm__ volatile ("cli");
     File* file = files;
     while (file)
     {
@@ -202,5 +201,5 @@ void deleteFile(const char* name)
         }
         file = file->next;
     }
-    unlock(&managingFiles);
+    __asm__ volatile ("sti");
 }

@@ -15,7 +15,6 @@ typedef struct
 
 Allocation* allocated = 0;
 uint64_t allocations = 0;
-bool allocating = false;
 
 void initAllocator(uint64_t end)
 {
@@ -45,7 +44,7 @@ void markUnusable(uint64_t start, uint64_t end)
 
 void* allocate(uint64_t amount)
 {
-    lock(&allocating);
+    __asm__ volatile ("cli");
     uint64_t value = MEMORY_START;
     Allocation* allocation = allocated;
     uint64_t count = 0;
@@ -81,13 +80,13 @@ void* allocate(uint64_t amount)
     allocation->start = value;
     allocation->end = value + amount;
     allocations++;
-    unlock(&allocating);
+    __asm__ volatile ("sti");
     return (void*)value;
 }
 
 void* allocateAligned(uint64_t amount, uint64_t alignment)
 {
-    lock(&allocating);
+    __asm__ volatile ("cli");
     uint64_t value = MEMORY_START + (alignment - (MEMORY_START % alignment));
     Allocation* allocation = allocated;
     uint64_t count = 0;
@@ -123,13 +122,13 @@ void* allocateAligned(uint64_t amount, uint64_t alignment)
     allocation->start = value;
     allocation->end = value + amount;
     allocations++;
-    unlock(&allocating);
+    __asm__ volatile ("sti");
     return (void*)value;
 }
 
 void unallocate(void* pointer)
 {
-    lock(&allocating);
+    __asm__ volatile ("cli");
     Allocation* test = allocated;
     while (!test->present || test->start != (uint64_t)pointer)
     {
@@ -137,5 +136,5 @@ void unallocate(void* pointer)
     }
     test->present = false;
     allocations--;
-    unlock(&allocating);
+    __asm__ volatile ("sti");
 }
