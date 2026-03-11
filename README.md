@@ -21,6 +21,7 @@ My operating system which is my own very Unix unlike OS, kinda the OS analogue o
 - Processes
 - Terminal
 - Syscalls
+- IPC
 - Real time clock
 ## Plans
 You think I have plans? Pfft. Everything I say I'll never do, I end up doing anyways.

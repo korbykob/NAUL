@@ -21,6 +21,7 @@ void initIpc()
     serialPrint("Setting up IPC");
     registerSyscall(REGISTER_LISTENER, registerListener);
     registerSyscall(UNREGISTER_LISTENER, unregisterListener);
+    registerSyscall(CHECK_LISTENER, checkListener);
     registerSyscall(SEND_MESSAGE, sendMessage);
     serialPrint("Allocating listeners");
     listeners = allocate(sizeof(ListenerElement));
@@ -58,6 +59,27 @@ void unregisterListener(uint64_t (*handler)(uint64_t arg1, uint64_t arg2, uint64
     ((ListenerElement*)element->next)->prev = element->prev;
     unallocate(element);
     __asm__ volatile ("sti");
+}
+
+bool checkListener(const char* name)
+{
+    __asm__ volatile ("cli");
+    ListenerElement* element = listeners;
+    while (true)
+    {
+        if (compareStrings(name, element->name) == 0)
+        {
+            __asm__ volatile ("sti");
+            return true;
+        }
+        element = element->next;
+        if (element == listeners)
+        {
+            break;
+        }
+    }
+    __asm__ volatile ("sti");
+    return false;
 }
 
 uint64_t sendMessage(const char* name, uint64_t arg1, uint64_t arg2, uint64_t arg3, uint64_t arg4)
