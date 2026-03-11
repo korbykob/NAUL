@@ -45,7 +45,7 @@ uint64_t execute(const char* filename)
     uint64_t table = 0;
     __asm__ volatile ("mov %%cr3, %0" : "=r"(table));
     __asm__ volatile ("mov %0, %%cr3" : : "r"(createTable(program, (size - 1) / PAGE_SIZE + 1)));
-    uint64_t thread = createThread((void (*)())(PROCESS_ADDRESS + *(uint64_t*)data - sizeof(uint64_t)));
+    uint64_t thread = createThread(*(void (**)())data);
     __asm__ volatile ("mov %0, %%cr3" : : "r"(table));
     currentThread->symbols = oldSymbols;
     currentThread->symbolCount = oldCount;

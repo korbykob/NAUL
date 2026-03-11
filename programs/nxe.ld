@@ -2,14 +2,12 @@ OUTPUT_FORMAT(binary)
 ENTRY(entry)
 SECTIONS
 {
-    . = 0x8000000000 - (__header_end - __header_start);
+    . = 0x8000000000 - 8;
 
-    __header_start = .;
     .header :
     {
-        QUAD(entry - ADDR(.header));
+        QUAD(entry);
     }
-    __header_end = .;
 
     .text ALIGN(16) :
     {
@@ -21,13 +19,30 @@ SECTIONS
         *(.rodata*)
     }
 
+    .lrodata ALIGN(16) :
+    {
+        *(.lrodata*)
+    }
+
     .data ALIGN(16) :
     {
         *(.data*)
-        
-        . = ALIGN(16);
-        
+    }
+
+    .ldata ALIGN(16) :
+    {
+        *(.ldata*)
+    }
+
+    .bss ALIGN(16) :
+    {
         *(.bss*)
-        *(COMMON)
+        BYTE(0);
+    }
+    
+    .lbss ALIGN(16) :
+    {
+        *(.lbss*)
+        BYTE(0);
     }
 }
