@@ -54,7 +54,7 @@ bool checkFolder(const char* name)
 {
     __asm__ volatile ("cli");
     File* file = files;
-    while (file)
+    while (true)
     {
         if (compareStrings(name, file->name) == 0 && file->data == 0)
         {
@@ -75,7 +75,7 @@ bool checkFile(const char* name)
 {
     __asm__ volatile ("cli");
     File* file = files;
-    while (file)
+    while (true)
     {
         if (compareStrings(name, file->name) == 0 && file->data)
         {
@@ -131,7 +131,7 @@ const char** getFiles(const char* root, uint64_t* count)
     *count = 0;
     uint64_t length = stringLength(root);
     File* file = files;
-    while (file)
+    while (true)
     {
         if (compareStrings(file->name, root) != 0 && compareStart(file->name, root, length) == 0 && !stringContains(file->name + length + 1, '/'))
         {
@@ -146,7 +146,7 @@ const char** getFiles(const char* root, uint64_t* count)
     const char** items = allocate(*count * sizeof(const char*));
     uint64_t i = 0;
     file = files;
-    while (file)
+    while (true)
     {
         if (compareStrings(file->name, root) != 0 && compareStart(file->name, root, length) == 0 && !stringContains(file->name + length + 1, '/'))
         {
@@ -167,39 +167,30 @@ uint8_t* getFile(const char* name, uint64_t* size)
 {
     __asm__ volatile ("cli");
     File* file = files;
-    while (file)
+    while (compareStrings(name, file->name) != 0)
     {
-        if (compareStrings(name, file->name) == 0)
-        {
-            if (size)
-            {
-                *size = file->size;
-            }
-            __asm__ volatile ("sti");
-            return file->data;
-        }
         file = file->next;
     }
+    if (size)
+    {
+        *size = file->size;
+    }
     __asm__ volatile ("sti");
-    return 0;
+    return file->data;
 }
 
 void deleteFile(const char* name)
 {
     __asm__ volatile ("cli");
     File* file = files;
-    while (file)
+    while (compareStrings(name, file->name) != 0)
     {
-        if (compareStrings(name, file->name) == 0)
-        {
-            ((File*)file->prev)->next = file->next;
-            ((File*)file->next)->prev = file->prev;
-            unallocate(file->name);
-            unallocate(file->data);
-            unallocate(file);
-            break;
-        }
         file = file->next;
     }
+    ((File*)file->prev)->next = file->next;
+    ((File*)file->next)->prev = file->prev;
+    unallocate(file->name);
+    unallocate(file->data);
+    unallocate(file);
     __asm__ volatile ("sti");
 }
