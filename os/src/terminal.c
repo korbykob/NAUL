@@ -124,7 +124,10 @@ void drawCharacter(char character, uint32_t x, uint32_t y, uint32_t colour)
             {
                 if (*glyph & (0b10000000 >> x))
                 {
-                    *address = colour;
+                    if (!displayObtained)
+                    {
+                        *address = colour;
+                    }
                     *backAddress = colour;
                 }
                 address++;
@@ -142,7 +145,10 @@ void drop()
 {
     copyMemory32(backBuffer + information.width * 32, backBuffer, information.width * (information.height - 32));
     setMemory32(backBuffer + information.width * (information.height - 32), 0, information.width * 32);
-    copyMemory32(backBuffer, information.framebuffer, information.width * information.height);
+    if (!displayObtained)
+    {
+        copyMemory32(backBuffer, information.framebuffer, information.width * information.height);
+    }
 }
 
 void terminalPut(char character)
@@ -222,28 +228,10 @@ void terminalPut(char character)
     drawCharacter('_', cursorX * fontWidth, cursorY * fontHeight, colours[colour]);
 }
 
-void blinkThread()
+void terminalThread()
 {
     bool blink = false;
     uint64_t last = getFemtoseconds();
-    while (true)
-    {
-        uint64_t femtoseconds = getFemtoseconds();
-        if (femtoseconds - last >= FEMTOSECONDS_PER_SECOND / 2)
-        {
-            last = femtoseconds;
-            if (!displayObtained)
-            {
-                drawCharacter('_', cursorX * fontWidth, cursorY * fontHeight, blink ? colours[colour] : 0);
-                blink = !blink;
-            }
-        }
-        yieldThread();
-    }
-}
-
-void terminalThread()
-{
     while (true)
     {
         while (ttyBuffer.writeTail != ttyBuffer.writeHead)
@@ -304,6 +292,16 @@ void terminalThread()
             }
             keyboardBuffer.tail++;
         }
+        uint64_t femtoseconds = getFemtoseconds();
+        if (femtoseconds - last >= FEMTOSECONDS_PER_SECOND / 2)
+        {
+            last = femtoseconds;
+            if (!displayObtained)
+            {
+                drawCharacter('_', cursorX * fontWidth, cursorY * fontHeight, blink ? colours[colour] : 0);
+                blink = !blink;
+            }
+        }
         yieldThread();
     }
 }
@@ -324,8 +322,6 @@ void initTerminal()
     backBuffer = allocate(information.width * information.height * sizeof(uint32_t));
     serialPrint("Clearing out back buffer");
     setMemory32(backBuffer, 0, information.width * information.height);
-    serialPrint("Creating blink thread");
-    createThread(blinkThread);
     serialPrint("Registering keyboard handler");
     registerKeyboard(&keyboardBuffer);
     serialPrint("Creating terminal thread");
