@@ -98,7 +98,7 @@ iso()
 
     mmd -i naul.iso ::/naul
     mcopy -i naul.iso os/bin/naul.sym ::/naul/naul.sym
-    mcopy -i naul.iso os/font.psf ::/naul/font.psf
+    mcopy -i naul.iso os/res/font.psf ::/naul/font.psf
 
     mmd -i naul.iso ::/programs
     for program in programs/programs/*/; do
