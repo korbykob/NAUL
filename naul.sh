@@ -93,7 +93,7 @@ iso()
 {
     build
 
-    dd if=/dev/zero of=naul.iso bs=1M count=8 status=none
+    dd if=/dev/zero of=naul.iso bs=1M count=12 status=none
     mformat -i naul.iso ::
 
     mmd -i naul.iso ::/efi

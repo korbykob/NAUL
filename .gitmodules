@@ -10,3 +10,7 @@
 	path = programs/programs/desktop
 	url = https://github.com/korbykob/NAULDesktop.git
 	branch = main
+[submodule "programs/programs/doom"]
+	path = programs/programs/doom
+	url = https://github.com/korbykob/NAULDoom.git
+	branch = main
