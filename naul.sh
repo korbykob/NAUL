@@ -85,6 +85,10 @@ build()
 
 commands()
 {
+    if [ ! -f "os/gnu-efi/x86_64/gnuefi/crt0-efi-x86_64.o" ]; then
+        make -C os/gnu-efi
+    fi
+    
     bear --output .vscode/compile_commands.json -- ./naul.sh build
     sed -i 's|'$PWD'|${workspaceFolder}|g' .vscode/compile_commands.json
 }
