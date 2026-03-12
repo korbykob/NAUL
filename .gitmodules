@@ -6,3 +6,7 @@
 	path = programs/programs/shell
 	url = https://github.com/korbykob/NAULShell.git
 	branch = main
+[submodule "programs/programs/desktop"]
+	path = programs/programs/desktop
+	url = https://github.com/korbykob/NAULDesktop.git
+	branch = main
