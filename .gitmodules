@@ -14,3 +14,7 @@
 	path = programs/programs/doom
 	url = https://github.com/korbykob/NAULDoom.git
 	branch = main
+[submodule "programs/programs/terminal"]
+	path = programs/programs/terminal
+	url = https://github.com/korbykob/NAULTerminal.git
+	branch = main
