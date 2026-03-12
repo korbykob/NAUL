@@ -31,7 +31,7 @@ First clone the repo and its submodules:
 ```
 git clone --recursive https://github.com/korbykob/NAUL.git
 ```
-After cloning ensure you have build essentials and mtools installed and run:
+After cloning ensure you have build-essential, gnu-efi, and mtools installed and run:
 ```
 cd NAUL
 ./naul.sh iso

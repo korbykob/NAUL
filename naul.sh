@@ -14,18 +14,14 @@ clean()
 
 build()
 {
-    export COMPILER_FLAGS="-std=gnu17 -I${PWD}/include -ffreestanding -fno-stack-protector -fno-stack-check -mno-red-zone -maccumulate-outgoing-args -g -mavx2 -O2 -fvect-cost-model=dynamic -fno-omit-frame-pointer"
-    export BOOTLOADER_COMPILER_FLAGS="$COMPILER_FLAGS -Ios/include -fpic -c -fshort-wchar -Ios/gnu-efi/inc"
-    export KERNEL_COMPILER_FLAGS="$COMPILER_FLAGS -Ios/include -fpic -c -nostdinc"
-    export PROGRAM_COMPILER_FLAGS="$COMPILER_FLAGS -I${PWD}/programs/include -static -fno-pic -fno-pie -mcmodel=large -c -nostdinc"
+    export COMPILER_FLAGS="-I${PWD}/include -std=gnu17 -g -fno-omit-frame-pointer -ffreestanding -mno-red-zone -mavx2 -O2 -fvect-cost-model=dynamic"
+    export BOOTLOADER_COMPILER_FLAGS="$COMPILER_FLAGS -Ios/include -I/usr/include/efi -fshort-wchar -maccumulate-outgoing-args -fpic -c"
+    export KERNEL_COMPILER_FLAGS="$COMPILER_FLAGS -Ios/include -nostdinc -fpic -c"
+    export PROGRAM_COMPILER_FLAGS="$COMPILER_FLAGS -I${PWD}/programs/include -nostdinc -mcmodel=large -static -fno-pic -fno-pie -c"
 
-    export LINKER_FLAGS="-znoexecstack"
-    export KERNEL_LINKER_FLAGS="$LINKER_FLAGS -shared -Bsymbolic -Los/gnu-efi/x86_64/lib -Los/gnu-efi/x86_64/gnuefi -Tos/gnu-efi/gnuefi/elf_x86_64_efi.lds os/gnu-efi/x86_64/gnuefi/crt0-efi-x86_64.o"
-    export PROGRAM_LINKER_FLAGS="$LINKER_FLAGS -T${PWD}/programs/nxe.ld -no-pie"
-
-    if [ ! -f "os/gnu-efi/x86_64/gnuefi/crt0-efi-x86_64.o" ]; then
-        make -C os/gnu-efi
-    fi
+    export KERNEL_LINKER_FLAGS="-shared -Bsymbolic -T/usr/lib/elf_x86_64_efi.lds /usr/lib/crt0-efi-x86_64.o"
+    export KERNEL_LINKER_LIBS="/usr/lib/libgnuefi.a /usr/lib/libefi.a"
+    export PROGRAM_LINKER_FLAGS="-no-pie -T${PWD}/programs/nxe.ld"
 
     mkdir -p os/bin
     gcc $BOOTLOADER_COMPILER_FLAGS os/src/bootloader.c -o os/bin/bootloader.o
@@ -70,11 +66,11 @@ build()
     os/bin/processes.o \
     os/bin/ipc.o \
     os/bin/kernel.o \
-    -o os/bin/naul.so -lgnuefi -lefi
+    -o os/bin/naul.so $KERNEL_LINKER_LIBS
 
     nm os/bin/naul.so > os/bin/naul.sym
 
-    objcopy -j .text -j .sdata -j .data -j .rodata -j .dynamic -j .dynsym -j .rel -j .rela -j .rel.* -j .rela.* -j .reloc --target efi-app-x86_64 --subsystem=10 os/bin/naul.so os/bin/naul.efi
+    objcopy -j .text -j .sdata -j .data -j .rodata -j .dynamic -j .dynsym -j .rel -j .rela -j .rel.* -j .rela.* -j .reloc --output-target efi-app-x86_64 --subsystem=10 os/bin/naul.so os/bin/naul.efi
 
     for program in programs/programs/*/; do
         cd $program
@@ -85,10 +81,6 @@ build()
 
 commands()
 {
-    if [ ! -f "os/gnu-efi/x86_64/gnuefi/crt0-efi-x86_64.o" ]; then
-        make -C os/gnu-efi
-    fi
-    
     bear --output .vscode/compile_commands.json -- ./naul.sh build
     sed -i 's|'$PWD'|${workspaceFolder}|g' .vscode/compile_commands.json
 }
