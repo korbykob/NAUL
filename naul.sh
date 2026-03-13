@@ -106,7 +106,9 @@ iso()
 
         mmd -i naul.iso ::/programs/$name
         mcopy -i naul.iso ${program}bin/${name}.nxe ::/programs/${name}/${name}.nxe
-        mcopy -i naul.iso ${program}bin/${name}.sym ::/programs/${name}/${name}.sym
+        if [ -f "${program}bin/${name}.sym" ]; then
+            mcopy -i naul.iso ${program}bin/${name}.sym ::/programs/${name}/${name}.sym
+        fi
 
         if [ -d "${program}res" ]; then
             for file in ${program}res/*; do
