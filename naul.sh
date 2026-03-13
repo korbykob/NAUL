@@ -14,7 +14,7 @@ clean()
 
 build()
 {
-    export COMPILER_FLAGS="-I${PWD}/include -std=gnu17 -g -fno-omit-frame-pointer -ffreestanding -mno-red-zone -mavx2 -O2 -fvect-cost-model=dynamic"
+    export COMPILER_FLAGS="-I${PWD}/include -std=gnu17 -g -fno-omit-frame-pointer -ffreestanding -fno-stack-protector -fno-stack-check -mno-red-zone -mavx2 -O2 -fvect-cost-model=dynamic"
     export BOOTLOADER_COMPILER_FLAGS="$COMPILER_FLAGS -Ios/include -I/usr/include/efi -fshort-wchar -maccumulate-outgoing-args -fpic -c"
     export KERNEL_COMPILER_FLAGS="$COMPILER_FLAGS -Ios/include -nostdinc -fpic -c"
     export PROGRAM_COMPILER_FLAGS="$COMPILER_FLAGS -I${PWD}/programs/include -nostdinc -mcmodel=large -static -fno-pic -fno-pie -c"
