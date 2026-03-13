@@ -1,3 +1,4 @@
 os/bin
+programs/compatibility/bin
 programs/programs/*/bin
 naul.iso

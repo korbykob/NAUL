@@ -98,6 +98,19 @@ static void toHex(char* string, uint64_t value)
     reverseString(string);
 }
 
+static uint64_t fromString(const char* string)
+{
+    uint64_t length = stringLength(string);
+    uint64_t result = 0;
+    uint64_t value = 1;
+    for (uint64_t i = length - 1; i != __UINT64_MAX__; i--)
+    {
+        result += ('0' - string[i]) * value;
+        value *= 10;
+    }
+    return result;
+}
+
 static uint64_t fromHex(const char* string)
 {
     uint64_t length = stringLength(string);

@@ -1,4 +1,8 @@
 {
+    "files.associations": {
+        "*.c": "c",
+        "*.h": "c"
+    },
     "C_Cpp.codeAnalysis.clangTidy.checks.disabled": [
         "clang-analyzer-core.FixedAddressDereference"
     ],

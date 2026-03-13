@@ -18,10 +18,12 @@ build()
     export BOOTLOADER_COMPILER_FLAGS="$COMPILER_FLAGS -Ios/include -I/usr/include/efi -fshort-wchar -maccumulate-outgoing-args -fpic -c"
     export KERNEL_COMPILER_FLAGS="$COMPILER_FLAGS -Ios/include -nostdinc -fpic -c"
     export PROGRAM_COMPILER_FLAGS="$COMPILER_FLAGS -I${PWD}/programs/include -nostdinc -mcmodel=large -static -fno-pic -fno-pie -c"
+    export PROGRAM_COMPAT_COMPILER_FLAGS="$PROGRAM_COMPILER_FLAGS -I${PWD}/programs/compatibility/include"
 
     export KERNEL_LINKER_FLAGS="-shared -Bsymbolic -T/usr/lib/elf_x86_64_efi.lds /usr/lib/crt0-efi-x86_64.o"
     export KERNEL_LINKER_LIBS="/usr/lib/libgnuefi.a /usr/lib/libefi.a"
     export PROGRAM_LINKER_FLAGS="-no-pie -T${PWD}/programs/nxe.ld"
+    export PROGRAM_COMPAT_LINKER_FLAGS="$PROGRAM_LINKER_FLAGS ${PWD}/programs/compatibility/bin/entry.o"
 
     mkdir -p os/bin
     gcc $BOOTLOADER_COMPILER_FLAGS os/src/bootloader.c -o os/bin/bootloader.o
@@ -71,6 +73,9 @@ build()
     nm os/bin/naul.so > os/bin/naul.sym
 
     objcopy -j .text -j .sdata -j .data -j .rodata -j .dynamic -j .dynsym -j .rel -j .rela -j .rel.* -j .rela.* -j .reloc --output-target efi-app-x86_64 --subsystem=10 os/bin/naul.so os/bin/naul.efi
+
+    mkdir -p programs/compatibility/bin
+    gcc $PROGRAM_COMPAT_COMPILER_FLAGS programs/compatibility/src/entry.c -o programs/compatibility/bin/entry.o
 
     for program in programs/programs/*/; do
         cd $program

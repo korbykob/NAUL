@@ -3,7 +3,9 @@
         {
             "name": "Linux",
             "includePath": [
-                "${workspaceFolder}/include"
+                "${workspaceFolder}/include",
+                "${workspaceFolder}/programs/include",
+                "${workspaceFolder}/programs/compatibility/include"
             ],
             "compileCommands": [
                 "${workspaceFolder}/.vscode/compile_commands.json"
