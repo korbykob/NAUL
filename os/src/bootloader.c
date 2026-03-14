@@ -106,7 +106,7 @@ void parseFolder(EFI_FILE_HANDLE fs, const CHAR16* name, void (*found)(EFI_FILE_
     uefi_call_wrapper(folder->Close, 1, folder);
 }
 
-void countFiles()
+void countFiles(__attribute__((unused)) EFI_FILE_HANDLE fs, __attribute__((unused)) const CHAR16* name)
 {
     information.fileCount++;
 }
