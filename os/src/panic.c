@@ -103,7 +103,6 @@ void panicWrite(const char* string)
 
 void panic(uint8_t exception, uint32_t code)
 {
-    __asm__ volatile ("cli");
     setMemory32(information.framebuffer, 0, information.width * information.height);
     serialWrite("\x1b[91m\n");
     panicWrite("KERNEL PANIC RUH ROH!!\n\nAs a wise man once said: \"So... what happend is:\"\n\n");

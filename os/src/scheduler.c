@@ -67,7 +67,7 @@ void initScheduler()
     registerSyscall(WAIT_FOR_THREAD, waitForThread);
     registerSyscall(DESTROY_THREAD, destroyThread);
     registerSyscall(EXIT_THREAD, exitThread);
-    installIsr(0x67, skipThread);
+    installIsr(0x67, IDT_INTERRUPT_GATE, skipThread);
     serialPrint("Creating main thread");
     threads = allocate(sizeof(Thread));
     threads->next = threads;
@@ -80,7 +80,7 @@ void initScheduler()
     __asm__ volatile ("movq %%rsp, %0" : "=g"(threads->sp));
     currentThread = threads;
     serialPrint("Configuring timer");
-    installIsr(SCHEDULER_INTERRUPT, updateScheduler);
+    installIsr(SCHEDULER_INTERRUPT, IDT_INTERRUPT_GATE, updateScheduler);
     serialPrint("Setting timer divisor");
     *(uint32_t*)LAPIC_DIVISOR_REGISTER = 3;
     serialPrint("Calibrating timer");

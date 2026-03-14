@@ -6,7 +6,7 @@
 #define PIC_MASTER_SPURIOUS 7
 #define PIC_SLAVE_SPURIOUS 15
 #define KERNEL_CODE_SEGMENT 0x8
-#define IDT_INTERRUPT_GATE 0xE
+#define IDT_TRAP_GATE 0xF
 #define IDT_PRESENT 0x80
 
 struct
@@ -96,7 +96,7 @@ void initIdt()
     serialPrint("Setting up IDT");
     for (uint8_t i = 0; i < EXCEPTION_COUNT; i++)
     {
-        installIsr(i, (void (*)())((uint8_t*)exception + (i * decSize)));
+        installIsr(i, IDT_INTERRUPT_GATE, (void (*)())((uint8_t*)exception + (i * decSize)));
     }
     installIrq(PIC_MASTER_SPURIOUS, masterSpurious);
     installIrq(PIC_SLAVE_SPURIOUS, slaveSpurious);
@@ -105,13 +105,13 @@ void initIdt()
     serialPrint("Set up IDT");
 }
 
-void installIsr(uint8_t interrupt, void (*handler)())
+void installIsr(uint8_t interrupt, uint8_t attributes, void (*handler)())
 {
     uint16_t index = interrupt;
     idt[index].lower = (uint64_t)handler;
     idt[index].selector = KERNEL_CODE_SEGMENT;
     idt[index].ist = 0;
-    idt[index].attributes = IDT_INTERRUPT_GATE | IDT_PRESENT;
+    idt[index].attributes = attributes | IDT_PRESENT;
     idt[index].middle = (uint64_t)handler >> 16;
     idt[index].higher = (uint64_t)handler >> 32;
     idt[index].zero = 0;
@@ -119,5 +119,5 @@ void installIsr(uint8_t interrupt, void (*handler)())
 
 void installIrq(uint8_t interrupt, void (*handler)())
 {
-    installIsr(interrupt + PIC_OFFSET, handler);
+    installIsr(interrupt + PIC_OFFSET, IDT_INTERRUPT_GATE, handler);
 }
