@@ -17,7 +17,7 @@
 #define NANOPRINTF_IMPLEMENTATION
 #include "nanoprintf.h"
 
-#define fflush(stream) 0
+#define fflush(stream) ({ 0; })
 #define fprintf(stream, format, ...) printf(format, __VA_ARGS__)
 
 static void nanoPut(int c, void *ctx)

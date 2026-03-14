@@ -4,7 +4,8 @@
         "*.h": "c"
     },
     "C_Cpp.codeAnalysis.clangTidy.checks.disabled": [
-        "clang-analyzer-core.FixedAddressDereference"
+        "clang-analyzer-core.FixedAddressDereference",
+        "clang-diagnostic-unknown-warning-option"
     ],
     "C_Cpp.codeAnalysis.clangTidy.headerFilter": "**/PureDOOM.h"
 }

@@ -101,12 +101,12 @@ const char capsScancodes[256] = {
     0, /* F12 Key */
     0 /* All other keys are undefined */
 };
-KeyboardBuffer keyboardBuffer = { 0, 0 };
+KeyboardBuffer keyboardBuffer = { 0 };
 bool leftShift = false;
 bool rightShift = false;
 bool shift = false;
 bool caps = false;
-TtyBuffer ttyBuffer = { 0, 0, 0, 0, 0 };
+TtyBuffer ttyBuffer = { 0 };
 bool waitingColour = false;
 
 void drawCharacter(char character, uint32_t x, uint32_t y, uint32_t colour)

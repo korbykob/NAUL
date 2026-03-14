@@ -14,16 +14,13 @@ clean()
 
 build()
 {
-    export COMPILER_FLAGS="-I${PWD}/include -std=gnu17 -g -fno-omit-frame-pointer -ffreestanding -fno-stack-protector -fno-stack-check -mno-red-zone -mavx2 -O2 -fvect-cost-model=dynamic"
-    export BOOTLOADER_COMPILER_FLAGS="$COMPILER_FLAGS -Ios/include -I/usr/include/efi -fshort-wchar -maccumulate-outgoing-args -fpic -c"
-    export KERNEL_COMPILER_FLAGS="$COMPILER_FLAGS -Ios/include -nostdinc -fpic -c"
-    export PROGRAM_COMPILER_FLAGS="$COMPILER_FLAGS -I${PWD}/programs/include -nostdinc -mcmodel=large -static -fno-pic -fno-pie -c"
-    export PROGRAM_COMPAT_COMPILER_FLAGS="$PROGRAM_COMPILER_FLAGS -I${PWD}/programs/compatibility/include"
-
-    export KERNEL_LINKER_FLAGS="-shared -Bsymbolic -T/usr/lib/elf_x86_64_efi.lds /usr/lib/crt0-efi-x86_64.o"
-    export KERNEL_LINKER_LIBS="/usr/lib/libgnuefi.a /usr/lib/libefi.a"
-    export PROGRAM_LINKER_FLAGS="-no-pie -T${PWD}/programs/nxe.ld"
-    export PROGRAM_COMPAT_LINKER_FLAGS="$PROGRAM_LINKER_FLAGS ${PWD}/programs/compatibility/bin/entry.o"
+    COMPILER_FLAGS="-isystem ${PWD}/include -ffreestanding -mno-red-zone -fno-stack-protector -fno-stack-check -maccumulate-outgoing-args -c"
+    
+    OS_COMPILER_FLAGS="$COMPILER_FLAGS -Ios/include -fpic -g -fno-omit-frame-pointer -mavx2 -O2 -fvect-cost-model=dynamic -Wall -Wextra -Werror"
+    BOOTLOADER_COMPILER_FLAGS="$OS_COMPILER_FLAGS -I/usr/include/efi -fshort-wchar"
+    KERNEL_COMPILER_FLAGS="$OS_COMPILER_FLAGS -Ios/include -nostdinc"
+    KERNEL_LINKER_FLAGS="-shared -Bsymbolic -T/usr/lib/elf_x86_64_efi.lds /usr/lib/crt0-efi-x86_64.o"
+    KERNEL_LINKER_LIBS="/usr/lib/libgnuefi.a /usr/lib/libefi.a"
 
     mkdir -p os/bin
     gcc $BOOTLOADER_COMPILER_FLAGS os/src/bootloader.c -o os/bin/bootloader.o
@@ -73,6 +70,11 @@ build()
     nm os/bin/naul.so > os/bin/naul.sym
 
     objcopy -j .text -j .sdata -j .data -j .rodata -j .dynamic -j .dynsym -j .rel -j .rela -j .rel.* -j .rela.* -j .reloc --output-target efi-app-x86_64 --subsystem=10 os/bin/naul.so os/bin/naul.efi
+
+    export PROGRAM_COMPILER_FLAGS="$COMPILER_FLAGS -isystem ${PWD}/programs/include -nostdinc -mcmodel=large -static -fno-pic -fno-pie"
+    export PROGRAM_COMPAT_COMPILER_FLAGS="$PROGRAM_COMPILER_FLAGS -isystem ${PWD}/programs/compatibility/include"
+    export PROGRAM_LINKER_FLAGS="-no-pie -T${PWD}/programs/nxe.ld"
+    export PROGRAM_COMPAT_LINKER_FLAGS="$PROGRAM_LINKER_FLAGS ${PWD}/programs/compatibility/bin/entry.o"
 
     mkdir -p programs/compatibility/bin
     gcc $PROGRAM_COMPAT_COMPILER_FLAGS programs/compatibility/src/entry.c -o programs/compatibility/bin/entry.o

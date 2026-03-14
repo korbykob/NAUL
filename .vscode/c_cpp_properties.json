@@ -2,7 +2,6 @@
     "configurations": [
         {
             "name": "Linux",
-            "cStandard": "gnu17",
             "intelliSenseMode": "linux-gcc-x64",
             "compilerPath": "/usr/bin/gcc",
             "includePath": [

@@ -105,7 +105,7 @@ void panic(uint8_t exception, uint32_t code)
 {
     __asm__ volatile ("cli");
     setMemory32(information.framebuffer, 0, information.width * information.height);
-    serialWrite("\e[91m\n");
+    serialWrite("\x1b[91m\n");
     panicWrite("KERNEL PANIC RUH ROH!!\n\nAs a wise man once said: \"So... what happend is:\"\n\n");
     panicWrite(exceptions[exception].name);
     panicWrite(" occured");
@@ -166,6 +166,6 @@ void panic(uint8_t exception, uint32_t code)
         }
     }
     panicWrite("\nAnyways have fun debugging this one NERRDD\n");
-    serialWrite("\e[0m");
+    serialWrite("\x1b[0m");
     __asm__ volatile ("hlt");
 }
