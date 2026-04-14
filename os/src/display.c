@@ -24,6 +24,7 @@ void obtainDisplay(Display* display)
     display->buffer = information.framebuffer;
     display->width = information.width;
     display->height = information.height;
+    display->pitch = information.pitch;
 }
 
 void releaseDisplay()

@@ -111,8 +111,8 @@ bool waitingColour = false;
 
 void drawCharacter(char character, uint32_t x, uint32_t y, uint32_t colour)
 {
-    uint32_t* address = information.framebuffer + y * information.width + x;
-    uint32_t* backAddress = backBuffer + y * information.width + x;
+    uint32_t* address = information.framebuffer + y * information.pitch + x;
+    uint32_t* backAddress = backBuffer + y * information.pitch + x;
     uint8_t* glyph = font->data + font->glyphSize * character;
     for (uint32_t y = 0; y < font->height; y++)
     {
@@ -136,18 +136,18 @@ void drawCharacter(char character, uint32_t x, uint32_t y, uint32_t colour)
             glyph++;
             width -= amount;
         }
-        address += information.width - font->width;
-        backAddress += information.width - font->width;
+        address += information.pitch - font->width;
+        backAddress += information.pitch - font->width;
     }
 }
 
 void drop()
 {
-    copyMemory32(backBuffer + information.width * 32, backBuffer, information.width * (information.height - 32));
-    setMemory32(backBuffer + information.width * (information.height - 32), 0, information.width * 32);
+    copyMemory32(backBuffer + information.pitch * font->height, backBuffer, information.pitch * (information.height - font->height));
+    setMemory32(backBuffer + information.pitch * (information.height - font->height), 0, information.pitch * font->height);
     if (!displayObtained)
     {
-        copyMemory32(backBuffer, information.framebuffer, information.width * information.height);
+        copyMemory32(backBuffer, information.framebuffer, information.pitch * information.height);
     }
 }
 
@@ -172,8 +172,8 @@ void terminalPut(char character)
         }
         uint32_t x = cursorX * fontWidth;
         uint32_t y = cursorY * fontHeight;
-        uint32_t* address = information.framebuffer + y * information.width + x;
-        uint32_t* backAddress = backBuffer + y * information.width + x;
+        uint32_t* address = information.framebuffer + y * information.pitch + x;
+        uint32_t* backAddress = backBuffer + y * information.pitch + x;
         for (uint32_t y = 0; y < fontHeight; y++)
         {
             for (uint32_t x = 0; x < fontWidth; x++)
@@ -181,8 +181,8 @@ void terminalPut(char character)
                 *address++ = 0;
                 *backAddress++ = 0;
             }
-            address += information.width - fontWidth;
-            backAddress += information.width - fontWidth;
+            address += information.pitch - fontWidth;
+            backAddress += information.pitch - fontWidth;
         }
     }
     else if (character == '\n')
@@ -199,8 +199,8 @@ void terminalPut(char character)
     }
     else if (character == TTY_CLEAR)
     {
-        setMemory32(information.framebuffer, 0, information.width * information.height);
-        setMemory32(backBuffer, 0, information.width * information.height);
+        setMemory32(information.framebuffer, 0, information.pitch * information.height);
+        setMemory32(backBuffer, 0, information.pitch * information.height);
         cursorX = 0;
         cursorY = 0;
     }
@@ -319,9 +319,9 @@ void initTerminal()
     terminalHeight = information.height / fontHeight;
     terminalPitch = terminalWidth * 2;
     serialPrint("Allocating back buffer");
-    backBuffer = allocate(information.width * information.height * sizeof(uint32_t));
+    backBuffer = allocate(information.pitch * information.height * sizeof(uint32_t));
     serialPrint("Clearing out back buffer");
-    setMemory32(backBuffer, 0, information.width * information.height);
+    setMemory32(backBuffer, 0, information.pitch * information.height);
     serialPrint("Registering keyboard handler");
     registerKeyboard(&keyboardBuffer);
     serialPrint("Creating terminal thread");
@@ -331,5 +331,5 @@ void initTerminal()
 
 void redrawTerminal()
 {
-    copyMemory32(backBuffer, information.framebuffer, information.width * information.height);
+    copyMemory32(backBuffer, information.framebuffer, information.pitch * information.height);
 }

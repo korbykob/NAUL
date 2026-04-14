@@ -45,15 +45,7 @@ typedef struct
     uint8_t protection;
 } __attribute__((packed)) Hpet;
 
-Info information = 
-{
-    0,
-    0,
-    0,
-    0,
-    0,
-    0
-};
+Info information = { 0 };
 
 EFI_FILE_INFO* openFolder(EFI_FILE_HANDLE folder)
 {
@@ -253,6 +245,7 @@ EFI_STATUS efi_main(EFI_HANDLE ImageHandle, EFI_SYSTEM_TABLE* SystemTable)
     information.framebuffer = (uint32_t*)GOP->Mode->FrameBufferBase;
     information.width = GOP->Mode->Info->HorizontalResolution;
     information.height = GOP->Mode->Info->VerticalResolution;
+    information.pitch = GOP->Mode->Info->PixelsPerScanLine;
     serialPrint("Entering kernel");
     __asm__ volatile ("xorq %rbp, %rbp");
     kernel();
