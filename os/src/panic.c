@@ -58,7 +58,7 @@ uint32_t panicY = 0;
 void initPanic()
 {
     serialPrint("Setting up panic screen");
-    panicFont = (PsfFile*)getFile("/naul/font.psf", 0);
+    panicFont = (PsfFile*)getFile("/naul/font16.psf", 0);
     serialPrint("Set up panic screen");
 }
 

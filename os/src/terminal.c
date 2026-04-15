@@ -311,7 +311,7 @@ void initTerminal()
     serialPrint("Setting up terminal");
     registerTty(&ttyBuffer);
     serialPrint("Loading font");
-    font = (PsfFile*)getFile("/naul/font.psf", 0);
+    font = (PsfFile*)getFile("/naul/font16.psf", 0);
     fontWidth = font->width + 1;
     fontHeight = font->height;
     serialPrint("Setting up terminal graphics");
