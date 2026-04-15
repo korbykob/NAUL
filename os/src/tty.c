@@ -14,6 +14,7 @@ struct
     uint8_t oldId;
     TtyBuffer* buffer;
 } ttyBuffers[256];
+bool ttyLock = false;
 
 void initTty()
 {
@@ -33,7 +34,7 @@ void initTty()
 
 void registerTty(TtyBuffer* buffer)
 {
-    __asm__ volatile ("cli");
+    lock(&ttyLock);
     uint8_t id = 0;
     while (ttyBuffers[id].used)
     {
@@ -43,12 +44,12 @@ void registerTty(TtyBuffer* buffer)
     ttyBuffers[id].oldId = currentThread->ttyId;
     ttyBuffers[id].buffer = getAddress(buffer);
     currentThread->ttyId = id;
-    __asm__ volatile ("sti");
+    unlock(&ttyLock);
 }
 
 void unregisterTty(TtyBuffer* buffer)
 {
-    __asm__ volatile ("cli");
+    lock(&ttyLock);
     TtyBuffer* address = getAddress(buffer);
     uint8_t id = 0;
     while (ttyBuffers[id].buffer != address)
@@ -57,36 +58,36 @@ void unregisterTty(TtyBuffer* buffer)
     }
     currentThread->ttyId = ttyBuffers[id].oldId;
     ttyBuffers[id].used = false;
-    __asm__ volatile ("sti");
+    unlock(&ttyLock);
 }
 
 void put(char character)
 {
-    __asm__ volatile ("cli");
+    lock(&ttyLock);
     TtyBuffer* tty = ttyBuffers[currentThread->ttyId].buffer;
     tty->writeBuffer[tty->writeHead] = character;
     tty->writeHead++;
-    __asm__ volatile ("sti");
+    unlock(&ttyLock);
 }
 
 void write(const char* message)
 {
-    __asm__ volatile ("cli");
+    lock(&ttyLock);
     TtyBuffer* tty = ttyBuffers[currentThread->ttyId].buffer;
     uint64_t length = stringLength(message);
     copyMemory8((uint8_t*)message, (uint8_t*)&tty->writeBuffer[tty->writeHead], length);
     tty->writeHead += length;
-    __asm__ volatile ("sti");
+    unlock(&ttyLock);
 }
 
 void read(char* buffer, uint64_t length)
 {
-    __asm__ volatile ("cli");
+    lock(&ttyLock);
     TtyBuffer* tty = ttyBuffers[currentThread->ttyId].buffer;
     tty->readCursor = 0;
     tty->readBuffer = getAddress(buffer);
     tty->readLength = length;
-    __asm__ volatile ("sti");
+    unlock(&ttyLock);
     while (tty->readBuffer)
     {
         yieldThread();

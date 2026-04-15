@@ -16,6 +16,7 @@ typedef struct
 } ListenerElement;
 
 ListenerElement* listeners = 0;
+bool ipcLock = false;
 
 void initIpc()
 {
@@ -36,7 +37,7 @@ void initIpc()
 
 void registerListener(uint64_t (*handler)(uint64_t arg1, uint64_t arg2, uint64_t arg3, uint64_t arg4), const char* name)
 {
-    __asm__ volatile ("cli");
+    lock(&ipcLock);
     ListenerElement* element = allocate(sizeof(ListenerElement));
     ((ListenerElement*)listeners->prev)->next = element;
     element->next = listeners;
@@ -45,12 +46,12 @@ void registerListener(uint64_t (*handler)(uint64_t arg1, uint64_t arg2, uint64_t
     copyString(name, element->name);
     __asm__ volatile ("mov %%cr3, %0" : "=r"(element->paging));
     element->handler = handler;
-    __asm__ volatile ("sti");
+    unlock(&ipcLock);
 }
 
 void unregisterListener(uint64_t (*handler)(uint64_t arg1, uint64_t arg2, uint64_t arg3, uint64_t arg4))
 {
-    __asm__ volatile ("cli");
+    lock(&ipcLock);
     ListenerElement* element = listeners;
     while (element->handler != handler)
     {
@@ -59,18 +60,18 @@ void unregisterListener(uint64_t (*handler)(uint64_t arg1, uint64_t arg2, uint64
     ((ListenerElement*)element->prev)->next = element->next;
     ((ListenerElement*)element->next)->prev = element->prev;
     unallocate(element);
-    __asm__ volatile ("sti");
+    unlock(&ipcLock);
 }
 
 bool checkListener(const char* name)
 {
-    __asm__ volatile ("cli");
+    lock(&ipcLock);
     ListenerElement* element = listeners;
     while (true)
     {
         if (compareStrings(name, element->name) == 0)
         {
-            __asm__ volatile ("sti");
+            unlock(&ipcLock);
             return true;
         }
         element = element->next;
@@ -79,19 +80,19 @@ bool checkListener(const char* name)
             break;
         }
     }
-    __asm__ volatile ("sti");
+    unlock(&ipcLock);
     return false;
 }
 
 uint64_t sendMessage(const char* name, uint64_t arg1, uint64_t arg2, uint64_t arg3, uint64_t arg4)
 {
-    __asm__ volatile ("cli");
+    lock(&ipcLock);
     ListenerElement* element = listeners;
     while (compareStrings(element->name, name) != 0)
     {
         element = element->next;
     }
-    __asm__ volatile ("sti");
+    unlock(&ipcLock);
     uint64_t oldPaging = 0;
     __asm__ volatile ("mov %%cr3, %0" : "=r"(oldPaging));
     __asm__ volatile ("mov %0, %%cr3" : : "r"(element->paging));

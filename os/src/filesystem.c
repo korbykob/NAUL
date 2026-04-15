@@ -17,6 +17,7 @@ typedef struct {
 } File;
 
 File* files = 0;
+bool filesystemLock = false;
 
 void initFilesystem()
 {
@@ -52,13 +53,13 @@ void initFilesystem()
 
 bool checkFolder(const char* name)
 {
-    __asm__ volatile ("cli");
+    lock(&filesystemLock);
     File* file = files;
     while (true)
     {
         if (compareStrings(name, file->name) == 0 && file->data == 0)
         {
-            __asm__ volatile ("sti");
+            unlock(&filesystemLock);
             return true;
         }
         file = file->next;
@@ -67,19 +68,19 @@ bool checkFolder(const char* name)
             break;
         }
     }
-    __asm__ volatile ("sti");
+    unlock(&filesystemLock);
     return false;
 }
 
 bool checkFile(const char* name)
 {
-    __asm__ volatile ("cli");
+    lock(&filesystemLock);
     File* file = files;
     while (true)
     {
         if (compareStrings(name, file->name) == 0 && file->data)
         {
-            __asm__ volatile ("sti");
+            unlock(&filesystemLock);
             return true;
         }
         file = file->next;
@@ -88,13 +89,13 @@ bool checkFile(const char* name)
             break;
         }
     }
-    __asm__ volatile ("sti");
+    unlock(&filesystemLock);
     return false;
 }
 
 void createFolder(const char* name)
 {
-    __asm__ volatile ("cli");
+    lock(&filesystemLock);
     File* file = allocate(sizeof(File));
     ((File*)files->prev)->next = file;
     file->next = files;
@@ -105,12 +106,12 @@ void createFolder(const char* name)
     copyString(name, file->name);
     file->size = 0;
     file->data = 0;
-    __asm__ volatile ("sti");
+    unlock(&filesystemLock);
 }
 
 void* createFile(const char* name, uint64_t size)
 {
-    __asm__ volatile ("cli");
+    lock(&filesystemLock);
     File* file = allocate(sizeof(File));
     ((File*)files->prev)->next = file;
     file->next = files;
@@ -121,13 +122,13 @@ void* createFile(const char* name, uint64_t size)
     copyString(name, file->name);
     file->size = size;
     file->data = allocate(size);
-    __asm__ volatile ("sti");
+    unlock(&filesystemLock);
     return file->data;
 }
 
 const char** getFiles(const char* root, uint64_t* count)
 {
-    __asm__ volatile ("cli");
+    lock(&filesystemLock);
     *count = 0;
     uint64_t length = stringLength(root);
     File* file = files;
@@ -159,13 +160,13 @@ const char** getFiles(const char* root, uint64_t* count)
             break;
         }
     }
-    __asm__ volatile ("sti");
+    unlock(&filesystemLock);
     return items;
 }
 
 uint8_t* getFile(const char* name, uint64_t* size)
 {
-    __asm__ volatile ("cli");
+    lock(&filesystemLock);
     File* file = files;
     while (compareStrings(name, file->name) != 0)
     {
@@ -175,13 +176,13 @@ uint8_t* getFile(const char* name, uint64_t* size)
     {
         *size = file->size;
     }
-    __asm__ volatile ("sti");
+    unlock(&filesystemLock);
     return file->data;
 }
 
 void deleteFile(const char* name)
 {
-    __asm__ volatile ("cli");
+    lock(&filesystemLock);
     File* file = files;
     while (compareStrings(name, file->name) != 0)
     {
@@ -192,5 +193,5 @@ void deleteFile(const char* name)
     unallocate(file->name);
     unallocate(file->data);
     unallocate(file);
-    __asm__ volatile ("sti");
+    unlock(&filesystemLock);
 }

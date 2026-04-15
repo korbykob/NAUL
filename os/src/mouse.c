@@ -36,6 +36,7 @@ typedef struct
 uint8_t mouseCycle = 0;
 uint8_t mouseBytes[3];
 MouseBufferElement* mouseBuffers = 0;
+bool mouseLock = false;
 
 void mouse()
 {
@@ -122,19 +123,19 @@ void initMouse()
 
 void registerMouse(MouseBuffer* buffer)
 {
-    __asm__ volatile ("cli");
+    lock(&mouseLock);
     MouseBufferElement* element = allocate(sizeof(MouseBufferElement));
     ((MouseBufferElement*)mouseBuffers->prev)->next = element;
     element->next = mouseBuffers;
     element->prev = mouseBuffers->prev;
     mouseBuffers->prev = element;
     element->buffer = getAddress(buffer);
-    __asm__ volatile ("sti");
+    unlock(&mouseLock);
 }
 
 void unregisterMouse(MouseBuffer* buffer)
 {
-    __asm__ volatile ("cli");
+    lock(&mouseLock);
     MouseBuffer* address = getAddress(buffer);
     MouseBufferElement* element = mouseBuffers;
     while (element->buffer != address)
@@ -144,5 +145,5 @@ void unregisterMouse(MouseBuffer* buffer)
     ((MouseBufferElement*)element->prev)->next = element->next;
     ((MouseBufferElement*)element->next)->prev = element->prev;
     unallocate(element);
-    __asm__ volatile ("sti");
+    unlock(&mouseLock);
 }

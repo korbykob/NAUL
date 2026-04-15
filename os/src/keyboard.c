@@ -25,6 +25,7 @@ typedef struct
 } KeyboardBufferElement;
 
 KeyboardBufferElement* keyboardBuffers = 0;
+bool keyboardLock = false;
 
 void keyboard()
 {
@@ -84,19 +85,19 @@ void initKeyboard()
 
 void registerKeyboard(KeyboardBuffer* buffer)
 {
-    __asm__ volatile ("cli");
+    lock(&keyboardLock);
     KeyboardBufferElement* element = allocate(sizeof(KeyboardBufferElement));
     ((KeyboardBufferElement*)keyboardBuffers->prev)->next = element;
     element->next = keyboardBuffers;
     element->prev = keyboardBuffers->prev;
     keyboardBuffers->prev = element;
     element->buffer = getAddress(buffer);
-    __asm__ volatile ("sti");
+    unlock(&keyboardLock);
 }
 
 void unregisterKeyboard(KeyboardBuffer* buffer)
 {
-    __asm__ volatile ("cli");
+    lock(&keyboardLock);
     KeyboardBuffer* address = getAddress(buffer);
     KeyboardBufferElement* element = keyboardBuffers;
     while (element->buffer != address)
@@ -106,5 +107,5 @@ void unregisterKeyboard(KeyboardBuffer* buffer)
     ((KeyboardBufferElement*)element->prev)->next = element->next;
     ((KeyboardBufferElement*)element->next)->prev = element->prev;
     unallocate(element);
-    __asm__ volatile ("sti");
+    unlock(&keyboardLock);
 }
