@@ -7,6 +7,7 @@
 #include <io.h>
 #include <paging.h>
 #include <calls.h>
+#include <scheduler.h>
 #include <cpu.h>
 #include <mem.h>
 

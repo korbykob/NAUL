@@ -3,6 +3,7 @@
 #include <calls.h>
 #include <syscalls.h>
 #include <allocator.h>
+#include <cpu.h>
 #include <str.h>
 
 typedef struct

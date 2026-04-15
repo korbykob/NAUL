@@ -12,6 +12,7 @@
 #include <cpu.h>
 #include <mem.h>
 #include <psf.h>
+#include <cpu.h>
 
 #define TERMINAL_DEFAULT 0x989898
 #define TERMINAL_WHITE 0xFFFFFF

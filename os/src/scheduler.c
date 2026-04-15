@@ -31,9 +31,8 @@ Thread* currentThread = 0;
 
 __attribute__((naked)) void nextThread()
 {
-    __asm__ volatile ("tryNext:");
     __asm__ volatile ("movq %1, %0" : "=m"(currentThread) : "r"(currentThread->next));
-    __asm__ volatile ("testq %0, %0; jnz tryNext" : : "r"(currentThread->waiting));
+    __asm__ volatile ("testq %0, %0; jnz nextThread" : : "r"(currentThread->waiting));
     __asm__ volatile ("movq %0, %%rsp" : : "g"(currentThread->sp));
     popCr3();
     popAvxRegisters();
