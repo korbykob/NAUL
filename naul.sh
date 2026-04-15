@@ -22,6 +22,7 @@ build()
     KERNEL_LINKER_FLAGS="-shared -Bsymbolic -T/usr/lib/elf_x86_64_efi.lds /usr/lib/crt0-efi-x86_64.o"
     KERNEL_LINKER_LIBS="/usr/lib/libgnuefi.a /usr/lib/libefi.a"
 
+    echo "Compiling naul..."
     mkdir -p os/bin
     gcc $BOOTLOADER_COMPILER_FLAGS os/src/bootloader.c -o os/bin/bootloader.o
     gcc $KERNEL_COMPILER_FLAGS os/src/allocator.c -o os/bin/allocator.o
@@ -80,6 +81,7 @@ build()
     gcc $PROGRAM_COMPAT_COMPILER_FLAGS programs/compatibility/src/entry.c -o programs/compatibility/bin/entry.o
 
     for program in programs/programs/*/; do
+        echo "Compiling $(basename $program)..."
         cd $program
         ./build.sh
         cd - > /dev/null
@@ -105,7 +107,8 @@ iso()
 
     mmd -i naul.iso ::/naul
     mcopy -i naul.iso os/bin/naul.sym ::/naul/naul.sym
-    mcopy -i naul.iso os/res/font.psf ::/naul/font.psf
+    mcopy -i naul.iso os/res/font16.psf ::/naul/font16.psf
+    mcopy -i naul.iso os/res/font32.psf ::/naul/font32.psf
 
     mmd -i naul.iso ::/programs
     for program in programs/programs/*/; do

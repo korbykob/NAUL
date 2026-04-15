@@ -868,6 +868,7 @@
       "-fno-pic",
       "-fno-pie",
       "-Iinclude",
+      "-std=gnu17",
       "-Wall",
       "-Wextra",
       "-Werror",
