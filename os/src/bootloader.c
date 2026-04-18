@@ -4,6 +4,8 @@
 #include <serial.h>
 #include <allocator.h>
 #include <kernel.h>
+#include <bmp.h>
+#include <mem.h>
 
 typedef struct
 {
@@ -44,6 +46,16 @@ typedef struct
     uint16_t minimum;
     uint8_t protection;
 } __attribute__((packed)) Hpet;
+typedef struct 
+{
+    AcpiSdtHeader header;
+    uint16_t version;
+    uint8_t status;
+    uint8_t type;
+    BmpHeader* image;
+    uint32_t offsetX;
+    uint32_t offsetY;
+} __attribute__((packed)) Bgrt;
 
 Info information = { 0 };
 
@@ -190,7 +202,28 @@ EFI_STATUS efi_main(EFI_HANDLE ImageHandle, EFI_SYSTEM_TABLE* SystemTable)
                 {
                     serialPrint("Found HPET");
                     information.hpetAddress = ((Hpet*)xsdt->entries[table])->address;
-                    break;
+                }
+                else if (strncmpa(xsdt->entries[table]->signature, "BGRT", 4) == 0)
+                {
+                    serialPrint("Found BGRT");
+                    BmpHeader* splash = ((Bgrt*)xsdt->entries[table])->image;
+                    uint32_t startX = (GOP->Mode->Info->HorizontalResolution / 2) - (splash->width / 2);
+                    uint32_t startY = (GOP->Mode->Info->VerticalResolution / 2) - (splash->height / 2);
+                    uint8_t* splashData = (uint8_t*)splash + splash->offset;
+                    serialPrint("Drawing boot logo");
+                    for (int32_t y = 0; y < splash->height; y++)
+                    {
+                        for (int32_t x = 0; x < splash->width; x++)
+                        {
+                            ((uint32_t*)GOP->Mode->FrameBufferBase)[(startY + (splash->height - y - 1)) * GOP->Mode->Info->PixelsPerScanLine + (startX + x)] = (splashData[2] << 16) | (splashData[1] << 8) | splashData[0];
+                            splashData += 3;
+                        }
+                        uint32_t pitch = (splash->width * 3) % 4;
+                        if (pitch)
+                        {
+                            splashData += 4 - pitch;
+                        }
+                    }
                 }
             }
             break;
@@ -241,6 +274,8 @@ EFI_STATUS efi_main(EFI_HANDLE ImageHandle, EFI_SYSTEM_TABLE* SystemTable)
     }
     serialPrint("Exiting boot services");
     uefi_call_wrapper(BS->ExitBootServices, 2, ImageHandle, key);
+    serialPrint("Clearing screen");
+    setMemory32((uint32_t*)GOP->Mode->FrameBufferBase, 0, GOP->Mode->Info->PixelsPerScanLine * GOP->Mode->Info->VerticalResolution);
     serialPrint("Setting up information");
     information.framebuffer = (uint32_t*)GOP->Mode->FrameBufferBase;
     information.width = GOP->Mode->Info->HorizontalResolution;
