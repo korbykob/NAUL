@@ -14,9 +14,9 @@ clean()
 
 build()
 {
-    COMPILER_FLAGS="-isystem ${PWD}/include -ffreestanding -mno-red-zone -fno-stack-protector -fno-stack-check -maccumulate-outgoing-args -c"
+    COMPILER_FLAGS="-isystem ${PWD}/include -march=x86-64-v3 -ffreestanding -mno-red-zone -fno-stack-protector -fno-stack-check -maccumulate-outgoing-args -c"
     
-    OS_COMPILER_FLAGS="$COMPILER_FLAGS -Ios/include -fpic -g -fno-omit-frame-pointer -mavx2 -O2 -fvect-cost-model=dynamic -Wall -Wextra -Werror"
+    OS_COMPILER_FLAGS="$COMPILER_FLAGS -Ios/include -fpic -g -fno-omit-frame-pointer -O2 -fvect-cost-model=dynamic -Wall -Wextra -Werror"
     BOOTLOADER_COMPILER_FLAGS="$OS_COMPILER_FLAGS -I/usr/include/efi -fshort-wchar"
     KERNEL_COMPILER_FLAGS="$OS_COMPILER_FLAGS -Ios/include -nostdinc"
     KERNEL_LINKER_FLAGS="-shared -Bsymbolic -T/usr/lib/elf_x86_64_efi.lds /usr/lib/crt0-efi-x86_64.o"
