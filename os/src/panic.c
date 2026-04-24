@@ -69,7 +69,7 @@ void panicWrite(const char* string)
     {
         if (*string != '\n')
         {
-            uint32_t* address = information.framebuffer + panicY * information.width + panicX;
+            uint32_t* address = information.framebuffer + panicY * information.pitch + panicX;
             uint8_t* glyph = panicFont->data + panicFont->glyphSize * *string;
             for (uint32_t y = 0; y < panicFont->height; y++)
             {
@@ -88,7 +88,7 @@ void panicWrite(const char* string)
                     glyph++;
                     width -= amount;
                 }
-                address += information.width - panicFont->width;
+                address += information.pitch - panicFont->width;
             }
             panicX += panicFont->width + 1;
         }
@@ -103,7 +103,7 @@ void panicWrite(const char* string)
 
 void panic(uint8_t exception, uint32_t code)
 {
-    setMemory32(information.framebuffer, 0, information.width * information.height);
+    setMemory32(information.framebuffer, 0, information.pitch * information.height);
     serialWrite("\x1b[91m\n");
     panicWrite("KERNEL PANIC RUH ROH!!\n\nAs a wise man once said: \"So... what happend is:\"\n\n");
     panicWrite(exceptions[exception].name);
