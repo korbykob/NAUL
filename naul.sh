@@ -17,10 +17,15 @@ build()
     COMPILER_FLAGS="-isystem ${PWD}/include -march=x86-64-v3 -ffreestanding -mno-red-zone -fno-stack-protector -fno-stack-check -maccumulate-outgoing-args -c"
     
     OS_COMPILER_FLAGS="$COMPILER_FLAGS -Ios/include -fpic -g -fno-omit-frame-pointer -O2 -fvect-cost-model=dynamic -Wall -Wextra -Werror"
-    BOOTLOADER_COMPILER_FLAGS="$OS_COMPILER_FLAGS -I/usr/include/efi -fshort-wchar"
+    BOOTLOADER_COMPILER_FLAGS="$OS_COMPILER_FLAGS -Ios/gnu-efi/inc -fshort-wchar"
     KERNEL_COMPILER_FLAGS="$OS_COMPILER_FLAGS -Ios/include -nostdinc"
-    KERNEL_LINKER_FLAGS="-shared -Bsymbolic -T/usr/lib/elf_x86_64_efi.lds /usr/lib/crt0-efi-x86_64.o"
-    KERNEL_LINKER_LIBS="/usr/lib/libgnuefi.a /usr/lib/libefi.a"
+    KERNEL_LINKER_FLAGS="-shared -Bsymbolic"
+    KERNEL_LINKER_LIBS="os/gnu-efi/x86_64/gnuefi/crt0-efi-x86_64.o -Tos/gnu-efi/gnuefi/elf_x86_64_efi.lds -Los/gnu-efi/x86_64/lib -Los/gnu-efi/x86_64/gnuefi -lgnuefi -lefi"
+
+    echo "Compiling gnu-efi..."
+    if [ ! -f "os/gnu-efi/x86_64/gnuefi/crt0-efi-x86_64.o" ]; then
+        make -C os/gnu-efi
+    fi
 
     echo "Compiling naul..."
     mkdir -p os/bin

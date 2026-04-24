@@ -20,7 +20,7 @@
       "-Wall",
       "-Wextra",
       "-Werror",
-      "-I/usr/include/efi",
+      "-Ios/gnu-efi/inc",
       "-fshort-wchar",
       "-o",
       "os/bin/bootloader.o",
