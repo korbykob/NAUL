@@ -1,4 +1,4 @@
 #!/bin/bash
 set -e
 
-rm -r bin
+rm -fr bin

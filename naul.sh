@@ -3,13 +3,14 @@ set -e
 
 clean()
 {
-    rm -r os/bin
+    rm -fr os/bin
+    rm -fr programs/compatibility/bin
     for program in programs/programs/*/; do
         cd $program
         ./clean.sh
         cd - > /dev/null
     done
-    rm naul.iso
+    rm -f naul.iso
 }
 
 build()
