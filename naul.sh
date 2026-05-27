@@ -22,8 +22,8 @@ build()
     KERNEL_LINKER_FLAGS="-shared -Bsymbolic"
     KERNEL_LINKER_LIBS="os/gnu-efi/x86_64/gnuefi/crt0-efi-x86_64.o -Tos/gnu-efi/gnuefi/elf_x86_64_efi.lds -Los/gnu-efi/x86_64/lib -Los/gnu-efi/x86_64/gnuefi -lgnuefi -lefi"
 
-    echo "Compiling gnu-efi..."
     if [ ! -f "os/gnu-efi/x86_64/gnuefi/crt0-efi-x86_64.o" ]; then
+        echo "Compiling gnu-efi..."
         make -C os/gnu-efi
     fi
 
@@ -138,7 +138,7 @@ run()
     iso
     clear
 
-    qemu-system-x86_64 -enable-kvm -bios OVMF-pure-efi.fd -cdrom naul.iso -m 4G -cpu host -serial null -serial null -serial stdio -display sdl
+    qemu-system-x86_64 -enable-kvm -bios OVMF-pure-efi.fd -drive file=naul.iso,media=cdrom,if=virtio -m 4G -cpu host -serial null -serial null -serial stdio -display sdl
 }
 
 usage()
