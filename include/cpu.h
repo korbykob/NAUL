@@ -1,5 +1,7 @@
 #pragma once
 
+#include <definitions.h>
+
 #define yieldThread() __asm__ volatile ("int $0x67" : : : "memory")
 
 static inline void lock(bool* mutex)

@@ -1,0 +1,7 @@
+CompileFlags:
+  CompilationDatabase: .vscode
+
+Diagnostics:
+  Suppress:
+    - unused-function
+    - unknown-warning-option
