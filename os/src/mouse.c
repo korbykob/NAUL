@@ -77,7 +77,9 @@ __attribute__((naked)) void mouseDummy()
 __attribute__((naked)) void mouseInterrupt()
 {
     pushRegisters();
+    pushAvxRegisters();
     __asm__ volatile ("cld; call mouse");
+    popAvxRegisters();
     popRegisters();
     __asm__ volatile ("iretq");
 }

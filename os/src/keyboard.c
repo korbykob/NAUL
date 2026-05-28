@@ -55,7 +55,9 @@ void keyboard()
 __attribute__((naked)) void keyboardInterrupt()
 {
     pushRegisters();
+    pushAvxRegisters();
     __asm__ volatile ("cld; call keyboard");
+    popAvxRegisters();
     popRegisters();
     __asm__ volatile ("iretq");
 }
