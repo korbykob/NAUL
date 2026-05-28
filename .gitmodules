@@ -1,21 +1,17 @@
 [submodule "os/gnu-efi"]
 	path = os/gnu-efi
 	url = https://github.com/ncroxon/gnu-efi.git
-	branch = 3.0.19
+	update = none
 	ignore = dirty
 [submodule "programs/programs/shell"]
 	path = programs/programs/shell
 	url = https://github.com/korbykob/NAULShell.git
-	branch = main
 [submodule "programs/programs/desktop"]
 	path = programs/programs/desktop
 	url = https://github.com/korbykob/NAULDesktop.git
-	branch = main
 [submodule "programs/programs/doom"]
 	path = programs/programs/doom
 	url = https://github.com/korbykob/NAULDoom.git
-	branch = main
 [submodule "programs/programs/terminal"]
 	path = programs/programs/terminal
 	url = https://github.com/korbykob/NAULTerminal.git
-	branch = main
