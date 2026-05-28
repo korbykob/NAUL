@@ -2,11 +2,9 @@
 #include <serial.h>
 #include <syscalls.h>
 #include <bootloader.h>
-#include <allocator.h>
 #include <calls.h>
 #include <terminal.h>
 #include <cpu.h>
-#include <mem.h>
 
 bool displayObtained = false;
 

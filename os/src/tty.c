@@ -2,7 +2,6 @@
 #include <serial.h>
 #include <calls.h>
 #include <syscalls.h>
-#include <paging.h>
 #include <scheduler.h>
 #include <cpu.h>
 #include <str.h>

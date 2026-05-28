@@ -5,7 +5,6 @@
 #include <allocator.h>
 #include <hpet.h>
 #include <scheduler.h>
-#include <paging.h>
 #include <keyboard.h>
 #include <display.h>
 #include <tty.h>

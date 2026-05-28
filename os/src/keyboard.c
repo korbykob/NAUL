@@ -5,7 +5,6 @@
 #include <idt.h>
 #include <pic.h>
 #include <io.h>
-#include <paging.h>
 #include <calls.h>
 #include <scheduler.h>
 #include <cpu.h>

@@ -1,5 +1,4 @@
 #include <gdt.h>
-#include <definitions.h>
 #include <serial.h>
 
 #define GDT_LONG_MODE 0x20000000000000
