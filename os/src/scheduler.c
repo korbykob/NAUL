@@ -35,7 +35,7 @@ __attribute__((naked)) void nextThread()
     __asm__ volatile ("testq %0, %0; jnz nextThread" : : "r"(currentThread->waiting));
     __asm__ volatile ("movq %0, %%rsp" : : "g"(currentThread->sp));
     popCr3();
-    popAvxRegisters();
+    popSimdRegisters();
     popRegisters();
     __asm__ volatile ("iretq");
 }
@@ -43,7 +43,7 @@ __attribute__((naked)) void nextThread()
 __attribute__((naked)) void skipThread()
 {
     pushRegisters();
-    pushAvxRegisters();
+    pushSimdRegisters();
     pushCr3();
     __asm__ volatile ("movq %%rsp, %0" : "=g"(currentThread->sp));
     __asm__ volatile ("jmp nextThread");
@@ -52,7 +52,7 @@ __attribute__((naked)) void skipThread()
 __attribute__((naked)) void updateScheduler()
 {
     pushRegisters();
-    pushAvxRegisters();
+    pushSimdRegisters();
     pushCr3();
     __asm__ volatile ("movq %%rsp, %0" : "=g"(currentThread->sp));
     __asm__ volatile ("movl $0, %0" : "=m"(*(uint32_t*)LAPIC_EOI_REGISTER));
@@ -139,7 +139,7 @@ uint64_t createThread(void (*function)())
     currentThread = thread;
     __asm__ volatile ("movq %0, %%rsp" : : "g"(currentThread->sp));
     __asm__ volatile ("pushq %rax; pushq %rbx; pushq %rcx; pushq %rdx; pushq %rsi; pushq %rdi; pushq $0; pushq %rsp; pushq %r8; pushq %r9; pushq %r10; pushq %r11; pushq %r12; pushq %r13; pushq %r14; pushq %r15");
-    pushAvxRegisters();
+    pushSimdRegisters();
     pushCr3();
     __asm__ volatile ("movq %%rsp, %0" : "=g"(currentThread->sp));
     __asm__ volatile ("movq %1, %0" : "=m"(currentThread) : "r"(currentThread->next));
