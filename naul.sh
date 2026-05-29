@@ -119,17 +119,17 @@ iso()
 
     mmd -i naul.iso ::/programs
     for program in programs/programs/*/; do
-        name=$(basename $program)
+        name=$(basename "$program")
 
-        mmd -i naul.iso ::/programs/$name
-        mcopy -i naul.iso ${program}bin/${name}.nxe ::/programs/${name}/${name}.nxe
+        mmd -i naul.iso "::/programs/$name"
+        mcopy -i naul.iso "${program}bin/${name}.nxe" "::/programs/${name}/${name}.nxe"
         if [ -f "${program}bin/${name}.sym" ]; then
-            mcopy -i naul.iso ${program}bin/${name}.sym ::/programs/${name}/${name}.sym
+            mcopy -i naul.iso "${program}bin/${name}.sym" "::/programs/${name}/${name}.sym"
         fi
 
         if [ -d "${program}res" ]; then
-            for file in ${program}res/*; do
-                mcopy -i naul.iso $file ::/programs/${name}/$(basename $file)
+            for file in "${program}res/"*; do
+                mcopy -i naul.iso "$file" "::/programs/${name}/$(basename "$file")"
             done
         fi
     done
