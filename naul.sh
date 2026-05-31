@@ -3,6 +3,7 @@ set -e
 
 clean()
 {
+    make -C os/gnu-efi clean
     rm -fr os/bin
     rm -fr programs/compatibility/bin
     for program in programs/programs/*/; do
