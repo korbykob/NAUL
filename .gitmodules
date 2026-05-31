@@ -1,7 +1,7 @@
 [submodule "os/gnu-efi"]
 	path = os/gnu-efi
 	url = https://github.com/ncroxon/gnu-efi.git
-	update = none
+	branch = 3.0.19
 	ignore = dirty
 [submodule "programs/programs/shell"]
 	path = programs/programs/shell
