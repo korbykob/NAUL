@@ -98,8 +98,6 @@ build()
 commands()
 {
     bear --output .vscode/compile_commands.json -- ./naul.sh build
-    sed -i -E '/"-maccumulate-outgoing-args",/d' .vscode/compile_commands.json
-    sed -i -E '/"-fvect-cost-model=dynamic",/d' .vscode/compile_commands.json
 }
 
 iso()

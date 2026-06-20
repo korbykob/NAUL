@@ -1,5 +1,8 @@
 CompileFlags:
   CompilationDatabase: .vscode
+  Remove:
+    - -maccumulate-outgoing-args
+    - -fvect-cost-model=dynamic
 
 Diagnostics:
   Suppress:
