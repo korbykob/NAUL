@@ -5,6 +5,7 @@ enum Syscalls
     ALLOCATE,
     ALLOCATE_ALIGNED,
     UNALLOCATE,
+    GET_USAGE,
 
     CHECK_FOLDER,
     CHECK_FILE,

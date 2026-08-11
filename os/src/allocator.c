@@ -23,6 +23,7 @@ void initAllocator(uint64_t end)
     registerSyscall(ALLOCATE, allocate);
     registerSyscall(ALLOCATE_ALIGNED, allocateAligned);
     registerSyscall(UNALLOCATE, unallocate);
+    registerSyscall(GET_USAGE, getUsage);
     serialPrint("Storing allocation location");
     allocated = (Allocation*)(end - sizeof(Allocation));
     serialPrint("Set up allocator");
@@ -138,4 +139,21 @@ void unallocate(void* pointer)
     test->present = false;
     allocations--;
     unlock(&allocatorLock);
+}
+
+uint64_t getUsage()
+{
+    uint64_t size = 0;
+    Allocation* allocation = allocated;
+    uint64_t count = 0;
+    while (count != allocations)
+    {
+        if (allocation->present)
+        {
+            size += allocation->end - allocation->start;
+            count++;
+        }
+        allocation--;
+    }
+    return size;
 }

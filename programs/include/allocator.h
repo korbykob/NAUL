@@ -18,3 +18,8 @@ static inline void unallocate(void* pointer)
 {
     SYSCALL_1(UNALLOCATE, pointer);
 }
+
+static inline uint64_t getUsage()
+{
+    SYSCALL_0_RETURN(GET_USAGE, uint64_t);
+}

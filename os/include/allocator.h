@@ -11,3 +11,5 @@ void* allocate(uint64_t amount);
 void* allocateAligned(uint64_t amount, uint64_t alignment);
 
 void unallocate(void* pointer);
+
+uint64_t getUsage();
