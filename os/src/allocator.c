@@ -15,6 +15,7 @@ typedef struct
 
 Allocation* allocated = 0;
 uint64_t allocations = 0;
+uint64_t unusable = 0;
 bool allocatorLock = false;
 
 void initAllocator(uint64_t end)
@@ -42,6 +43,7 @@ void markUnusable(uint64_t start, uint64_t end)
     allocation->start = start;
     allocation->end = end;
     allocations++;
+    unusable += end - start;
 }
 
 void* allocate(uint64_t amount)
@@ -155,5 +157,5 @@ uint64_t getUsage()
         }
         allocation--;
     }
-    return size;
+    return size - unusable;
 }
