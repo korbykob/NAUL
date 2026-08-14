@@ -13,10 +13,10 @@ jobs:
         with:
           submodules: recursive
       
-      - name: Generate Iso
+      - name: Generate iso
         run: ./naul.sh iso
       
-      - name: Update Release
+      - name: Update release
         uses: softprops/action-gh-release@v3
         with:
           tag_name: latest
