@@ -21,7 +21,7 @@ jobs:
         with:
           tag_name: latest
           name: Latest
-          prerelease: true
           files: naul.iso
-          make_latest: false
+          make_latest: true
           generate_release_notes: false
+          overwrite_files: true
