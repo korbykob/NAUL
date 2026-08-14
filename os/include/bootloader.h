@@ -17,6 +17,7 @@ typedef struct
     InitFile* fileData;
     uint64_t fileCount;
     uint64_t hpetAddress;
+    uint64_t fadtAddress;
 } Info;
 
 extern Info information;

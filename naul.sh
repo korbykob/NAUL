@@ -43,6 +43,7 @@ build()
     gcc $KERNEL_COMPILER_FLAGS os/src/syscalls.c -o os/bin/syscalls.o
     gcc $KERNEL_COMPILER_FLAGS os/src/hpet.c -o os/bin/hpet.o
     gcc $KERNEL_COMPILER_FLAGS os/src/scheduler.c -o os/bin/scheduler.o
+    gcc $KERNEL_COMPILER_FLAGS os/src/power.c -o os/bin/power.o
     gcc $KERNEL_COMPILER_FLAGS os/src/keyboard.c -o os/bin/keyboard.o
     gcc $KERNEL_COMPILER_FLAGS os/src/mouse.c -o os/bin/mouse.o
     gcc $KERNEL_COMPILER_FLAGS os/src/display.c -o os/bin/display.o
@@ -65,6 +66,7 @@ build()
     os/bin/syscalls.o \
     os/bin/hpet.o \
     os/bin/scheduler.o \
+    os/bin/power.o \
     os/bin/keyboard.o \
     os/bin/mouse.o \
     os/bin/display.o \

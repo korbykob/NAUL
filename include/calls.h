@@ -7,6 +7,9 @@ enum Syscalls
     UNALLOCATE,
     GET_USAGE,
 
+    REBOOT,
+    SHUTDOWN,
+
     CHECK_FOLDER,
     CHECK_FILE,
     CREATE_FOLDER,

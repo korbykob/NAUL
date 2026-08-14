@@ -10,6 +10,7 @@
 #include <pic.h>
 #include <hpet.h>
 #include <scheduler.h>
+#include <power.h>
 #include <keyboard.h>
 #include <mouse.h>
 #include <display.h>
@@ -30,6 +31,7 @@ void kernel()
     initSyscalls();
     initHpet();
     initScheduler();
+    initPower();
     initKeyboard();
     initMouse();
     initDisplay();

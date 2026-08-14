@@ -62,7 +62,7 @@ Info information = { 0 };
 EFI_FILE_INFO* openFolder(EFI_FILE_HANDLE folder)
 {
     EFI_STATUS status = EFI_SUCCESS;
-    EFI_FILE_INFO *buffer = NULL;
+    EFI_FILE_INFO* buffer = NULL;
     UINTN bufferSize = SIZE_OF_EFI_FILE_INFO + 200;
     BOOLEAN end = FALSE;
     while (GrowBuffer(&status, (void**)&buffer, bufferSize))
@@ -224,6 +224,11 @@ EFI_STATUS efi_main(EFI_HANDLE ImageHandle, EFI_SYSTEM_TABLE* SystemTable)
                             splashData += 4 - pitch;
                         }
                     }
+                }
+                else if (strncmpa(xsdt->entries[table]->signature, "FACP", 4) == 0)
+                {
+                    serialPrint("Found FADT");
+                    information.fadtAddress = (uint64_t)xsdt->entries[table];
                 }
             }
             break;
