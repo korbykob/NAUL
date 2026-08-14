@@ -1,0 +1,25 @@
+name: Latest
+
+on: [push, workflow_dispatch]
+
+permissions:
+  contents: write
+
+jobs:
+  build:
+    runs-on: self-hosted
+    steps:
+      - uses: actions/checkout@v6
+      
+      - name: Generate Iso
+        run: ./naul.sh iso
+      
+      - name: Update Release
+        uses: softprops/action-gh-release@v3
+        with:
+          tag_name: latest
+          name: Latest
+          prerelease: true
+          files: naul.iso
+          make_latest: false
+          generate_release_notes: false
