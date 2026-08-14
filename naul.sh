@@ -17,7 +17,7 @@ clean()
 build()
 {
     COMPILER_FLAGS="-isystem ${PWD}/include -march=x86-64-v3 -ffreestanding -mno-red-zone -fno-stack-protector -fno-stack-check -maccumulate-outgoing-args -c"
-    
+
     OS_COMPILER_FLAGS="$COMPILER_FLAGS -Ios/include -fpic -g -fno-omit-frame-pointer -O2 -fvect-cost-model=dynamic -Wall -Wextra -Werror"
     BOOTLOADER_COMPILER_FLAGS="$OS_COMPILER_FLAGS -Ios/gnu-efi/inc -fshort-wchar"
     KERNEL_COMPILER_FLAGS="$OS_COMPILER_FLAGS -Ios/include -nostdinc"
@@ -26,34 +26,34 @@ build()
 
     if [ ! -f "os/gnu-efi/x86_64/gnuefi/crt0-efi-x86_64.o" ]; then
         echo "Compiling gnu-efi..."
-        make -C os/gnu-efi
+        make -C os/gnu-efi ARCH=x86_64 AR=x86_64-linux-gnu-ar AS=x86_64-linux-gnu-as CC=x86_64-linux-gnu-gcc LD=x86_64-linux-gnu-ld OBJCOPY=x86_64-linux-gnu-objcopy RANLIB=x86_64-linux-gnu-ranlib
     fi
 
     echo "Compiling naul..."
     mkdir -p os/bin
-    gcc $BOOTLOADER_COMPILER_FLAGS os/src/bootloader.c -o os/bin/bootloader.o
-    gcc $KERNEL_COMPILER_FLAGS os/src/allocator.c -o os/bin/allocator.o
-    gcc $KERNEL_COMPILER_FLAGS os/src/gdt.c -o os/bin/gdt.o
-    gcc $KERNEL_COMPILER_FLAGS os/src/idt.c -o os/bin/idt.o
-    gcc $KERNEL_COMPILER_FLAGS os/src/pic.c -o os/bin/pic.o
-    gcc $KERNEL_COMPILER_FLAGS os/src/filesystem.c -o os/bin/filesystem.o
-    gcc $KERNEL_COMPILER_FLAGS os/src/symbols.c -o os/bin/symbols.o
-    gcc $KERNEL_COMPILER_FLAGS os/src/panic.c -o os/bin/panic.o
-    gcc $KERNEL_COMPILER_FLAGS os/src/paging.c -o os/bin/paging.o
-    gcc $KERNEL_COMPILER_FLAGS os/src/syscalls.c -o os/bin/syscalls.o
-    gcc $KERNEL_COMPILER_FLAGS os/src/hpet.c -o os/bin/hpet.o
-    gcc $KERNEL_COMPILER_FLAGS os/src/scheduler.c -o os/bin/scheduler.o
-    gcc $KERNEL_COMPILER_FLAGS os/src/power.c -o os/bin/power.o
-    gcc $KERNEL_COMPILER_FLAGS os/src/keyboard.c -o os/bin/keyboard.o
-    gcc $KERNEL_COMPILER_FLAGS os/src/mouse.c -o os/bin/mouse.o
-    gcc $KERNEL_COMPILER_FLAGS os/src/display.c -o os/bin/display.o
-    gcc $KERNEL_COMPILER_FLAGS os/src/tty.c -o os/bin/tty.o
-    gcc $KERNEL_COMPILER_FLAGS os/src/terminal.c -o os/bin/terminal.o
-    gcc $KERNEL_COMPILER_FLAGS os/src/processes.c -o os/bin/processes.o
-    gcc $KERNEL_COMPILER_FLAGS os/src/ipc.c -o os/bin/ipc.o
-    gcc $KERNEL_COMPILER_FLAGS os/src/kernel.c -o os/bin/kernel.o
+    x86_64-linux-gnu-gcc $BOOTLOADER_COMPILER_FLAGS os/src/bootloader.c -o os/bin/bootloader.o
+    x86_64-linux-gnu-gcc $KERNEL_COMPILER_FLAGS os/src/allocator.c -o os/bin/allocator.o
+    x86_64-linux-gnu-gcc $KERNEL_COMPILER_FLAGS os/src/gdt.c -o os/bin/gdt.o
+    x86_64-linux-gnu-gcc $KERNEL_COMPILER_FLAGS os/src/idt.c -o os/bin/idt.o
+    x86_64-linux-gnu-gcc $KERNEL_COMPILER_FLAGS os/src/pic.c -o os/bin/pic.o
+    x86_64-linux-gnu-gcc $KERNEL_COMPILER_FLAGS os/src/filesystem.c -o os/bin/filesystem.o
+    x86_64-linux-gnu-gcc $KERNEL_COMPILER_FLAGS os/src/symbols.c -o os/bin/symbols.o
+    x86_64-linux-gnu-gcc $KERNEL_COMPILER_FLAGS os/src/panic.c -o os/bin/panic.o
+    x86_64-linux-gnu-gcc $KERNEL_COMPILER_FLAGS os/src/paging.c -o os/bin/paging.o
+    x86_64-linux-gnu-gcc $KERNEL_COMPILER_FLAGS os/src/syscalls.c -o os/bin/syscalls.o
+    x86_64-linux-gnu-gcc $KERNEL_COMPILER_FLAGS os/src/hpet.c -o os/bin/hpet.o
+    x86_64-linux-gnu-gcc $KERNEL_COMPILER_FLAGS os/src/scheduler.c -o os/bin/scheduler.o
+    x86_64-linux-gnu-gcc $KERNEL_COMPILER_FLAGS os/src/power.c -o os/bin/power.o
+    x86_64-linux-gnu-gcc $KERNEL_COMPILER_FLAGS os/src/keyboard.c -o os/bin/keyboard.o
+    x86_64-linux-gnu-gcc $KERNEL_COMPILER_FLAGS os/src/mouse.c -o os/bin/mouse.o
+    x86_64-linux-gnu-gcc $KERNEL_COMPILER_FLAGS os/src/display.c -o os/bin/display.o
+    x86_64-linux-gnu-gcc $KERNEL_COMPILER_FLAGS os/src/tty.c -o os/bin/tty.o
+    x86_64-linux-gnu-gcc $KERNEL_COMPILER_FLAGS os/src/terminal.c -o os/bin/terminal.o
+    x86_64-linux-gnu-gcc $KERNEL_COMPILER_FLAGS os/src/processes.c -o os/bin/processes.o
+    x86_64-linux-gnu-gcc $KERNEL_COMPILER_FLAGS os/src/ipc.c -o os/bin/ipc.o
+    x86_64-linux-gnu-gcc $KERNEL_COMPILER_FLAGS os/src/kernel.c -o os/bin/kernel.o
 
-    ld $KERNEL_LINKER_FLAGS \
+    x86_64-linux-gnu-ld $KERNEL_LINKER_FLAGS \
     os/bin/bootloader.o \
     os/bin/allocator.o \
     os/bin/gdt.o \
@@ -77,9 +77,9 @@ build()
     os/bin/kernel.o \
     -o os/bin/naul.so $KERNEL_LINKER_LIBS
 
-    nm os/bin/naul.so > os/bin/naul.sym
+    x86_64-linux-gnu-nm os/bin/naul.so > os/bin/naul.sym
 
-    objcopy -j .text -j .sdata -j .data -j .rodata -j .dynamic -j .dynsym -j .rel -j .rela -j .rel.* -j .rela.* -j .reloc --output-target efi-app-x86_64 --subsystem=10 os/bin/naul.so os/bin/naul.efi
+    x86_64-linux-gnu-objcopy -j .text -j .sdata -j .data -j .rodata -j .dynamic -j .dynsym -j .rel -j .rela -j .rel.* -j .rela.* -j .reloc --output-target efi-app-x86_64 --subsystem=10 os/bin/naul.so os/bin/naul.efi
 
     export PROGRAM_COMPILER_FLAGS="$COMPILER_FLAGS -isystem ${PWD}/programs/include -nostdinc -mcmodel=large -static -fno-pic -fno-pie"
     export PROGRAM_COMPAT_COMPILER_FLAGS="$PROGRAM_COMPILER_FLAGS -isystem ${PWD}/programs/compatibility/include"
@@ -87,7 +87,7 @@ build()
     export PROGRAM_COMPAT_LINKER_FLAGS="$PROGRAM_LINKER_FLAGS ${PWD}/programs/compatibility/bin/entry.o"
 
     mkdir -p programs/compatibility/bin
-    gcc $PROGRAM_COMPAT_COMPILER_FLAGS programs/compatibility/src/entry.c -o programs/compatibility/bin/entry.o
+    x86_64-linux-gnu-gcc $PROGRAM_COMPAT_COMPILER_FLAGS programs/compatibility/src/entry.c -o programs/compatibility/bin/entry.o
 
     for program in programs/programs/*/; do
         echo "Compiling $(basename $program)..."
@@ -141,7 +141,7 @@ run()
     iso
     clear
 
-    qemu-system-x86_64 -enable-kvm -bios OVMF-pure-efi.fd -drive file=naul.iso,media=cdrom,if=virtio -m 4G -cpu host -serial null -serial null -serial stdio -display sdl
+    qemu-system-x86_64 -enable-kvm -bios OVMF-pure-efi.fd -drive file=naul.iso,media=cdrom,if=virtio -m 4G -cpu host,migratable=off -serial null -serial null -serial stdio -display sdl
 }
 
 usage()
