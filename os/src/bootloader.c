@@ -279,8 +279,6 @@ EFI_STATUS efi_main(EFI_HANDLE ImageHandle, EFI_SYSTEM_TABLE* SystemTable)
     }
     serialPrint("Exiting boot services");
     uefi_call_wrapper(BS->ExitBootServices, 2, ImageHandle, key);
-    serialPrint("Clearing screen");
-    setMemory32((uint32_t*)GOP->Mode->FrameBufferBase, 0, GOP->Mode->Info->PixelsPerScanLine * GOP->Mode->Info->VerticalResolution);
     serialPrint("Setting up information");
     information.framebuffer = (uint32_t*)GOP->Mode->FrameBufferBase;
     information.width = GOP->Mode->Info->HorizontalResolution;

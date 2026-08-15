@@ -18,6 +18,8 @@
 #include <terminal.h>
 #include <processes.h>
 #include <ipc.h>
+#include <bootloader.h>
+#include <mem.h>
 
 void kernel()
 {
@@ -40,6 +42,7 @@ void kernel()
     initProcesses();
     initIpc();
     serialPrint("Yo puter ready B)");
+    setMemory32(information.framebuffer, 0, information.pitch * information.height);
     write("Welcome to " TTY_WHITE "NAUL" TTY_DEFAULT " (Not A Unix Like)!\n\nStarting shell, use \"" TTY_GREEN "help" TTY_DEFAULT "\" for more information:\n");
     while (true)
     {
