@@ -12,6 +12,9 @@ jobs:
       - uses: actions/checkout@v7
         with:
           submodules: recursive
+
+      - name: Clean build
+        run: ./naul.sh clean
       
       - name: Generate iso
         run: ./naul.sh iso
