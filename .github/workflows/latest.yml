@@ -12,6 +12,11 @@ jobs:
       - uses: actions/checkout@v7
         with:
           submodules: recursive
+      
+      - name: Move latest tag
+        run: |
+          git tag -f latest "$GITHUB_SHA"
+          git push origin latest --force
 
       - name: Clean build
         run: ./naul.sh clean
@@ -25,6 +30,5 @@ jobs:
           tag_name: latest
           name: Latest
           files: naul.iso
-          make_latest: false
+          make_latest: true
           generate_release_notes: false
-          overwrite_files: true
