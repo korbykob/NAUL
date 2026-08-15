@@ -3,7 +3,7 @@ set -e
 
 clean()
 {
-    make -C os/gnu-efi clean
+    make -C os/gnu-efi clean ARCH=x86_64 AR=x86_64-linux-gnu-ar AS=x86_64-linux-gnu-as CC=x86_64-linux-gnu-gcc LD=x86_64-linux-gnu-ld OBJCOPY=x86_64-linux-gnu-objcopy RANLIB=x86_64-linux-gnu-ranlib
     rm -fr os/bin
     rm -fr programs/compatibility/bin
     for program in programs/programs/*/; do
