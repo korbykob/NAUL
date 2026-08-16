@@ -15,3 +15,6 @@
 [submodule "programs/programs/terminal"]
 	path = programs/programs/terminal
 	url = https://github.com/korbykob/NAULTerminal.git
+[submodule "programs/programs/nesemu"]
+	path = programs/programs/nesemu
+	url = https://github.com/korbykob/NAULNesEmu.git
