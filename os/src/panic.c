@@ -9,6 +9,8 @@
 #include <psf.h>
 
 #define PANIC_COLOUR 0xFF5050
+#define PANIC_ACPI_COMMAND 0x30
+#define PANIC_ACPI_DISABLE 0x35
 
 typedef struct
 {
@@ -165,5 +167,6 @@ void panic(uint8_t exception, uint32_t code)
     }
     panicWrite("\nAnyways have fun debugging this one NERRDD\n");
     serialWrite("\x1b[0m");
+    outb(*(uint32_t*)(information.fadtAddress + PANIC_ACPI_COMMAND), *(uint8_t*)(information.fadtAddress + PANIC_ACPI_DISABLE));
     __asm__ volatile ("hlt");
 }
