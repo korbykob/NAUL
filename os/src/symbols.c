@@ -43,7 +43,7 @@ Symbol* parseSymbols(const char* file, uint64_t* count)
     while (current < symbolsSize)
     {
         current += 17;
-        if (data[current] == 'T')
+        if (data[current] == 'T' || data[current] == 't')
         {
             amount++;
         }
@@ -58,7 +58,7 @@ Symbol* parseSymbols(const char* file, uint64_t* count)
     name[16] = '\0';
     for (uint64_t i = 0; i < amount; i++)
     {
-        if (data[17] == 'T')
+        if (data[17] == 'T' || data[17] == 't')
         {
             copyMemory8((uint8_t*)data, (uint8_t*)name, 16);
             symbols[i].address = fromHex(name);
