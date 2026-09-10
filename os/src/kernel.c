@@ -1,13 +1,13 @@
 #include <kernel.h>
-#include <serial.h>
+#include <filesystem.h>
+#include <terminal.h>
 #include <gdt.h>
 #include <idt.h>
-#include <filesystem.h>
+#include <pic.h>
 #include <symbols.h>
 #include <panic.h>
 #include <paging.h>
 #include <syscalls.h>
-#include <pic.h>
 #include <hpet.h>
 #include <scheduler.h>
 #include <power.h>
@@ -17,14 +17,14 @@
 #include <tty.h>
 #include <processes.h>
 #include <ipc.h>
-#include <terminal.h>
 
 void kernel()
 {
+    initFilesystem();
+    initTerminal();
     initGdt();
     initIdt();
     initPic();
-    initFilesystem();
     initSymbols();
     initPanic();
     initPaging();
@@ -38,8 +38,10 @@ void kernel()
     initTty();
     initProcesses();
     initIpc();
-    initTerminal();
-    serialPrint("Yo puter ready B)");
+    log("Starting terminal");
+    startTerminal();
+    log("Yo puter ready B)");
+    put(TTY_CLEAR);
     write("Welcome to " TTY_WHITE "NAUL" TTY_DEFAULT " (Not A Unix Like)!\n\nStarting shell, use \"" TTY_GREEN "help" TTY_DEFAULT "\" for more information:\n");
     while (true)
     {

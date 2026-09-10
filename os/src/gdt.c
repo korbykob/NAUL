@@ -1,5 +1,5 @@
 #include <gdt.h>
-#include <serial.h>
+#include <terminal.h>
 
 #define GDT_LONG_MODE 0x20000000000000
 #define GDT_PRESENT 0x800000000000
@@ -27,7 +27,7 @@ __attribute__((naked)) void loadGdt()
 
 void initGdt()
 {
-    serialPrint("Setting up GDT");
+    log("Setting up GDT");
     loadGdt();
-    serialPrint("Set up GDT");
+    log("Set up GDT");
 }

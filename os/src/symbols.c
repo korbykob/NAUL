@@ -1,5 +1,5 @@
 #include <symbols.h>
-#include <serial.h>
+#include <terminal.h>
 #include <filesystem.h>
 #include <allocator.h>
 #include <str.h>
@@ -11,9 +11,9 @@ uint64_t kernelOffset = 0;
 
 void initSymbols()
 {
-    serialPrint("Setting up symbols");
+    log("Setting up symbols");
     kernelSymbols = parseSymbols("/naul/naul.sym", &symbolCount);
-    serialPrint("Calculating loaded offset");
+    log("Calculating loaded offset");
     uint64_t offset = 0;
     __asm__ volatile ("leaq initSymbols(%%rip), %0;" : "=g"(offset));
     uint64_t offsetId = 0;
@@ -26,7 +26,7 @@ void initSymbols()
         offsetId++;
     }
     kernelOffset = offset - kernelSymbols[offsetId].address;
-    serialPrint("Set up symbols");
+    log("Set up symbols");
 }
 
 uint64_t getKernelOffset()

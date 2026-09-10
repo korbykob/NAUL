@@ -1,5 +1,5 @@
 #include <ipc.h>
-#include <serial.h>
+#include <terminal.h>
 #include <calls.h>
 #include <syscalls.h>
 #include <allocator.h>
@@ -20,19 +20,19 @@ bool ipcLock = false;
 
 void initIpc()
 {
-    serialPrint("Setting up IPC");
+    log("Setting up IPC");
     registerSyscall(REGISTER_LISTENER, registerListener);
     registerSyscall(UNREGISTER_LISTENER, unregisterListener);
     registerSyscall(CHECK_LISTENER, checkListener);
     registerSyscall(SEND_MESSAGE, sendMessage);
-    serialPrint("Allocating listeners");
+    log("Allocating listeners");
     listeners = allocate(sizeof(ListenerElement));
     listeners->next = listeners;
     listeners->prev = listeners;
     listeners->name[0] = '\0';
     listeners->paging = 0;
     listeners->handler = 0;
-    serialPrint("Set up IPC");
+    log("Set up IPC");
 }
 
 void registerListener(uint64_t (*handler)(uint64_t arg1, uint64_t arg2, uint64_t arg3, uint64_t arg4), const char* name)

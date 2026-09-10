@@ -1,5 +1,5 @@
 #include <pic.h>
-#include <serial.h>
+#include <terminal.h>
 #include <io.h>
 
 #define PIC_MASTER_COMMAND 0x20
@@ -16,26 +16,26 @@
 
 void initPic()
 {
-    serialPrint("Setting up PICs");
+    log("Setting up PICs");
     outb(PIC_MASTER_COMMAND, PIC_INIT | PIC_FOUR_COMMANDS);
     outb(PIC_SLAVE_COMMAND, PIC_INIT | PIC_FOUR_COMMANDS);
-    serialPrint("Setting IRQ offsets");
+    log("Setting IRQ offsets");
     outb(PIC_MASTER_DATA, PIC_OFFSET);
     outb(PIC_SLAVE_DATA, PIC_OFFSET + PIC_INTERRUPT_COUNT);
-    serialPrint("Setting up second PIC at IRQ 2");
+    log("Setting up second PIC at IRQ 2");
     outb(PIC_MASTER_DATA, PIC_MASTER_CASCADE);
     outb(PIC_SLAVE_DATA, PIC_SLAVE_CASCADE);
-    serialPrint("Place PICs into 8086 mode");
+    log("Place PICs into 8086 mode");
     outb(PIC_MASTER_DATA, PIC_8086_MODE);
     outb(PIC_SLAVE_DATA, PIC_8086_MODE);
-    serialPrint("Masking all interrupts");
+    log("Masking all interrupts");
     outb(PIC_MASTER_DATA, __UINT8_MAX__);
     outb(PIC_SLAVE_DATA, __UINT8_MAX__);
-    serialPrint("Unmasking cascade interrupt");
+    log("Unmasking cascade interrupt");
     unmaskPic(PIC_SLAVE_CASCADE);
-    serialPrint("Enabling interrupts");
+    log("Enabling interrupts");
     __asm__ volatile ("sti");
-    serialPrint("Set up PICs");
+    log("Set up PICs");
 }
 
 void unmaskPic(uint8_t interrupt)

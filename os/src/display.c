@@ -1,19 +1,18 @@
 #include <display.h>
-#include <serial.h>
+#include <terminal.h>
 #include <syscalls.h>
 #include <bootloader.h>
 #include <calls.h>
-#include <terminal.h>
 #include <cpu.h>
 
 bool displayObtained = false;
 
 void initDisplay()
 {
-    serialPrint("Setting up display");
+    log("Setting up display");
     registerSyscall(OBTAIN_DISPLAY, obtainDisplay);
     registerSyscall(RELEASE_DISPLAY, releaseDisplay);
-    serialPrint("Set up display");
+    log("Set up display");
 }
 
 void obtainDisplay(Display* display)

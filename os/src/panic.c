@@ -1,4 +1,5 @@
 #include <panic.h>
+#include <terminal.h>
 #include <serial.h>
 #include <filesystem.h>
 #include <bootloader.h>
@@ -58,9 +59,9 @@ uint32_t panicY = 0;
 
 void initPanic()
 {
-    serialPrint("Setting up panic screen");
+    log("Setting up panic screen");
     panicFont = (PsfFile*)getFile("/naul/font16.psf", 0);
-    serialPrint("Set up panic screen");
+    log("Set up panic screen");
 }
 
 void panicWrite(const char* string)

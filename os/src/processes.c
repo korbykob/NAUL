@@ -1,5 +1,5 @@
 #include <processes.h>
-#include <serial.h>
+#include <terminal.h>
 #include <syscalls.h>
 #include <calls.h>
 #include <filesystem.h>
@@ -12,10 +12,10 @@
 
 void initProcesses()
 {
-    serialPrint("Setting up processes");
+    log("Setting up processes");
     registerSyscall(EXECUTE, execute);
     registerSyscall(QUIT, quit);
-    serialPrint("Set up processes");
+    log("Set up processes");
 }
 
 uint64_t execute(const char* filename)

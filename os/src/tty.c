@@ -1,5 +1,5 @@
 #include <tty.h>
-#include <serial.h>
+#include <terminal.h>
 #include <calls.h>
 #include <syscalls.h>
 #include <scheduler.h>
@@ -17,18 +17,18 @@ bool ttyLock = false;
 
 void initTty()
 {
-    serialPrint("Setting up TTY");
+    log("Setting up TTY");
     registerSyscall(REGISTER_TTY, registerTty);
     registerSyscall(UNREGISTER_TTY, unregisterTty);
     registerSyscall(PUT, put);
     registerSyscall(WRITE, write);
     registerSyscall(READ, read);
-    serialPrint("Clearing out TTY buffers");
+    log("Clearing out TTY buffers");
     for (uint16_t i = 0; i < 256; i++)
     {
         ttyBuffers[i].used = false;
     }
-    serialPrint("Set up TTY");
+    log("Set up TTY");
 }
 
 void registerTty(TtyBuffer* buffer)

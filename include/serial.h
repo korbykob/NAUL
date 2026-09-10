@@ -15,12 +15,3 @@ static void serialWrite(const char* string)
         serialPut(*string++);
     }
 }
-
-static void serialPrint(const char* string)
-{
-    serialWrite("\x1b[1;34m[");
-    serialWrite(__builtin_strrchr(__BASE_FILE__, '/') + 1);
-    serialWrite("]:\x1b[0m ");
-    serialWrite(string);
-    serialPut('\n');
-}

@@ -1,5 +1,5 @@
 #include <paging.h>
-#include <serial.h>
+#include <terminal.h>
 #include <allocator.h>
 #include <mem.h>
 
@@ -13,12 +13,12 @@ uint64_t mainPdpt = 0;
 
 void initPaging()
 {
-    serialPrint("Setting up paging");
+    log("Setting up paging");
     uint64_t* uefiPml4t = 0;
     __asm__ volatile ("mov %%cr3, %0" : "=r"(uefiPml4t));
-    serialPrint("Storing paging");
+    log("Storing paging");
     mainPdpt = uefiPml4t[0];
-    serialPrint("Set up paging");
+    log("Set up paging");
 }
 
 uint64_t createTable(void* start, uint64_t pages)

@@ -1,5 +1,5 @@
 #include <scheduler.h>
-#include <serial.h>
+#include <terminal.h>
 #include <syscalls.h>
 #include <idt.h>
 #include <allocator.h>
@@ -61,13 +61,13 @@ __attribute__((naked)) void updateScheduler()
 
 void initScheduler()
 {
-    serialPrint("Setting up scheduler");
+    log("Setting up scheduler");
     registerSyscall(CREATE_THREAD, createThread);
     registerSyscall(WAIT_FOR_THREAD, waitForThread);
     registerSyscall(DESTROY_THREAD, destroyThread);
     registerSyscall(EXIT_THREAD, exitThread);
     installIsr(0x67, IDT_INTERRUPT_GATE, skipThread);
-    serialPrint("Creating main thread");
+    log("Creating main thread");
     threads = allocate(sizeof(Thread));
     threads->next = threads;
     threads->prev = threads;
@@ -78,20 +78,20 @@ void initScheduler()
     threads->ttyId = 0;
     __asm__ volatile ("movq %%rsp, %0" : "=g"(threads->sp));
     currentThread = threads;
-    serialPrint("Configuring timer");
+    log("Configuring timer");
     installIsr(SCHEDULER_INTERRUPT, IDT_INTERRUPT_GATE, updateScheduler);
-    serialPrint("Setting timer divisor");
+    log("Setting timer divisor");
     *(uint32_t*)LAPIC_DIVISOR_REGISTER = 3;
-    serialPrint("Calibrating timer");
+    log("Calibrating timer");
     *(uint32_t*)LAPIC_RELOAD_COUNT = __UINT32_MAX__;
     uint64_t start = getFemtoseconds();
     while (getFemtoseconds() - start < FEMTOSECONDS_PER_MILLISECOND);
     uint32_t ticks = __UINT32_MAX__ - *(uint32_t*)LAPIC_COUNTER;
-    serialPrint("Setting initial timer count");
+    log("Setting initial timer count");
     *(uint32_t*)LAPIC_RELOAD_COUNT = ticks;
-    serialPrint("Setting interrupt vector");
+    log("Setting interrupt vector");
     *(uint32_t*)LAPIC_CONFIG_REGISTER = SCHEDULER_INTERRUPT | LAPIC_PERIODIC_MODE;
-    serialPrint("Set up scheduler");
+    log("Set up scheduler");
 }
 
 uint64_t createThread(void (*function)())

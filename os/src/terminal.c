@@ -1,5 +1,4 @@
 #include <terminal.h>
-#include <serial.h>
 #include <bootloader.h>
 #include <filesystem.h>
 #include <allocator.h>
@@ -11,7 +10,6 @@
 #include <cpu.h>
 #include <mem.h>
 #include <psf.h>
-#include <cpu.h>
 
 #define TERMINAL_DEFAULT 0x989898
 #define TERMINAL_WHITE 0xFFFFFF
@@ -108,6 +106,28 @@ bool shift = false;
 bool caps = false;
 TtyBuffer ttyBuffer = { 0 };
 bool waitingColour = false;
+bool terminalReady = false;
+
+void initTerminal()
+{
+    log("Setting up terminal");
+    font = (PsfFile*)getFile("/naul/font16.psf", 0);
+    fontWidth = font->width + 1;
+    fontHeight = font->height;
+    log("Setting up terminal graphics");
+    terminalWidth = information.width / fontWidth;
+    terminalHeight = information.height / fontHeight;
+    terminalPitch = terminalWidth * 2;
+    log("Allocating back buffer");
+    backBuffer = allocate(information.pitch * information.height * sizeof(uint32_t));
+    log("Clearing out back buffer");
+    setMemory32(backBuffer, 0, information.pitch * information.height);
+    log("Clearing out screen");
+    setMemory32(information.framebuffer, 0, information.pitch * information.height);
+    log("Marking terminal as ready");
+    terminalReady = true;
+    log("Set up terminal");
+}
 
 void drawCharacter(char character, uint32_t x, uint32_t y, uint32_t colour)
 {
@@ -139,93 +159,6 @@ void drawCharacter(char character, uint32_t x, uint32_t y, uint32_t colour)
         address += information.pitch - font->width;
         backAddress += information.pitch - font->width;
     }
-}
-
-void drop()
-{
-    copyMemory32(backBuffer + information.pitch * font->height, backBuffer, information.pitch * (information.height - font->height));
-    setMemory32(backBuffer + information.pitch * (information.height - font->height), 0, information.pitch * font->height);
-    if (!displayObtained)
-    {
-        copyMemory32(backBuffer, information.framebuffer, information.pitch * information.height);
-    }
-}
-
-void terminalPut(char character)
-{
-    drawCharacter('_', cursorX * fontWidth, cursorY * fontHeight, 0);
-    if (waitingColour)
-    {
-        waitingColour = false;
-        colour = character;
-    }
-    else if (character == '\b')
-    {
-        if (cursorX > 0)
-        {
-            cursorX--;
-        }
-        else
-        {
-            cursorY--;
-            cursorX = terminalWidth - 1;
-        }
-        uint32_t x = cursorX * fontWidth;
-        uint32_t y = cursorY * fontHeight;
-        uint32_t* address = information.framebuffer + y * information.pitch + x;
-        uint32_t* backAddress = backBuffer + y * information.pitch + x;
-        for (uint32_t y = 0; y < fontHeight; y++)
-        {
-            for (uint32_t x = 0; x < fontWidth; x++)
-            {
-                *address++ = 0;
-                *backAddress++ = 0;
-            }
-            address += information.pitch - fontWidth;
-            backAddress += information.pitch - fontWidth;
-        }
-    }
-    else if (character == '\n')
-    {
-        cursorX = 0;
-        if (cursorY + 1 != terminalHeight)
-        {
-            cursorY++;
-        }
-        else
-        {
-            drop();
-        }
-    }
-    else if (character == TTY_CLEAR)
-    {
-        setMemory32(information.framebuffer, 0, information.pitch * information.height);
-        setMemory32(backBuffer, 0, information.pitch * information.height);
-        cursorX = 0;
-        cursorY = 0;
-    }
-    else if (character == TERMINAL_COLOUR)
-    {
-        waitingColour = true;
-    }
-    else
-    {
-        drawCharacter(character, cursorX * fontWidth, cursorY * fontHeight, colours[colour]);
-        cursorX++;
-        if (cursorX == terminalWidth)
-        {
-            cursorX = 0;
-            if (cursorY + 1 != terminalHeight)
-            {
-                cursorY++;
-            }
-            else
-            {
-                drop();
-            }
-        }
-    }
-    drawCharacter('_', cursorX * fontWidth, cursorY * fontHeight, colours[colour]);
 }
 
 void terminalThread()
@@ -306,29 +239,112 @@ void terminalThread()
     }
 }
 
-void initTerminal()
+void startTerminal()
 {
-    serialPrint("Setting up terminal");
     registerTty(&ttyBuffer);
-    serialPrint("Loading font");
-    font = (PsfFile*)getFile("/naul/font16.psf", 0);
-    fontWidth = font->width + 1;
-    fontHeight = font->height;
-    serialPrint("Setting up terminal graphics");
-    terminalWidth = information.width / fontWidth;
-    terminalHeight = information.height / fontHeight;
-    terminalPitch = terminalWidth * 2;
-    serialPrint("Allocating back buffer");
-    backBuffer = allocate(information.pitch * information.height * sizeof(uint32_t));
-    serialPrint("Clearing out back buffer");
-    setMemory32(backBuffer, 0, information.pitch * information.height);
-    serialPrint("Registering keyboard handler");
     registerKeyboard(&keyboardBuffer);
-    serialPrint("Clearing screen");
-    setMemory32(information.framebuffer, 0, information.pitch * information.height);
-    serialPrint("Creating terminal thread");
     createThread(terminalThread);
-    serialPrint("Set up terminal");
+}
+
+void drop()
+{
+    copyMemory32(backBuffer + information.pitch * font->height, backBuffer, information.pitch * (information.height - font->height));
+    setMemory32(backBuffer + information.pitch * (information.height - font->height), 0, information.pitch * font->height);
+    if (!displayObtained)
+    {
+        copyMemory32(backBuffer, information.framebuffer, information.pitch * information.height);
+    }
+}
+
+void terminalPut(char character)
+{
+    if (terminalReady)
+    {
+        drawCharacter('_', cursorX * fontWidth, cursorY * fontHeight, 0);
+        if (waitingColour)
+        {
+            waitingColour = false;
+            colour = character;
+        }
+        else if (character == '\b')
+        {
+            if (cursorX > 0)
+            {
+                cursorX--;
+            }
+            else
+            {
+                cursorY--;
+                cursorX = terminalWidth - 1;
+            }
+            uint32_t x = cursorX * fontWidth;
+            uint32_t y = cursorY * fontHeight;
+            uint32_t* address = information.framebuffer + y * information.pitch + x;
+            uint32_t* backAddress = backBuffer + y * information.pitch + x;
+            for (uint32_t y = 0; y < fontHeight; y++)
+            {
+                for (uint32_t x = 0; x < fontWidth; x++)
+                {
+                    *address++ = 0;
+                    *backAddress++ = 0;
+                }
+                address += information.pitch - fontWidth;
+                backAddress += information.pitch - fontWidth;
+            }
+        }
+        else if (character == '\n')
+        {
+            cursorX = 0;
+            if (cursorY + 1 != terminalHeight)
+            {
+                cursorY++;
+            }
+            else
+            {
+                drop();
+            }
+        }
+        else if (character == TTY_CLEAR)
+        {
+            setMemory32(information.framebuffer, 0, information.pitch * information.height);
+            setMemory32(backBuffer, 0, information.pitch * information.height);
+            cursorX = 0;
+            cursorY = 0;
+        }
+        else if (character == TERMINAL_COLOUR)
+        {
+            waitingColour = true;
+        }
+        else
+        {
+            drawCharacter(character, cursorX * fontWidth, cursorY * fontHeight, colours[colour]);
+            cursorX++;
+            if (cursorX == terminalWidth)
+            {
+                cursorX = 0;
+                if (cursorY + 1 != terminalHeight)
+                {
+                    cursorY++;
+                }
+                else
+                {
+                    drop();
+                }
+            }
+        }
+        drawCharacter('_', cursorX * fontWidth, cursorY * fontHeight, colours[colour]);
+    }
+}
+
+void terminalWrite(const char* string)
+{
+    if (terminalReady)
+    {
+        while (*string)
+        {
+            terminalPut(*string++);
+        }
+    }
 }
 
 void redrawTerminal()

@@ -1,5 +1,5 @@
 #include <allocator.h>
-#include <serial.h>
+#include <terminal.h>
 #include <syscalls.h>
 #include <calls.h>
 #include <cpu.h>
@@ -20,14 +20,14 @@ bool allocatorLock = false;
 
 void initAllocator(uint64_t end)
 {
-    serialPrint("Setting up allocator");
+    log("Setting up allocator");
     registerSyscall(ALLOCATE, allocate);
     registerSyscall(ALLOCATE_ALIGNED, allocateAligned);
     registerSyscall(UNALLOCATE, unallocate);
     registerSyscall(GET_USAGE, getUsage);
-    serialPrint("Storing allocation location");
+    log("Storing allocation location");
     allocated = (Allocation*)(end - sizeof(Allocation));
-    serialPrint("Set up allocator");
+    log("Set up allocator");
 }
 
 void markUnusable(uint64_t start, uint64_t end)

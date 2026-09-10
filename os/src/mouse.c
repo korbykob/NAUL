@@ -1,5 +1,5 @@
 #include <mouse.h>
-#include <serial.h>
+#include <terminal.h>
 #include <syscalls.h>
 #include <allocator.h>
 #include <idt.h>
@@ -86,40 +86,40 @@ __attribute__((naked)) void mouseInterrupt()
 
 void initMouse()
 {
-    serialPrint("Setting up PS/2 mouse");
+    log("Setting up PS/2 mouse");
     registerSyscall(REGISTER_MOUSE, registerMouse);
     registerSyscall(UNREGISTER_MOUSE, unregisterMouse);
-    serialPrint("Allocating mouse buffers");
+    log("Allocating mouse buffers");
     mouseBuffers = allocate(sizeof(MouseBufferElement));
     mouseBuffers->next = mouseBuffers;
     mouseBuffers->prev = mouseBuffers;
     mouseBuffers->buffer = 0;
-    serialPrint("Enabling second PS/2 port");
+    log("Enabling second PS/2 port");
     outb(MOUSE_COMMAND, PS2_ENABLE_SECOND);
-    serialPrint("Checking second PS/2 port");
+    log("Checking second PS/2 port");
     outb(MOUSE_COMMAND, PS2_GET_CONFIG);
     uint8_t config = inb(MOUSE_DATA);
     if (!(config & PS2_SECOND_CLOCK))
     {
-        serialPrint("Installing mouse dummy IRQ");
+        log("Installing mouse dummy IRQ");
         installIrq(MOUSE_INTERRUPT, mouseDummy);
-        serialPrint("Unmasking interrupt");
+        log("Unmasking interrupt");
         unmaskPic(MOUSE_INTERRUPT);
-        serialPrint("Enabling second PS/2 interrupt");
+        log("Enabling second PS/2 interrupt");
         outb(MOUSE_COMMAND, PS2_SET_CONFIG);
         outb(MOUSE_DATA, config | PS2_SECOND_INTERRUPT);
-        serialPrint("Setting mouse to defaults");
+        log("Setting mouse to defaults");
         outb(MOUSE_COMMAND, MOUSE_PS2_PORT);
         outb(MOUSE_DATA, MOUSE_DEFAULTS);
         inb(MOUSE_DATA);
-        serialPrint("Enabling mouse interrupts");
+        log("Enabling mouse interrupts");
         outb(MOUSE_COMMAND, MOUSE_PS2_PORT);
         outb(MOUSE_DATA, MOUSE_STREAMING);
         inb(MOUSE_DATA);
-        serialPrint("Installing mouse IRQ");
+        log("Installing mouse IRQ");
         installIrq(MOUSE_INTERRUPT, mouseInterrupt);
     }
-    serialPrint("Set up PS/2 mouse");
+    log("Set up PS/2 mouse");
 }
 
 void registerMouse(MouseBuffer* buffer)

@@ -1,5 +1,5 @@
 #include <power.h>
-#include <serial.h>
+#include <terminal.h>
 #include <bootloader.h>
 #include <scheduler.h>
 #include <hpet.h>
@@ -57,12 +57,12 @@ void powerThread()
 
 void initPower()
 {
-    serialPrint("Setting up power");
+    log("Setting up power");
     registerSyscall(REBOOT, reboot);
     registerSyscall(SHUTDOWN, shutdown);
-    serialPrint("Enabling ACPI");
+    log("Enabling ACPI");
     outb(*(uint32_t*)(information.fadtAddress + POWER_SMI_COMMAND), *(uint8_t*)(information.fadtAddress + POWER_ENABLE_REGISTER));
-    serialPrint("Searching for S5 mode");
+    log("Searching for S5 mode");
     bool guess = true;
     char* current = (char*)((uint64_t)*(uint32_t*)(information.fadtAddress + POWER_FADT_DSDT) + POWER_HEADER_SIZE);
     char* end = current + *(uint32_t*)((uint64_t)*(uint32_t*)(information.fadtAddress + POWER_FADT_DSDT) + POWER_DSDT_LENGTH);
@@ -95,9 +95,9 @@ void initPower()
     {
         shutdownA = 0x1400;
     }
-    serialPrint("Creating power thread");
+    log("Creating power thread");
     createThread(powerThread);
-    serialPrint("Set up power");
+    log("Set up power");
 }
 
 void reboot()

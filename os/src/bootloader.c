@@ -1,7 +1,7 @@
 #include <bootloader.h>
 #include <efi.h>
 #include <efilib.h>
-#include <serial.h>
+#include <terminal.h>
 #include <allocator.h>
 #include <kernel.h>
 #include <bmp.h>
@@ -145,15 +145,15 @@ EFI_STATUS efi_main(EFI_HANDLE ImageHandle, EFI_SYSTEM_TABLE* SystemTable)
 {
     __asm__ volatile ("movq %%cr4, %%rax; xorq $0x40000, %%rax; movq %%rax, %%cr4; xorq %%rcx, %%rcx; xgetbv; orl $7, %%eax; xsetbv" : : : "%rdx", "%rcx", "%rax");
     InitializeLib(ImageHandle, SystemTable);
-    serialPrint("Locating GOP protocol");
+    log("Locating GOP protocol");
     EFI_GRAPHICS_OUTPUT_PROTOCOL* GOP = NULL;
     LibLocateProtocol(&GraphicsOutputProtocol, (void**)&GOP);
-    serialPrint("Resetting GOP");
+    log("Resetting GOP");
     uefi_call_wrapper(GOP->SetMode, 2, GOP, 0);
     uefi_call_wrapper(ST->ConOut->SetCursorPosition, 3, ST->ConOut, 0, 0);
-    serialPrint("Disabling watchdog timer");
+    log("Disabling watchdog timer");
     uefi_call_wrapper(BS->SetWatchdogTimer, 4, 0, 0, 0, NULL);
-    serialPrint("Displaying resolution prompt");
+    log("Displaying resolution prompt");
     Print(u"Use the up and down arrow keys to move.\nPress enter to select and boot using the selected resolution.\n\nPlease select a resolution:\n");
     for (UINT32 i = 0; i < GOP->Mode->MaxMode; i++)
     {
@@ -162,7 +162,7 @@ EFI_STATUS efi_main(EFI_HANDLE ImageHandle, EFI_SYSTEM_TABLE* SystemTable)
         uefi_call_wrapper(GOP->QueryMode, 4, GOP, i, &size, &info);
         Print(u"%dx%d\n", info->HorizontalResolution, info->VerticalResolution);
     }
-    serialPrint("Waiting for user to choose resolution");
+    log("Waiting for user to choose resolution");
     UINT32 selected = 0;
     EFI_INPUT_KEY pressed = { 1, u'\0' };
     while (pressed.UnicodeChar != '\r')
@@ -185,32 +185,32 @@ EFI_STATUS efi_main(EFI_HANDLE ImageHandle, EFI_SYSTEM_TABLE* SystemTable)
         WaitForSingleEvent(ST->ConIn->WaitForKey, 0);
         uefi_call_wrapper(ST->ConIn->ReadKeyStroke, 2, ST->ConIn, &pressed);
     }
-    serialPrint("Switching GOP mode");
+    log("Switching GOP mode");
     uefi_call_wrapper(GOP->SetMode, 2, GOP, selected);
-    serialPrint("Searching tables");
+    log("Searching tables");
     EFI_GUID guid = ACPI_20_TABLE_GUID;
     for (uint64_t i = 0; i < ST->NumberOfTableEntries; i++)
     {
         if (CompareGuid(&ST->ConfigurationTable[i].VendorGuid, &guid) == 0)
         {
-            serialPrint("Found ACPI 2.0 table");
+            log("Found ACPI 2.0 table");
             Xsdt* xsdt = ((Xsdp*)ST->ConfigurationTable[i].VendorTable)->xsdt;
-            serialPrint("Searching ACPI table");
+            log("Searching ACPI table");
             for (uint32_t table = 0; table < (xsdt->header.length - sizeof(AcpiSdtHeader)) / sizeof(AcpiSdtHeader*); table++)
             {
                 if (strncmpa(xsdt->entries[table]->signature, "HPET", 4) == 0)
                 {
-                    serialPrint("Found HPET");
+                    log("Found HPET");
                     information.hpetAddress = ((Hpet*)xsdt->entries[table])->address;
                 }
                 else if (strncmpa(xsdt->entries[table]->signature, "BGRT", 4) == 0)
                 {
-                    serialPrint("Found BGRT");
+                    log("Found BGRT");
                     BmpHeader* splash = ((Bgrt*)xsdt->entries[table])->image;
                     uint32_t startX = (GOP->Mode->Info->HorizontalResolution / 2) - (splash->width / 2);
                     uint32_t startY = (GOP->Mode->Info->VerticalResolution / 2) - (splash->height / 2);
                     uint8_t* splashData = (uint8_t*)splash + splash->offset;
-                    serialPrint("Drawing boot logo");
+                    log("Drawing boot logo");
                     for (int32_t y = 0; y < splash->height; y++)
                     {
                         for (int32_t x = 0; x < splash->width; x++)
@@ -227,30 +227,30 @@ EFI_STATUS efi_main(EFI_HANDLE ImageHandle, EFI_SYSTEM_TABLE* SystemTable)
                 }
                 else if (strncmpa(xsdt->entries[table]->signature, "FACP", 4) == 0)
                 {
-                    serialPrint("Found FADT");
+                    log("Found FADT");
                     information.fadtAddress = (uint64_t)xsdt->entries[table];
                 }
             }
             break;
         }
     }
-    serialPrint("Locating LIP protocol");
+    log("Locating LIP protocol");
     EFI_LOADED_IMAGE* image = NULL;
     uefi_call_wrapper(BS->HandleProtocol, 3, ImageHandle, &LoadedImageProtocol, &image);
-    serialPrint("Opening root file system");
+    log("Opening root file system");
     EFI_FILE_HANDLE root = LibOpenRoot(image->DeviceHandle);
-    serialPrint("Counting files");
+    log("Counting files");
     parseFolder(root, u".", countFiles);
-    serialPrint("Allocating room for files");
+    log("Allocating room for files");
     information.fileData = AllocatePool(sizeof(InitFile) * information.fileCount);
     information.fileCount = 0;
-    serialPrint("Reading files");
+    log("Reading files");
     parseFolder(root, u".", addFiles);
     UINTN entries = 0;
     UINTN key = 0;
     UINTN size = 0;
     UINT32 version = 0;
-    serialPrint("Reading memory map");
+    log("Reading memory map");
     uint8_t* map = (uint8_t*)LibMemoryMap(&entries, &key, &size, &version);
     uint64_t memory = 0;
     uint64_t memorySize = 0;
@@ -268,7 +268,7 @@ EFI_STATUS efi_main(EFI_HANDLE ImageHandle, EFI_SYSTEM_TABLE* SystemTable)
         }
     }
     initAllocator(memory + memorySize);
-    serialPrint("Marking unusable memory");
+    log("Marking unusable memory");
     for (UINTN i = 0; i < entries; i++)
     {
         EFI_MEMORY_DESCRIPTOR* iterator = (EFI_MEMORY_DESCRIPTOR*)(map + i * size);
@@ -277,14 +277,14 @@ EFI_STATUS efi_main(EFI_HANDLE ImageHandle, EFI_SYSTEM_TABLE* SystemTable)
             markUnusable(iterator->PhysicalStart, iterator->PhysicalStart + iterator->NumberOfPages * EFI_PAGE_SIZE);
         }
     }
-    serialPrint("Exiting boot services");
+    log("Exiting boot services");
     uefi_call_wrapper(BS->ExitBootServices, 2, ImageHandle, key);
-    serialPrint("Setting up information");
+    log("Setting up information");
     information.framebuffer = (uint32_t*)GOP->Mode->FrameBufferBase;
     information.width = GOP->Mode->Info->HorizontalResolution;
     information.height = GOP->Mode->Info->VerticalResolution;
     information.pitch = GOP->Mode->Info->PixelsPerScanLine;
-    serialPrint("Entering kernel");
+    log("Entering kernel");
     __asm__ volatile ("xorq %rbp, %rbp");
     kernel();
     return EFI_SUCCESS;

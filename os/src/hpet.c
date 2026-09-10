@@ -1,5 +1,5 @@
 #include <hpet.h>
-#include <serial.h>
+#include <terminal.h>
 #include <bootloader.h>
 #include <syscalls.h>
 #include <calls.h>
@@ -13,13 +13,13 @@ uint64_t femtosecondsPerTick = 0;
 
 void initHpet()
 {
-    serialPrint("Setting up HPET");
+    log("Setting up HPET");
     registerSyscall(GET_FEMTOSECONDS, getFemtoseconds);
-    serialPrint("Getting femtoseconds per tick");
+    log("Getting femtoseconds per tick");
     femtosecondsPerTick = *(uint64_t*)(information.hpetAddress + HPET_CAP_REGISTER) >> 32;
-    serialPrint("Enabling timer");
+    log("Enabling timer");
     *(uint64_t*)(information.hpetAddress + HPET_CONFIG_REGISTER) |= HPET_ENABLED;
-    serialPrint("Set up HPET");
+    log("Set up HPET");
 }
 
 uint64_t getFemtoseconds()

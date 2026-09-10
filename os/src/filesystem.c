@@ -1,5 +1,5 @@
 #include <filesystem.h>
-#include <serial.h>
+#include <terminal.h>
 #include <syscalls.h>
 #include <bootloader.h>
 #include <allocator.h>
@@ -21,7 +21,7 @@ bool filesystemLock = false;
 
 void initFilesystem()
 {
-    serialPrint("Setting up filesystem");
+    log("Setting up filesystem");
     registerSyscall(CHECK_FOLDER, checkFolder);
     registerSyscall(CHECK_FILE, checkFile);
     registerSyscall(CREATE_FOLDER, createFolder);
@@ -29,13 +29,13 @@ void initFilesystem()
     registerSyscall(GET_FILES, getFiles);
     registerSyscall(GET_FILE, getFile);
     registerSyscall(DELETE_FILE, deleteFile);
-    serialPrint("Allocating file list");
+    log("Allocating file list");
     files = allocate(sizeof(File));
     files->next = files;
     files->prev = files;
     files->name = "";
     files->data = 0;
-    serialPrint("Adding files to filesystem");
+    log("Adding files to filesystem");
     for (uint64_t i = 0; i < information.fileCount; i++)
     {
         if (information.fileData[i].data == 0)
@@ -48,7 +48,7 @@ void initFilesystem()
             copyMemory8(information.fileData[i].data, data, information.fileData[i].size);
         }
     }
-    serialPrint("Set up filesystem");
+    log("Set up filesystem");
 }
 
 bool checkFolder(const char* name)

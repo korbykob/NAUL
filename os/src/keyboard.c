@@ -1,5 +1,5 @@
 #include <keyboard.h>
-#include <serial.h>
+#include <terminal.h>
 #include <syscalls.h>
 #include <allocator.h>
 #include <idt.h>
@@ -64,24 +64,24 @@ __attribute__((naked)) void keyboardInterrupt()
 
 void initKeyboard()
 {
-    serialPrint("Setting up PS/2 keyboard");
+    log("Setting up PS/2 keyboard");
     registerSyscall(REGISTER_KEYBOARD, registerKeyboard);
     registerSyscall(UNREGISTER_KEYBOARD, unregisterKeyboard);
-    serialPrint("Allocating keyboard buffers");
+    log("Allocating keyboard buffers");
     keyboardBuffers = allocate(sizeof(KeyboardBufferElement));
     keyboardBuffers->next = keyboardBuffers;
     keyboardBuffers->prev = keyboardBuffers;
     keyboardBuffers->buffer = 0;
-    serialPrint("Installing keyboard IRQ");
+    log("Installing keyboard IRQ");
     installIrq(KEYBOARD_INTERRUPT, keyboardInterrupt);
-    serialPrint("Flushing PS/2 input buffer");
+    log("Flushing PS/2 input buffer");
     if (inb(KEYBOARD_COMMAND) & KEYBOARD_BUFFER_FULL)
     {
         inb(KEYBOARD_DATA);
     }
-    serialPrint("Unmasking interrupt");
+    log("Unmasking interrupt");
     unmaskPic(KEYBOARD_INTERRUPT);
-    serialPrint("Set up PS/2 keyboard");
+    log("Set up PS/2 keyboard");
 }
 
 void registerKeyboard(KeyboardBuffer* buffer)

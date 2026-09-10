@@ -1,5 +1,5 @@
 #include <syscalls.h>
-#include <serial.h>
+#include <terminal.h>
 #include <idt.h>
 #include <scheduler.h>
 
@@ -22,9 +22,9 @@ __attribute__((naked)) void syscallTrampoline()
 
 void initSyscalls()
 {
-    serialPrint("Setting up syscalls");
+    log("Setting up syscalls");
     installIsr(0x69, IDT_TRAP_GATE, syscallTrampoline);
-    serialPrint("Set up syscalls");
+    log("Set up syscalls");
 }
 
 void registerSyscall(uint64_t code, void* handler)

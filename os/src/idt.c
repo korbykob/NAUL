@@ -1,5 +1,5 @@
 #include <idt.h>
-#include <serial.h>
+#include <terminal.h>
 #include <panic.h>
 #include <pic.h>
 
@@ -92,16 +92,16 @@ __attribute__((naked)) void slaveSpurious()
 
 void initIdt()
 {
-    serialPrint("Setting up IDT");
+    log("Setting up IDT");
     for (uint8_t i = 0; i < EXCEPTION_COUNT; i++)
     {
         installIsr(i, IDT_INTERRUPT_GATE, (void (*)())((uint8_t*)exception + (i * decSize)));
     }
     installIrq(PIC_MASTER_SPURIOUS, masterSpurious);
     installIrq(PIC_SLAVE_SPURIOUS, slaveSpurious);
-    serialPrint("Loading IDT");
+    log("Loading IDT");
     __asm__ volatile ("lidt %0" : : "m"(idtr));
-    serialPrint("Set up IDT");
+    log("Set up IDT");
 }
 
 void installIsr(uint8_t interrupt, uint8_t attributes, void (*handler)())
