@@ -38,11 +38,11 @@ void kernel()
     initMouse();
     initDisplay();
     initTty();
-    initTerminal();
     initProcesses();
     initIpc();
-    serialPrint("Yo puter ready B)");
+    initTerminal();
     setMemory32(information.framebuffer, 0, information.pitch * information.height);
+    serialPrint("Yo puter ready B)");
     write("Welcome to " TTY_WHITE "NAUL" TTY_DEFAULT " (Not A Unix Like)!\n\nStarting shell, use \"" TTY_GREEN "help" TTY_DEFAULT "\" for more information:\n");
     while (true)
     {

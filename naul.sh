@@ -33,6 +33,7 @@ build()
     mkdir -p os/bin
     x86_64-linux-gnu-gcc $BOOTLOADER_COMPILER_FLAGS os/src/bootloader.c -o os/bin/bootloader.o
     x86_64-linux-gnu-gcc $KERNEL_COMPILER_FLAGS os/src/allocator.c -o os/bin/allocator.o
+    x86_64-linux-gnu-gcc $KERNEL_COMPILER_FLAGS os/src/kernel.c -o os/bin/kernel.o
     x86_64-linux-gnu-gcc $KERNEL_COMPILER_FLAGS os/src/gdt.c -o os/bin/gdt.o
     x86_64-linux-gnu-gcc $KERNEL_COMPILER_FLAGS os/src/idt.c -o os/bin/idt.o
     x86_64-linux-gnu-gcc $KERNEL_COMPILER_FLAGS os/src/pic.c -o os/bin/pic.o
@@ -48,14 +49,14 @@ build()
     x86_64-linux-gnu-gcc $KERNEL_COMPILER_FLAGS os/src/mouse.c -o os/bin/mouse.o
     x86_64-linux-gnu-gcc $KERNEL_COMPILER_FLAGS os/src/display.c -o os/bin/display.o
     x86_64-linux-gnu-gcc $KERNEL_COMPILER_FLAGS os/src/tty.c -o os/bin/tty.o
-    x86_64-linux-gnu-gcc $KERNEL_COMPILER_FLAGS os/src/terminal.c -o os/bin/terminal.o
     x86_64-linux-gnu-gcc $KERNEL_COMPILER_FLAGS os/src/processes.c -o os/bin/processes.o
     x86_64-linux-gnu-gcc $KERNEL_COMPILER_FLAGS os/src/ipc.c -o os/bin/ipc.o
-    x86_64-linux-gnu-gcc $KERNEL_COMPILER_FLAGS os/src/kernel.c -o os/bin/kernel.o
+    x86_64-linux-gnu-gcc $KERNEL_COMPILER_FLAGS os/src/terminal.c -o os/bin/terminal.o
 
     x86_64-linux-gnu-ld $KERNEL_LINKER_FLAGS \
     os/bin/bootloader.o \
     os/bin/allocator.o \
+    os/bin/kernel.o \
     os/bin/gdt.o \
     os/bin/idt.o \
     os/bin/pic.o \
@@ -74,7 +75,7 @@ build()
     os/bin/terminal.o \
     os/bin/processes.o \
     os/bin/ipc.o \
-    os/bin/kernel.o \
+    os/bin/terminal.o \
     -o os/bin/naul.so $KERNEL_LINKER_LIBS
 
     x86_64-linux-gnu-nm os/bin/naul.so > os/bin/naul.sym
