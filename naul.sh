@@ -106,7 +106,7 @@ iso()
 {
     build
 
-    dd if=/dev/zero of=naul.iso bs=1M count=64 status=none
+    dd if=/dev/zero of=naul.iso bs=1M count=12 status=none
     mformat -i naul.iso ::
 
     mmd -i naul.iso ::/efi
@@ -141,7 +141,7 @@ run()
     iso
     clear
 
-    qemu-system-x86_64 -enable-kvm -bios OVMF-pure-efi.fd -drive file=naul.iso,media=cdrom,if=virtio -m 4G -cpu host,migratable=off -serial null -serial null -serial stdio -audiodev pa,id=snd0 -device intel-hda -device hda-output,audiodev=snd0 -display sdl
+    qemu-system-x86_64 -enable-kvm -bios OVMF-pure-efi.fd -drive file=naul.iso,media=cdrom,if=virtio -m 4G -cpu host,migratable=off -serial null -serial null -serial stdio -display sdl
 }
 
 usage()
