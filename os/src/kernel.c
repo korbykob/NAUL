@@ -15,11 +15,9 @@
 #include <mouse.h>
 #include <display.h>
 #include <tty.h>
-#include <terminal.h>
 #include <processes.h>
 #include <ipc.h>
-#include <bootloader.h>
-#include <mem.h>
+#include <terminal.h>
 
 void kernel()
 {
@@ -41,7 +39,6 @@ void kernel()
     initProcesses();
     initIpc();
     initTerminal();
-    setMemory32(information.framebuffer, 0, information.pitch * information.height);
     serialPrint("Yo puter ready B)");
     write("Welcome to " TTY_WHITE "NAUL" TTY_DEFAULT " (Not A Unix Like)!\n\nStarting shell, use \"" TTY_GREEN "help" TTY_DEFAULT "\" for more information:\n");
     while (true)

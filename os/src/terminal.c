@@ -324,6 +324,8 @@ void initTerminal()
     setMemory32(backBuffer, 0, information.pitch * information.height);
     serialPrint("Registering keyboard handler");
     registerKeyboard(&keyboardBuffer);
+    serialPrint("Clearing screen");
+    setMemory32(information.framebuffer, 0, information.pitch * information.height);
     serialPrint("Creating terminal thread");
     createThread(terminalThread);
     serialPrint("Set up terminal");
