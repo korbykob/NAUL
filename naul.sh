@@ -72,7 +72,6 @@ build()
     os/bin/mouse.o \
     os/bin/display.o \
     os/bin/tty.o \
-    os/bin/terminal.o \
     os/bin/processes.o \
     os/bin/ipc.o \
     os/bin/terminal.o \
