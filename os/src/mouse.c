@@ -34,44 +34,44 @@ typedef struct
 
 uint8_t mouseCycle = 0;
 uint8_t mouseBytes[3];
+bool setup = false;
 MouseBufferElement* mouseBuffers = 0;
 bool mouseLock = false;
 
 void mouse()
 {
-    mouseBytes[mouseCycle] = inb(MOUSE_DATA);
-    mouseCycle++;
-    if (mouseCycle == 3)
+    uint8_t data = inb(MOUSE_DATA);
+    if (setup && (mouseCycle != 0 || data & 0x08))
     {
-        mouseCycle = 0;
-        int16_t x = mouseBytes[1] - ((mouseBytes[0] << 4) & MOUSE_OVERFLOW_MASK);
-        int16_t y = mouseBytes[2] - ((mouseBytes[0] << 3) & MOUSE_OVERFLOW_MASK);
-        bool left = mouseBytes[0] & MOUSE_LEFT_MASK;
-        bool right = mouseBytes[0] & MOUSE_RIGHT_MASK;
-        MouseBufferElement* element = mouseBuffers;
-        while (true)
+        mouseBytes[mouseCycle] = data;
+        mouseCycle++;
+        if (mouseCycle == 3)
         {
-            if (element->buffer)
+            mouseCycle = 0;
+            int16_t x = mouseBytes[1] - ((mouseBytes[0] << 4) & MOUSE_OVERFLOW_MASK);
+            int16_t y = mouseBytes[2] - ((mouseBytes[0] << 3) & MOUSE_OVERFLOW_MASK);
+            bool left = mouseBytes[0] & MOUSE_LEFT_MASK;
+            bool right = mouseBytes[0] & MOUSE_RIGHT_MASK;
+            MouseBufferElement* element = mouseBuffers;
+            while (true)
             {
-                element->buffer->buffer[element->buffer->head].x = x;
-                element->buffer->buffer[element->buffer->head].y = y;
-                element->buffer->buffer[element->buffer->head].left = left;
-                element->buffer->buffer[element->buffer->head].right = right;
-                element->buffer->head++;
-            }
-            element = element->next;
-            if (element == mouseBuffers)
-            {
-                break;
+                if (element->buffer)
+                {
+                    element->buffer->buffer[element->buffer->head].x = x;
+                    element->buffer->buffer[element->buffer->head].y = y;
+                    element->buffer->buffer[element->buffer->head].left = left;
+                    element->buffer->buffer[element->buffer->head].right = right;
+                    element->buffer->head++;
+                }
+                element = element->next;
+                if (element == mouseBuffers)
+                {
+                    break;
+                }
             }
         }
     }
     picAck(MOUSE_INTERRUPT);
-}
-
-__attribute__((naked)) void mouseDummy()
-{
-    __asm__ volatile ("pushw %ax; movb $0x20, %al; outb %al, $0x20; outb %al, $0xA0; popw %ax; iretq");
 }
 
 __attribute__((naked)) void mouseInterrupt()
@@ -101,8 +101,8 @@ void initMouse()
     uint8_t config = inb(MOUSE_DATA);
     if (!(config & PS2_SECOND_CLOCK))
     {
-        log("Installing mouse dummy IRQ");
-        installIrq(MOUSE_INTERRUPT, mouseDummy);
+        log("Installing mouse IRQ");
+        installIrq(MOUSE_INTERRUPT, mouseInterrupt);
         log("Unmasking interrupt");
         unmaskPic(MOUSE_INTERRUPT);
         log("Enabling second PS/2 interrupt");
@@ -116,8 +116,8 @@ void initMouse()
         outb(MOUSE_COMMAND, MOUSE_PS2_PORT);
         outb(MOUSE_DATA, MOUSE_STREAMING);
         inb(MOUSE_DATA);
-        log("Installing mouse IRQ");
-        installIrq(MOUSE_INTERRUPT, mouseInterrupt);
+        log("Marking mouse as setup");
+        setup = true;
     }
     log("Set up PS/2 mouse");
 }
