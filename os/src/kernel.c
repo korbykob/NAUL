@@ -3,9 +3,9 @@
 #include <terminal.h>
 #include <gdt.h>
 #include <idt.h>
-#include <pic.h>
 #include <symbols.h>
 #include <panic.h>
+#include <pic.h>
 #include <paging.h>
 #include <syscalls.h>
 #include <hpet.h>
@@ -24,9 +24,9 @@ void kernel()
     initTerminal();
     initGdt();
     initIdt();
-    initPic();
     initSymbols();
     initPanic();
+    initPic();
     initPaging();
     initSyscalls();
     initHpet();

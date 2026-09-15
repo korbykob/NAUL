@@ -38,9 +38,9 @@ build()
     x86_64-linux-gnu-gcc $KERNEL_COMPILER_FLAGS os/src/terminal.c -o os/bin/terminal.o
     x86_64-linux-gnu-gcc $KERNEL_COMPILER_FLAGS os/src/gdt.c -o os/bin/gdt.o
     x86_64-linux-gnu-gcc $KERNEL_COMPILER_FLAGS os/src/idt.c -o os/bin/idt.o
-    x86_64-linux-gnu-gcc $KERNEL_COMPILER_FLAGS os/src/pic.c -o os/bin/pic.o
     x86_64-linux-gnu-gcc $KERNEL_COMPILER_FLAGS os/src/symbols.c -o os/bin/symbols.o
     x86_64-linux-gnu-gcc $KERNEL_COMPILER_FLAGS os/src/panic.c -o os/bin/panic.o
+    x86_64-linux-gnu-gcc $KERNEL_COMPILER_FLAGS os/src/pic.c -o os/bin/pic.o
     x86_64-linux-gnu-gcc $KERNEL_COMPILER_FLAGS os/src/paging.c -o os/bin/paging.o
     x86_64-linux-gnu-gcc $KERNEL_COMPILER_FLAGS os/src/syscalls.c -o os/bin/syscalls.o
     x86_64-linux-gnu-gcc $KERNEL_COMPILER_FLAGS os/src/hpet.c -o os/bin/hpet.o
@@ -61,9 +61,9 @@ build()
     os/bin/terminal.o \
     os/bin/gdt.o \
     os/bin/idt.o \
-    os/bin/pic.o \
     os/bin/symbols.o \
     os/bin/panic.o \
+    os/bin/pic.o \
     os/bin/paging.o \
     os/bin/syscalls.o \
     os/bin/hpet.o \
