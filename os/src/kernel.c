@@ -5,7 +5,7 @@
 #include <idt.h>
 #include <symbols.h>
 #include <panic.h>
-#include <pic.h>
+#include <ioapic.h>
 #include <paging.h>
 #include <syscalls.h>
 #include <hpet.h>
@@ -26,7 +26,7 @@ void kernel()
     initIdt();
     initSymbols();
     initPanic();
-    initPic();
+    initIoapic();
     initPaging();
     initSyscalls();
     initHpet();

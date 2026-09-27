@@ -3,7 +3,7 @@
 #include <syscalls.h>
 #include <allocator.h>
 #include <idt.h>
-#include <pic.h>
+#include <ioapic.h>
 #include <io.h>
 #include <calls.h>
 #include <scheduler.h>
@@ -71,7 +71,7 @@ void mouse()
             }
         }
     }
-    picAck(MOUSE_INTERRUPT);
+    ioapicAck();
 }
 
 __attribute__((naked)) void mouseInterrupt()
@@ -104,7 +104,7 @@ void initMouse()
         log("Installing mouse IRQ");
         installIrq(MOUSE_INTERRUPT, mouseInterrupt);
         log("Unmasking interrupt");
-        unmaskPic(MOUSE_INTERRUPT);
+        unmaskIoapic(MOUSE_INTERRUPT);
         log("Enabling second PS/2 interrupt");
         outb(MOUSE_COMMAND, PS2_SET_CONFIG);
         outb(MOUSE_DATA, config | PS2_SECOND_INTERRUPT);

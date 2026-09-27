@@ -3,6 +3,8 @@
 #include <definitions.h>
 #include <symbols.h>
 
+#define APIC_BASE_ADDRESS 0xFEE00000
+#define LAPIC_EOI_REGISTER (APIC_BASE_ADDRESS + 0xB0)
 #define pushRegisters() __asm__ volatile ("pushq %rax; pushq %rbx; pushq %rcx; pushq %rdx; pushq %rsi; pushq %rdi; pushq %rbp; pushq %rsp; pushq %r8; pushq %r9; pushq %r10; pushq %r11; pushq %r12; pushq %r13; pushq %r14; pushq %r15")
 #define pushSimdRegisters() __asm__ volatile ("subq $512, %rsp; vmovdqu %ymm0, 480(%rsp); vmovdqu %ymm1, 448(%rsp); vmovdqu %ymm2, 416(%rsp); vmovdqu %ymm3, 384(%rsp); vmovdqu %ymm4, 352(%rsp); vmovdqu %ymm5, 320(%rsp); vmovdqu %ymm6, 288(%rsp); vmovdqu %ymm7, 256(%rsp); vmovdqu %ymm8, 224(%rsp); vmovdqu %ymm9, 192(%rsp); vmovdqu %ymm10, 160(%rsp); vmovdqu %ymm11, 128(%rsp); vmovdqu %ymm12, 96(%rsp); vmovdqu %ymm13, 64(%rsp); vmovdqu %ymm14, 32(%rsp); vmovdqu %ymm15, (%rsp)")
 #define pushCr3() __asm__ volatile ("movq %%cr3, %%rax; pushq %%rax" : : : "%rax")

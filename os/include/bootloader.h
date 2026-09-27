@@ -18,6 +18,8 @@ typedef struct
     uint64_t fileCount;
     uint64_t hpetAddress;
     uint64_t fadtAddress;
+    uint64_t ioapicAddress;
+    uint32_t ioapicRedirects[256];
 } Info;
 
 extern Info information;

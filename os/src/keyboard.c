@@ -3,7 +3,7 @@
 #include <syscalls.h>
 #include <allocator.h>
 #include <idt.h>
-#include <pic.h>
+#include <ioapic.h>
 #include <io.h>
 #include <calls.h>
 #include <scheduler.h>
@@ -49,7 +49,7 @@ void keyboard()
             break;
         }
     }
-    picAck(KEYBOARD_INTERRUPT);
+    ioapicAck();
 }
 
 __attribute__((naked)) void keyboardInterrupt()
@@ -80,7 +80,7 @@ void initKeyboard()
         inb(KEYBOARD_DATA);
     }
     log("Unmasking interrupt");
-    unmaskPic(KEYBOARD_INTERRUPT);
+    unmaskIoapic(KEYBOARD_INTERRUPT);
     log("Set up PS/2 keyboard");
 }
 

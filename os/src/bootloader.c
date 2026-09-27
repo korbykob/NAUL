@@ -230,6 +230,29 @@ EFI_STATUS efi_main(EFI_HANDLE ImageHandle, EFI_SYSTEM_TABLE* SystemTable)
                     log("Found FADT");
                     information.fadtAddress = (uint64_t)xsdt->entries[table];
                 }
+                else if (strncmpa(xsdt->entries[table]->signature, "APIC", 4) == 0)
+                {
+                    log("Found APIC");
+                    uint8_t* record = ((uint8_t*)xsdt->entries[table]) + 44;
+                    log("Mapping linear IOAPIC redirects");
+                    for (uint16_t i = 0; i < 256; i++)
+                    {
+                        information.ioapicRedirects[i] = i;
+                    }
+                    while ((uint64_t)record - (uint64_t)xsdt->entries[table] != xsdt->entries[table]->length)
+                    {
+                        if (*record == 1)
+                        {
+                            log("Found IOAPIC");
+                            information.ioapicAddress = *(uint32_t*)(record + 4);
+                        }
+                        else if (*record == 2)
+                        {
+                            information.ioapicRedirects[*(record + 3)] = *(uint32_t*)(record + 4);
+                        }
+                        record += *(record + 1);
+                    }
+                }
             }
             break;
         }

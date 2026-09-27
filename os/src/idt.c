@@ -1,7 +1,7 @@
 #include <idt.h>
 #include <terminal.h>
 #include <panic.h>
-#include <pic.h>
+#include <ioapic.h>
 
 #define PIC_MASTER_SPURIOUS 7
 #define PIC_SLAVE_SPURIOUS 15
@@ -118,5 +118,5 @@ void installIsr(uint8_t interrupt, uint8_t attributes, void (*handler)())
 
 void installIrq(uint8_t interrupt, void (*handler)())
 {
-    installIsr(interrupt + PIC_OFFSET, IDT_INTERRUPT_GATE, handler);
+    installIsr(interrupt + IOAPIC_OFFSET, IDT_INTERRUPT_GATE, handler);
 }
