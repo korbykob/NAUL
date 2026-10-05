@@ -143,7 +143,9 @@ void addFiles(EFI_FILE_HANDLE fs, const CHAR16* name)
 
 EFI_STATUS efi_main(EFI_HANDLE ImageHandle, EFI_SYSTEM_TABLE* SystemTable)
 {
-    __asm__ volatile ("movq %%cr4, %%rax; xorq $0x40000, %%rax; movq %%rax, %%cr4; xorq %%rcx, %%rcx; xgetbv; orl $7, %%eax; xsetbv" : : : "%rdx", "%rcx", "%rax");
+    #ifndef NO_AVX2
+        __asm__ volatile ("movq %%cr4, %%rax; xorq $0x40000, %%rax; movq %%rax, %%cr4; xorq %%rcx, %%rcx; xgetbv; orl $7, %%eax; xsetbv" : : : "%rdx", "%rcx", "%rax");
+    #endif
     InitializeLib(ImageHandle, SystemTable);
     log("Locating GOP protocol");
     EFI_GRAPHICS_OUTPUT_PROTOCOL* GOP = NULL;

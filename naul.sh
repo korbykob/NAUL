@@ -16,9 +16,19 @@ clean()
 
 build()
 {
-    COMPILER_FLAGS="-isystem ${PWD}/include -march=x86-64-v3 -ffreestanding -mno-red-zone -fno-stack-protector -fno-stack-check -maccumulate-outgoing-args -c"
+    if [[ ! -v X86_64_LEVEL ]]; then
+        X86_64_LEVEL="3"
+    fi
+
+    COMPILER_FLAGS="-isystem ${PWD}/include -ffreestanding -mno-red-zone -fno-stack-protector -fno-stack-check -maccumulate-outgoing-args -c -march=x86-64"
+    if (( X86_64_LEVEL > 1 )); then
+        COMPILER_FLAGS="${COMPILER_FLAGS}-v${X86_64_LEVEL}"
+    fi
 
     OS_COMPILER_FLAGS="$COMPILER_FLAGS -Ios/include -fpic -g -fno-omit-frame-pointer -O2 -fvect-cost-model=dynamic -Wall -Wextra -Werror"
+    if (( X86_64_LEVEL < 3 )); then
+        OS_COMPILER_FLAGS="$OS_COMPILER_FLAGS -DNO_AVX2"
+    fi
     BOOTLOADER_COMPILER_FLAGS="$OS_COMPILER_FLAGS -Ios/gnu-efi/inc -fshort-wchar"
     KERNEL_COMPILER_FLAGS="$OS_COMPILER_FLAGS -Ios/include -nostdinc"
     KERNEL_LINKER_FLAGS="-shared -Bsymbolic"
@@ -152,9 +162,12 @@ usage()
     echo "Commands:"
     echo "    clean: Remove the build files"
     echo "    build: Generate the build files"
-    echo "    commands: Generate compile_commands.json"
+    echo "    commands: Build and generate compile_commands.json"
     echo "    iso: Build and create an iso"
     echo "    run: Build, create iso and run in QEMU"
+    echo
+    echo "Environment vars:"
+    echo "    X86_64_LEVEL: Value of 1 to 3 for optimisations"
 }
 
 case "$1" in
