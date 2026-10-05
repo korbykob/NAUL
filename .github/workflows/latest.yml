@@ -43,6 +43,6 @@ jobs:
           make_latest: true
           generate_release_notes: false
           files: |
-            naul.iso
-            naul-v2.iso
             naul-v1.iso
+            naul-v2.iso
+            naul.iso
