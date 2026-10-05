@@ -17,18 +17,32 @@ jobs:
         run: |
           git tag -f latest "$GITHUB_SHA"
           git push origin latest --force
-
-      - name: Clean build
-        run: ./naul.sh clean
       
-      - name: Generate iso
-        run: ./naul.sh iso
+      - name: Generate main iso
+        run: |
+          ./naul.sh clean
+          ./naul.sh iso
+      
+      - name: Generate v2 iso
+        run: |
+          ./naul.sh clean
+          X86_64_LEVEL=2 ./naul.sh iso
+          mv naul.iso naul-v2.iso
+      
+      - name: Generate v1 iso
+        run: |
+          ./naul.sh clean
+          X86_64_LEVEL=1 ./naul.sh iso
+          mv naul.iso naul-v1.iso
       
       - name: Update release
         uses: softprops/action-gh-release@v3
         with:
           tag_name: latest
           name: Latest
-          files: naul.iso
           make_latest: true
           generate_release_notes: false
+          files: |
+            naul.iso
+            naul-v2.iso
+            naul-v1.iso
