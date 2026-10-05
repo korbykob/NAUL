@@ -18,22 +18,22 @@ jobs:
           git tag -f latest "$GITHUB_SHA"
           git push origin latest --force
       
-      - name: Generate main iso
+      - name: Generate v1 iso
         run: |
           ./naul.sh clean
-          ./naul.sh iso
+          X86_64_LEVEL=1 ./naul.sh iso
+          mv naul.iso naul-v1.iso
       
       - name: Generate v2 iso
         run: |
           ./naul.sh clean
           X86_64_LEVEL=2 ./naul.sh iso
           mv naul.iso naul-v2.iso
-      
-      - name: Generate v1 iso
+
+      - name: Generate main iso
         run: |
           ./naul.sh clean
-          X86_64_LEVEL=1 ./naul.sh iso
-          mv naul.iso naul-v1.iso
+          ./naul.sh iso
       
       - name: Update release
         uses: softprops/action-gh-release@v3
