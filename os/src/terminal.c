@@ -16,7 +16,6 @@
 #define TERMINAL_BLUE 0x0080FF
 #define TERMINAL_GREEN 0x008000
 #define TERMINAL_RED 0xFF5050
-#define TERMINAL_NO_CHAR '\xff'
 #define TERMINAL_COLOUR '\xfe'
 #define KEY_LEFT_SHIFT 42
 #define KEY_RIGHT_SHIFT 54
@@ -285,7 +284,11 @@ void terminalPut(char character)
             {
                 for (uint32_t x = 0; x < fontWidth; x++)
                 {
-                    *address++ = 0;
+                    if (!displayObtained)
+                    {
+                        *address = 0;
+                    }
+                    address++;
                     *backAddress++ = 0;
                 }
                 address += information.pitch - fontWidth;
@@ -306,7 +309,10 @@ void terminalPut(char character)
         }
         else if (character == TTY_CLEAR)
         {
-            setMemory32(information.framebuffer, 0, information.pitch * information.height);
+            if (!displayObtained)
+            {
+                setMemory32(information.framebuffer, 0, information.pitch * information.height);
+            }
             setMemory32(backBuffer, 0, information.pitch * information.height);
             cursorX = 0;
             cursorY = 0;
