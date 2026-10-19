@@ -3,8 +3,6 @@
 #include <panic.h>
 #include <ioapic.h>
 
-#define PIC_MASTER_SPURIOUS 7
-#define PIC_SLAVE_SPURIOUS 15
 #define KERNEL_CODE_SEGMENT 0x8
 #define IDT_PRESENT 0x80
 
