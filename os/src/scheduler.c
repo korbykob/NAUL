@@ -173,11 +173,12 @@ uint64_t createThread(void (*function)())
 
 void waitForThread(uint64_t id)
 {
-    WaitingEntry* entry = allocate(sizeof(WaitingEntry));
-    entry->id = id;
-    entry->thread = currentThread;
+    WaitingEntry entry = { { 0, 0 }, id, currentThread };
     lock(&waitingLock);
-    linkList(&waitingList, &entry->header);
+    #pragma GCC diagnostic push
+    #pragma GCC diagnostic ignored "-Wdangling-pointer"
+    linkList(&waitingList, &entry.header);
+    #pragma GCC diagnostic pop
     unlock(&waitingLock);
     __asm__ volatile ("cli");
     currentThread->waiting = true;
@@ -198,7 +199,6 @@ void destroyThread(uint64_t id)
             __asm__ volatile ("sti");
             WaitingEntry* prev = entry->header.prev;
             unlinkList(&entry->header);
-            unallocate(entry);
             entry = prev;
         }
     }
@@ -228,7 +228,6 @@ void exitThread()
             __asm__ volatile ("sti");
             WaitingEntry* prev = entry->header.prev;
             unlinkList(&entry->header);
-            unallocate(entry);
             entry = prev;
         }
     }

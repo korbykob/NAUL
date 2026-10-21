@@ -65,14 +65,8 @@ void hpet()
         entry->thread->waiting = false;
         unlinkList(&entry->header);
         updateTimer();
-        ioapicAck();
-        __asm__ volatile ("sti");
-        unallocate(entry);
     }
-    else
-    {
-        ioapicAck();
-    }
+    ioapicAck();
 }
 
 __attribute__((naked)) void hpetInterrupt()
@@ -111,11 +105,9 @@ uint64_t getFemtoseconds()
 
 void waitFemtoseconds(uint64_t femtoseconds)
 {
-    SleepingEntry* entry = allocate(sizeof(SleepingEntry));
-    entry->time = (femtoseconds / femtosecondsPerTick) + *(uint64_t*)(information.hpetAddress + HPET_COUNTER);
-    entry->thread = currentThread;
+    SleepingEntry entry = { { 0, 0 }, (femtoseconds / femtosecondsPerTick) + *(uint64_t*)(information.hpetAddress + HPET_COUNTER), currentThread };
     __asm__ volatile ("cli");
-    linkList(&sleepingList, &entry->header);
+    linkList(&sleepingList, &entry.header);
     currentThread->waiting = true;
     updateTimer();
     __asm__ volatile ("sti");
@@ -137,5 +129,4 @@ void cancelWait(uint64_t id)
     unlinkList(&entry->header);
     updateTimer();
     __asm__ volatile ("sti");
-    unallocate(entry);
 }
