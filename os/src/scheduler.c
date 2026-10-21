@@ -173,17 +173,37 @@ uint64_t createThread(void (*function)())
 
 void waitForThread(uint64_t id)
 {
-    WaitingEntry entry = { { 0, 0 }, id, currentThread };
-    lock(&waitingLock);
-    #pragma GCC diagnostic push
-    #pragma GCC diagnostic ignored "-Wdangling-pointer"
-    linkList(&waitingList, &entry.header);
-    #pragma GCC diagnostic pop
-    unlock(&waitingLock);
     __asm__ volatile ("cli");
-    currentThread->waiting = true;
+    bool found = false;
+    Thread* current = &threads;
+    while (true)
+    {
+        if (current->id == id)
+        {
+            found = true;
+            break;
+        }
+        current = current->header.next;
+        if (current == &threads)
+        {
+            break;
+        }
+    }
     __asm__ volatile ("sti");
-    yieldThread();
+    if (found)
+    {
+        WaitingEntry entry = { { 0, 0 }, id, currentThread };
+        lock(&waitingLock);
+        #pragma GCC diagnostic push
+        #pragma GCC diagnostic ignored "-Wdangling-pointer"
+        linkList(&waitingList, &entry.header);
+        #pragma GCC diagnostic pop
+        unlock(&waitingLock);
+        __asm__ volatile ("cli");
+        currentThread->waiting = true;
+        __asm__ volatile ("sti");
+        yieldThread();
+    }
 }
 
 void destroyThread(uint64_t id)
