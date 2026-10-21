@@ -50,24 +50,24 @@
 
 #define SYSCALL_4(number, arg1, arg2, arg3, arg4) \
 {\
-    __asm__ volatile ("movq %4, %%r8; int $0x69" : : "D"(number), "S"(arg1), "d"(arg2), "c"(arg3), "g"(arg4) : "%rax", "memory"); \
+    __asm__ volatile ("movq %4, %%r8; int $0x69" : : "D"(number), "S"(arg1), "d"(arg2), "c"(arg3), "g"(arg4) : "%rax", "%r8", "memory"); \
 }
 
 #define SYSCALL_4_RETURN(number, type, arg1, arg2, arg3, arg4) \
 {\
     uint64_t result = 0; \
-    __asm__ volatile ("movq %5, %%r8; int $0x69" : "=a"(result) : "D"(number), "S"(arg1), "d"(arg2), "c"(arg3), "g"(arg4) : "memory"); \
+    __asm__ volatile ("movq %5, %%r8; int $0x69" : "=a"(result) : "D"(number), "S"(arg1), "d"(arg2), "c"(arg3), "g"(arg4) : "%r8", "memory"); \
     return (type)result; \
 }
 
 #define SYSCALL_5(number, arg1, arg2, arg3, arg4, arg5) \
 {\
-    __asm__ volatile ("movq %4, %%r8; movq %5, %%r9; int $0x69" : : "D"(number), "S"(arg1), "d"(arg2), "c"(arg3), "g"(arg4), "g"(arg5) : "%rax", "memory"); \
+    __asm__ volatile ("movq %4, %%r8; movq %5, %%r9; int $0x69" : : "D"(number), "S"(arg1), "d"(arg2), "c"(arg3), "g"(arg4), "g"(arg5) : "%rax", "%r8", "%r9", "memory"); \
 }
 
 #define SYSCALL_5_RETURN(number, type, arg1, arg2, arg3, arg4, arg5) \
 {\
     uint64_t result = 0; \
-    __asm__ volatile ("movq %5, %%r8; movq %6, %%r9; int $0x69" : "=a"(result) : "D"(number), "S"(arg1), "d"(arg2), "c"(arg3), "g"(arg4), "g"(arg5) : "memory"); \
+    __asm__ volatile ("movq %5, %%r8; movq %6, %%r9; int $0x69" : "=a"(result) : "D"(number), "S"(arg1), "d"(arg2), "c"(arg3), "g"(arg4), "g"(arg5) : "%r8", "%r9", "memory"); \
     return (type)result; \
 }
