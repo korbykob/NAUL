@@ -72,16 +72,16 @@ void cleaner()
     cleanerThread = currentThread;
     while (true)
     {
-        __asm__ volatile ("cli");
         while (deadThreads.next != &deadThreads)
         {
+            __asm__ volatile ("cli");
             Thread* thread = deadThreads.next;
             unlinkList(&thread->header);
+            __asm__ volatile ("sti");
             unallocate(thread->stack);
             unallocate(thread);
         }
         currentThread->waiting = true;
-        __asm__ volatile ("sti");
         yieldThread();
     }
 }
