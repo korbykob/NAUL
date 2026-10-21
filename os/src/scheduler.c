@@ -23,14 +23,24 @@ typedef struct
     uint64_t sp;
     uint64_t ss;
 } __attribute__((packed)) InterruptFrame;
+typedef struct
+{
+    List header;
+    uint64_t id;
+    Thread* thread;
+} WaitingEntry;
 
 Thread threads = { { &threads, &threads }, 0, 0, 0, 0, 0, 0, 0 };
 Thread* currentThread = &threads;
+List deadThreads = { &deadThreads, &deadThreads };
+Thread* cleanerThread = 0;
+List waitingList = { &waitingList, &waitingList };
+bool waitingLock = false;
 
 __attribute__((naked)) void nextThread()
 {
     __asm__ volatile ("movq %1, %0" : "=m"(currentThread) : "r"(currentThread->header.next));
-    __asm__ volatile ("testq %0, %0; jnz nextThread" : : "r"(currentThread->waiting));
+    __asm__ volatile ("testb %0, %0; jnz nextThread" : : "r"(currentThread->waiting));
     __asm__ volatile ("movq %0, %%rsp" : : "g"(currentThread->sp));
     popCr3();
     popSimdRegisters();
@@ -57,6 +67,25 @@ __attribute__((naked)) void updateScheduler()
     __asm__ volatile ("jmp nextThread");
 }
 
+void cleaner()
+{
+    cleanerThread = currentThread;
+    while (true)
+    {
+        __asm__ volatile ("cli");
+        while (deadThreads.next != &deadThreads)
+        {
+            Thread* thread = deadThreads.next;
+            unlinkList(&thread->header);
+            unallocate(thread->stack);
+            unallocate(thread);
+        }
+        currentThread->waiting = true;
+        __asm__ volatile ("sti");
+        yieldThread();
+    }
+}
+
 void initScheduler()
 {
     log("Setting up scheduler");
@@ -78,6 +107,12 @@ void initScheduler()
     *(uint32_t*)LAPIC_RELOAD_COUNT = ticks;
     log("Setting interrupt vector");
     *(uint32_t*)LAPIC_CONFIG_REGISTER = SCHEDULER_INTERRUPT | LAPIC_PERIODIC_MODE;
+    log("Creating cleaner thread");
+    createThread(cleaner);
+    while (cleanerThread == 0)
+    {
+        yieldThread();
+    }
     log("Set up scheduler");
 }
 
@@ -87,9 +122,31 @@ uint64_t createThread(void (*function)())
     uint64_t cs = 0;
     uint64_t ss = 0;
     __asm__ volatile ("pushfq; pop %0; movq %%cs, %1; movq %%ss, %2" : "=g"(flags), "=r"(cs), "=r"(ss));
-    __asm__ volatile ("cli");
     Thread* thread = allocate(sizeof(Thread));
     thread->header.next = currentThread;
+    thread->waiting = false;
+    thread->symbols = currentThread->symbols;
+    thread->symbolCount = currentThread->symbolCount;
+    thread->ttyId = currentThread->ttyId;
+    thread->stack = allocateAligned(STACK_SIZE, 16);
+    thread->sp = (uint64_t)thread->stack + STACK_SIZE - sizeof(InterruptFrame) - sizeof(void (**)());
+    InterruptFrame* frame = (InterruptFrame*)thread->sp;
+    frame->ip = (uint64_t)function;
+    frame->cs = cs;
+    frame->flags = flags;
+    frame->sp = thread->sp + sizeof(InterruptFrame);
+    frame->ss = ss;
+    *(void (**)())(thread->sp + sizeof(InterruptFrame)) = exitThread;
+    __asm__ volatile ("cli");
+    __asm__ volatile ("movq %%rsp, %0" : "=g"(currentThread->sp));
+    currentThread = thread;
+    __asm__ volatile ("movq %0, %%rsp" : : "g"(currentThread->sp));
+    __asm__ volatile ("pushq %rax; pushq %rbx; pushq %rcx; pushq %rdx; pushq %rsi; pushq %rdi; pushq $0; pushq %rsp; pushq %r8; pushq %r9; pushq %r10; pushq %r11; pushq %r12; pushq %r13; pushq %r14; pushq %r15");
+    pushSimdRegisters();
+    pushCr3();
+    __asm__ volatile ("movq %%rsp, %0" : "=g"(currentThread->sp));
+    __asm__ volatile ("movq %1, %0" : "=m"(currentThread) : "r"(currentThread->header.next));
+    __asm__ volatile ("movq %0, %%rsp" : : "g"(currentThread->sp));
     uint64_t id = 0;
     Thread* current = &threads;
     while (true)
@@ -109,28 +166,6 @@ uint64_t createThread(void (*function)())
         }
     }
     thread->id = id;
-    thread->waiting = 0;
-    thread->symbols = currentThread->symbols;
-    thread->symbolCount = currentThread->symbolCount;
-    thread->ttyId = currentThread->ttyId;
-    thread->stack = allocateAligned(STACK_SIZE, 16);
-    thread->sp = (uint64_t)thread->stack + STACK_SIZE - sizeof(InterruptFrame) - sizeof(void (**)());
-    InterruptFrame* frame = (InterruptFrame*)thread->sp;
-    frame->ip = (uint64_t)function;
-    frame->cs = cs;
-    frame->flags = flags;
-    frame->sp = thread->sp + sizeof(InterruptFrame);
-    frame->ss = ss;
-    *(void (**)())(thread->sp + sizeof(InterruptFrame)) = exitThread;
-    __asm__ volatile ("movq %%rsp, %0" : "=g"(currentThread->sp));
-    currentThread = thread;
-    __asm__ volatile ("movq %0, %%rsp" : : "g"(currentThread->sp));
-    __asm__ volatile ("pushq %rax; pushq %rbx; pushq %rcx; pushq %rdx; pushq %rsi; pushq %rdi; pushq $0; pushq %rsp; pushq %r8; pushq %r9; pushq %r10; pushq %r11; pushq %r12; pushq %r13; pushq %r14; pushq %r15");
-    pushSimdRegisters();
-    pushCr3();
-    __asm__ volatile ("movq %%rsp, %0" : "=g"(currentThread->sp));
-    __asm__ volatile ("movq %1, %0" : "=m"(currentThread) : "r"(currentThread->header.next));
-    __asm__ volatile ("movq %0, %%rsp" : : "g"(currentThread->sp));
     linkList(&threads.header, &thread->header);
     __asm__ volatile ("sti");
     return id;
@@ -138,12 +173,36 @@ uint64_t createThread(void (*function)())
 
 void waitForThread(uint64_t id)
 {
-    currentThread->waiting = id;
+    WaitingEntry* entry = allocate(sizeof(WaitingEntry));
+    entry->id = id;
+    entry->thread = currentThread;
+    lock(&waitingLock);
+    linkList(&waitingList, &entry->header);
+    unlock(&waitingLock);
+    __asm__ volatile ("cli");
+    currentThread->waiting = true;
+    __asm__ volatile ("sti");
     yieldThread();
 }
 
 void destroyThread(uint64_t id)
 {
+    lock(&waitingLock);
+    WaitingEntry* entry = (WaitingEntry*)&waitingList;
+    while (iterateList(&waitingList, (List**)&entry))
+    {
+        if (entry->id == id)
+        {
+            __asm__ volatile ("cli");
+            entry->thread->waiting = false;
+            __asm__ volatile ("sti");
+            WaitingEntry* prev = entry->header.prev;
+            unlinkList(&entry->header);
+            unallocate(entry);
+            entry = prev;
+        }
+    }
+    unlock(&waitingLock);
     __asm__ volatile ("cli");
     Thread* current = &threads;
     while (current->id != id)
@@ -151,44 +210,34 @@ void destroyThread(uint64_t id)
         current = current->header.next;
     }
     unlinkList(&current->header);
+    __asm__ volatile ("sti");
     unallocate(current->stack);
     unallocate(current);
-    current = &threads;
-    while (true)
-    {
-        if (current->waiting == id)
-        {
-            current->waiting = 0;
-        }
-        current = current->header.next;
-        if (current == &threads)
-        {
-            break;
-        }
-    }
-    __asm__ volatile ("sti");
 }
 
 void exitThread()
 {
-    __asm__ volatile ("cli");
-    Thread* current = &threads;
-    while (true)
+    lock(&waitingLock);
+    WaitingEntry* entry = (WaitingEntry*)&waitingList;
+    while (iterateList(&waitingList, (List**)&entry))
     {
-        if (current->waiting == currentThread->id)
+        if (entry->id == currentThread->id)
         {
-            current->waiting = 0;
-        }
-        current = current->header.next;
-        if (current == &threads)
-        {
-            break;
+            __asm__ volatile ("cli");
+            entry->thread->waiting = false;
+            __asm__ volatile ("sti");
+            WaitingEntry* prev = entry->header.prev;
+            unlinkList(&entry->header);
+            unallocate(entry);
+            entry = prev;
         }
     }
+    unlock(&waitingLock);
+    __asm__ volatile ("cli");
     Thread* prev = currentThread->header.prev;
     unlinkList(&currentThread->header);
-    unallocate(currentThread->stack);
-    unallocate(currentThread);
+    linkList(&deadThreads, &currentThread->header);
+    cleanerThread->waiting = false;
     currentThread = prev;
     __asm__ volatile ("jmp nextThread");
 }

@@ -2,7 +2,7 @@
 
 #include <definitions.h>
 
-#define yieldThread() __asm__ volatile ("int $0x67" : : : "memory")
+#define yieldThread() __asm__ volatile ("int $0x67")
 
 static inline void lock(bool* mutex)
 {

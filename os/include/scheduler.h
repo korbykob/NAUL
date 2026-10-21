@@ -22,7 +22,7 @@ typedef struct
 {
     List header;
     uint64_t id;
-    uint64_t waiting;
+    bool waiting;
     Symbol* symbols;
     uint64_t symbolCount;
     uint8_t ttyId;
