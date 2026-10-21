@@ -42,14 +42,14 @@ void registerTty(TtyBuffer* buffer)
     ttyBuffers[id].used = true;
     ttyBuffers[id].oldId = currentThread->ttyId;
     ttyBuffers[id].buffer = getAddress(buffer);
-    currentThread->ttyId = id;
     unlock(&ttyLock);
+    currentThread->ttyId = id;
 }
 
 void unregisterTty(TtyBuffer* buffer)
 {
-    lock(&ttyLock);
     TtyBuffer* address = getAddress(buffer);
+    lock(&ttyLock);
     uint8_t id = 0;
     while (ttyBuffers[id].buffer != address)
     {

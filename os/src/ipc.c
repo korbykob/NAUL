@@ -5,17 +5,17 @@
 #include <allocator.h>
 #include <cpu.h>
 #include <str.h>
+#include <list.h>
 
 typedef struct
 {
-    void* next;
-    void* prev;
+    List header;
     char name[256];
     uint64_t paging;
     uint64_t (*handler)(uint64_t arg1, uint64_t arg2, uint64_t arg3, uint64_t arg4);
 } ListenerElement;
 
-ListenerElement* listeners = 0;
+List listeners = { &listeners, &listeners };
 bool ipcLock = false;
 
 void initIpc()
@@ -25,59 +25,48 @@ void initIpc()
     registerSyscall(UNREGISTER_LISTENER, unregisterListener);
     registerSyscall(CHECK_LISTENER, checkListener);
     registerSyscall(SEND_MESSAGE, sendMessage);
-    log("Allocating listeners");
-    listeners = allocate(sizeof(ListenerElement));
-    listeners->next = listeners;
-    listeners->prev = listeners;
-    listeners->name[0] = '\0';
-    listeners->paging = 0;
-    listeners->handler = 0;
     log("Set up IPC");
 }
 
 void registerListener(uint64_t (*handler)(uint64_t arg1, uint64_t arg2, uint64_t arg3, uint64_t arg4), const char* name)
 {
-    lock(&ipcLock);
     ListenerElement* element = allocate(sizeof(ListenerElement));
-    ((ListenerElement*)listeners->prev)->next = element;
-    element->next = listeners;
-    element->prev = listeners->prev;
-    listeners->prev = element;
     copyString(name, element->name);
     __asm__ volatile ("mov %%cr3, %0" : "=r"(element->paging));
     element->handler = handler;
+    lock(&ipcLock);
+    linkList(&listeners, &element->header);
     unlock(&ipcLock);
 }
 
 void unregisterListener(uint64_t (*handler)(uint64_t arg1, uint64_t arg2, uint64_t arg3, uint64_t arg4))
 {
+    uint64_t paging = 0;
+    __asm__ volatile ("mov %%cr3, %0" : "=r"(paging));
     lock(&ipcLock);
-    ListenerElement* element = listeners;
-    while (element->handler != handler)
+    ListenerElement* element = (ListenerElement*)&listeners;
+    while (iterateList(&listeners, (List**)&element))
     {
-        element = element->next;
+        if (element->paging == paging && element->handler == handler)
+        {
+            break;
+        }
     }
-    ((ListenerElement*)element->prev)->next = element->next;
-    ((ListenerElement*)element->next)->prev = element->prev;
-    unallocate(element);
+    unlinkList(&element->header);
     unlock(&ipcLock);
+    unallocate(element);
 }
 
 bool checkListener(const char* name)
 {
     lock(&ipcLock);
-    ListenerElement* element = listeners;
-    while (true)
+    ListenerElement* element = (ListenerElement*)&listeners;
+    while (iterateList(&listeners, (List**)&element))
     {
         if (compareStrings(name, element->name) == 0)
         {
             unlock(&ipcLock);
             return true;
-        }
-        element = element->next;
-        if (element == listeners)
-        {
-            break;
         }
     }
     unlock(&ipcLock);
@@ -87,10 +76,13 @@ bool checkListener(const char* name)
 uint64_t sendMessage(const char* name, uint64_t arg1, uint64_t arg2, uint64_t arg3, uint64_t arg4)
 {
     lock(&ipcLock);
-    ListenerElement* element = listeners;
-    while (compareStrings(element->name, name) != 0)
+    ListenerElement* element = (ListenerElement*)&listeners;
+    while (iterateList(&listeners, (List**)&element))
     {
-        element = element->next;
+        if (compareStrings(element->name, name) == 0)
+        {
+            break;
+        }
     }
     unlock(&ipcLock);
     uint64_t oldPaging = 0;

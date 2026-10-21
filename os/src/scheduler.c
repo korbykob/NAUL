@@ -24,12 +24,12 @@ typedef struct
     uint64_t ss;
 } __attribute__((packed)) InterruptFrame;
 
-Thread* threads = 0;
-Thread* currentThread = 0;
+Thread threads = { { &threads, &threads }, 0, 0, 0, 0, 0, 0, 0 };
+Thread* currentThread = &threads;
 
 __attribute__((naked)) void nextThread()
 {
-    __asm__ volatile ("movq %1, %0" : "=m"(currentThread) : "r"(currentThread->next));
+    __asm__ volatile ("movq %1, %0" : "=m"(currentThread) : "r"(currentThread->header.next));
     __asm__ volatile ("testq %0, %0; jnz nextThread" : : "r"(currentThread->waiting));
     __asm__ volatile ("movq %0, %%rsp" : : "g"(currentThread->sp));
     popCr3();
@@ -65,17 +65,6 @@ void initScheduler()
     registerSyscall(DESTROY_THREAD, destroyThread);
     registerSyscall(EXIT_THREAD, exitThread);
     installIsr(0x67, IDT_INTERRUPT_GATE, skipThread);
-    log("Creating main thread");
-    threads = allocate(sizeof(Thread));
-    threads->next = threads;
-    threads->prev = threads;
-    threads->id = 0;
-    threads->waiting = 0;
-    threads->symbols = 0;
-    threads->symbolCount = 0;
-    threads->ttyId = 0;
-    __asm__ volatile ("movq %%rsp, %0" : "=g"(threads->sp));
-    currentThread = threads;
     log("Configuring timer");
     installIsr(SCHEDULER_INTERRUPT, IDT_INTERRUPT_GATE, updateScheduler);
     log("Setting timer divisor");
@@ -100,20 +89,20 @@ uint64_t createThread(void (*function)())
     __asm__ volatile ("pushfq; pop %0; movq %%cs, %1; movq %%ss, %2" : "=g"(flags), "=r"(cs), "=r"(ss));
     __asm__ volatile ("cli");
     Thread* thread = allocate(sizeof(Thread));
-    thread->next = currentThread;
+    thread->header.next = currentThread;
     uint64_t id = 0;
-    Thread* current = threads;
+    Thread* current = &threads;
     while (true)
     {
         if (current->id == id)
         {
             id++;
-            current = threads;
+            current = &threads;
         }
         else
         {
-            current = current->next;
-            if (current == threads)
+            current = current->header.next;
+            if (current == &threads)
             {
                 break;
             }
@@ -140,12 +129,9 @@ uint64_t createThread(void (*function)())
     pushSimdRegisters();
     pushCr3();
     __asm__ volatile ("movq %%rsp, %0" : "=g"(currentThread->sp));
-    __asm__ volatile ("movq %1, %0" : "=m"(currentThread) : "r"(currentThread->next));
+    __asm__ volatile ("movq %1, %0" : "=m"(currentThread) : "r"(currentThread->header.next));
     __asm__ volatile ("movq %0, %%rsp" : : "g"(currentThread->sp));
-    ((Thread*)threads->prev)->next = thread;
-    thread->next = threads;
-    thread->prev = threads->prev;
-    threads->prev = thread;
+    linkList(&threads.header, &thread->header);
     __asm__ volatile ("sti");
     return id;
 }
@@ -159,24 +145,23 @@ void waitForThread(uint64_t id)
 void destroyThread(uint64_t id)
 {
     __asm__ volatile ("cli");
-    Thread* current = threads;
+    Thread* current = &threads;
     while (current->id != id)
     {
-        current = current->next;
+        current = current->header.next;
     }
-    ((Thread*)current->prev)->next = current->next;
-    ((Thread*)current->next)->prev = current->prev;
+    unlinkList(&current->header);
     unallocate(current->stack);
     unallocate(current);
-    current = threads;
+    current = &threads;
     while (true)
     {
         if (current->waiting == id)
         {
             current->waiting = 0;
         }
-        current = current->next;
-        if (current == threads)
+        current = current->header.next;
+        if (current == &threads)
         {
             break;
         }
@@ -187,22 +172,21 @@ void destroyThread(uint64_t id)
 void exitThread()
 {
     __asm__ volatile ("cli");
-    Thread* current = threads;
+    Thread* current = &threads;
     while (true)
     {
         if (current->waiting == currentThread->id)
         {
             current->waiting = 0;
         }
-        current = current->next;
-        if (current == threads)
+        current = current->header.next;
+        if (current == &threads)
         {
             break;
         }
     }
-    Thread* prev = currentThread->prev;
-    prev->next = currentThread->next;
-    ((Thread*)currentThread->next)->prev = prev;
+    Thread* prev = currentThread->header.prev;
+    unlinkList(&currentThread->header);
     unallocate(currentThread->stack);
     unallocate(currentThread);
     currentThread = prev;

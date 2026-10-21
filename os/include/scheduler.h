@@ -2,6 +2,7 @@
 
 #include <definitions.h>
 #include <symbols.h>
+#include <list.h>
 
 #define APIC_BASE_ADDRESS 0xFEE00000
 #define LAPIC_EOI_REGISTER (APIC_BASE_ADDRESS + 0xB0)
@@ -19,8 +20,7 @@
 
 typedef struct
 {
-    void* next;
-    void* prev;
+    List header;
     uint64_t id;
     uint64_t waiting;
     Symbol* symbols;

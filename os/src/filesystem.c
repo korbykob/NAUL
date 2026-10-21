@@ -7,16 +7,16 @@
 #include <str.h>
 #include <cpu.h>
 #include <mem.h>
+#include <list.h>
 
 typedef struct {
-    void* next;
-    void* prev;
+    List header;
     char* name;
     uint64_t size;
     uint8_t* data;
 } File;
 
-File* files = 0;
+List files = { &files, &files };
 bool filesystemLock = false;
 
 void initFilesystem()
@@ -29,12 +29,8 @@ void initFilesystem()
     registerSyscall(GET_FILES, getFiles);
     registerSyscall(GET_FILE, getFile);
     registerSyscall(DELETE_FILE, deleteFile);
-    log("Allocating file list");
-    files = allocate(sizeof(File));
-    files->next = files;
-    files->prev = files;
-    files->name = "";
-    files->data = 0;
+    log("Creating root folder");
+    createFolder("");
     log("Adding files to filesystem");
     for (uint64_t i = 0; i < information.fileCount; i++)
     {
@@ -54,18 +50,13 @@ void initFilesystem()
 bool checkFolder(const char* name)
 {
     lock(&filesystemLock);
-    File* file = files;
-    while (true)
+    File* file = (File*)&files;
+    while (iterateList(&files, (List**)&file))
     {
         if (compareStrings(name, file->name) == 0 && file->data == 0)
         {
             unlock(&filesystemLock);
             return true;
-        }
-        file = file->next;
-        if (file == files)
-        {
-            break;
         }
     }
     unlock(&filesystemLock);
@@ -75,18 +66,13 @@ bool checkFolder(const char* name)
 bool checkFile(const char* name)
 {
     lock(&filesystemLock);
-    File* file = files;
-    while (true)
+    File* file = (File*)&files;
+    while (iterateList(&files, (List**)&file))
     {
         if (compareStrings(name, file->name) == 0 && file->data)
         {
             unlock(&filesystemLock);
             return true;
-        }
-        file = file->next;
-        if (file == files)
-        {
-            break;
         }
     }
     unlock(&filesystemLock);
@@ -95,69 +81,53 @@ bool checkFile(const char* name)
 
 void createFolder(const char* name)
 {
-    lock(&filesystemLock);
     File* file = allocate(sizeof(File));
-    ((File*)files->prev)->next = file;
-    file->next = files;
-    file->prev = files->prev;
-    files->prev = file;
     uint64_t length = stringLength(name) + 1;
     file->name = allocate(length);
     copyString(name, file->name);
     file->size = 0;
     file->data = 0;
+    lock(&filesystemLock);
+    linkList(&files, &file->header);
     unlock(&filesystemLock);
 }
 
 void* createFile(const char* name, uint64_t size)
 {
-    lock(&filesystemLock);
     File* file = allocate(sizeof(File));
-    ((File*)files->prev)->next = file;
-    file->next = files;
-    file->prev = files->prev;
-    files->prev = file;
     uint64_t length = stringLength(name) + 1;
     file->name = allocate(length);
     copyString(name, file->name);
     file->size = size;
     file->data = allocate(size);
+    lock(&filesystemLock);
+    linkList(&files, &file->header);
     unlock(&filesystemLock);
     return file->data;
 }
 
 const char** getFiles(const char* root, uint64_t* count)
 {
-    lock(&filesystemLock);
     *count = 0;
     uint64_t length = stringLength(root);
-    File* file = files;
-    while (true)
+    lock(&filesystemLock);
+    File* file = (File*)&files;
+    while (iterateList(&files, (List**)&file))
     {
         if (compareStrings(file->name, root) != 0 && compareStart(file->name, root, length) == 0 && !stringContains(file->name + length + 1, '/'))
         {
             *count = *count + 1;
         }
-        file = file->next;
-        if (file == files)
-        {
-            break;
-        }
     }
     const char** items = allocate(*count * sizeof(const char*));
     uint64_t i = 0;
-    file = files;
-    while (true)
+    file = (File*)&files;
+    while (iterateList(&files, (List**)&file))
     {
         if (compareStrings(file->name, root) != 0 && compareStart(file->name, root, length) == 0 && !stringContains(file->name + length + 1, '/'))
         {
             items[i] = file->name;
             i++;
-        }
-        file = file->next;
-        if (file == files)
-        {
-            break;
         }
     }
     unlock(&filesystemLock);
@@ -167,10 +137,13 @@ const char** getFiles(const char* root, uint64_t* count)
 uint8_t* getFile(const char* name, uint64_t* size)
 {
     lock(&filesystemLock);
-    File* file = files;
-    while (compareStrings(name, file->name) != 0)
+    File* file = (File*)&files;
+    while (iterateList(&files, (List**)&file))
     {
-        file = file->next;
+        if (compareStrings(name, file->name) == 0)
+        {
+            break;
+        }
     }
     if (size)
     {
@@ -183,15 +156,17 @@ uint8_t* getFile(const char* name, uint64_t* size)
 void deleteFile(const char* name)
 {
     lock(&filesystemLock);
-    File* file = files;
-    while (compareStrings(name, file->name) != 0)
+    File* file = (File*)&files;
+    while (iterateList(&files, (List**)&file))
     {
-        file = file->next;
+        if (compareStrings(name, file->name) == 0)
+        {
+            break;
+        }
     }
-    ((File*)file->prev)->next = file->next;
-    ((File*)file->next)->prev = file->prev;
+    unlinkList(&file->header);
+    unlock(&filesystemLock);
     unallocate(file->name);
     unallocate(file->data);
     unallocate(file);
-    unlock(&filesystemLock);
 }

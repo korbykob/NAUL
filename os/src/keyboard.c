@@ -9,6 +9,7 @@
 #include <scheduler.h>
 #include <cpu.h>
 #include <mem.h>
+#include <list.h>
 
 #define KEYBOARD_COMMAND 0x64
 #define KEYBOARD_DATA 0x60
@@ -18,12 +19,11 @@
 
 typedef struct
 {
-    void* next;
-    void* prev;
+    List header;
     KeyboardBuffer* buffer;
 } KeyboardBufferElement;
 
-KeyboardBufferElement* keyboardBuffers = 0;
+List keyboardBuffers = { &keyboardBuffers, &keyboardBuffers };
 bool keyboardLock = false;
 
 void keyboard()
@@ -34,20 +34,12 @@ void keyboard()
     {
         scancode &= ~KEYBOARD_PRESSED_MASK;
     }
-    KeyboardBufferElement* element = keyboardBuffers;
-    while (true)
+    KeyboardBufferElement* element = (KeyboardBufferElement*)&keyboardBuffers;
+    while (iterateList(&keyboardBuffers, (List**)&element))
     {
-        if (element->buffer)
-        {
-            element->buffer->buffer[element->buffer->head].scancode = scancode;
-            element->buffer->buffer[element->buffer->head].pressed = !unpressed;
-            element->buffer->head++;
-        }
-        element = element->next;
-        if (element == keyboardBuffers)
-        {
-            break;
-        }
+        element->buffer->buffer[element->buffer->head].scancode = scancode;
+        element->buffer->buffer[element->buffer->head].pressed = !unpressed;
+        element->buffer->head++;
     }
     ioapicAck();
 }
@@ -67,11 +59,6 @@ void initKeyboard()
     log("Setting up PS/2 keyboard");
     registerSyscall(REGISTER_KEYBOARD, registerKeyboard);
     registerSyscall(UNREGISTER_KEYBOARD, unregisterKeyboard);
-    log("Allocating keyboard buffers");
-    keyboardBuffers = allocate(sizeof(KeyboardBufferElement));
-    keyboardBuffers->next = keyboardBuffers;
-    keyboardBuffers->prev = keyboardBuffers;
-    keyboardBuffers->buffer = 0;
     log("Installing keyboard IRQ");
     installIrq(KEYBOARD_INTERRUPT, keyboardInterrupt);
     log("Flushing PS/2 input buffer");
@@ -86,27 +73,26 @@ void initKeyboard()
 
 void registerKeyboard(KeyboardBuffer* buffer)
 {
-    lock(&keyboardLock);
     KeyboardBufferElement* element = allocate(sizeof(KeyboardBufferElement));
-    ((KeyboardBufferElement*)keyboardBuffers->prev)->next = element;
-    element->next = keyboardBuffers;
-    element->prev = keyboardBuffers->prev;
-    keyboardBuffers->prev = element;
     element->buffer = getAddress(buffer);
+    lock(&keyboardLock);
+    linkList(&keyboardBuffers, &element->header);
     unlock(&keyboardLock);
 }
 
 void unregisterKeyboard(KeyboardBuffer* buffer)
 {
-    lock(&keyboardLock);
     KeyboardBuffer* address = getAddress(buffer);
-    KeyboardBufferElement* element = keyboardBuffers;
-    while (element->buffer != address)
+    lock(&keyboardLock);
+    KeyboardBufferElement* element = (KeyboardBufferElement*)&keyboardBuffers;
+    while (iterateList(&keyboardBuffers, (List**)&element))
     {
-        element = element->next;
+        if (element->buffer == address)
+        {
+            break;
+        }
     }
-    ((KeyboardBufferElement*)element->prev)->next = element->next;
-    ((KeyboardBufferElement*)element->next)->prev = element->prev;
-    unallocate(element);
+    unlinkList(&element->header);
     unlock(&keyboardLock);
+    unallocate(element);
 }

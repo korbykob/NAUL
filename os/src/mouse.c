@@ -9,6 +9,7 @@
 #include <scheduler.h>
 #include <cpu.h>
 #include <mem.h>
+#include <list.h>
 
 #define MOUSE_COMMAND 0x64
 #define MOUSE_DATA 0x60
@@ -27,15 +28,14 @@
 
 typedef struct
 {
-    void* next;
-    void* prev;
+    List header;
     MouseBuffer* buffer;
 } MouseBufferElement;
 
 uint8_t mouseCycle = 0;
 uint8_t mouseBytes[3];
 bool setup = false;
-MouseBufferElement* mouseBuffers = 0;
+List mouseBuffers = { &mouseBuffers, &mouseBuffers };
 bool mouseLock = false;
 
 void mouse()
@@ -52,22 +52,14 @@ void mouse()
             int16_t y = mouseBytes[2] - ((mouseBytes[0] << 3) & MOUSE_OVERFLOW_MASK);
             bool left = mouseBytes[0] & MOUSE_LEFT_MASK;
             bool right = mouseBytes[0] & MOUSE_RIGHT_MASK;
-            MouseBufferElement* element = mouseBuffers;
-            while (true)
+            MouseBufferElement* element = (MouseBufferElement*)&mouseBuffers;
+            while (iterateList(&mouseBuffers, (List**)&element))
             {
-                if (element->buffer)
-                {
-                    element->buffer->buffer[element->buffer->head].x = x;
-                    element->buffer->buffer[element->buffer->head].y = y;
-                    element->buffer->buffer[element->buffer->head].left = left;
-                    element->buffer->buffer[element->buffer->head].right = right;
-                    element->buffer->head++;
-                }
-                element = element->next;
-                if (element == mouseBuffers)
-                {
-                    break;
-                }
+                element->buffer->buffer[element->buffer->head].x = x;
+                element->buffer->buffer[element->buffer->head].y = y;
+                element->buffer->buffer[element->buffer->head].left = left;
+                element->buffer->buffer[element->buffer->head].right = right;
+                element->buffer->head++;
             }
         }
     }
@@ -89,11 +81,6 @@ void initMouse()
     log("Setting up PS/2 mouse");
     registerSyscall(REGISTER_MOUSE, registerMouse);
     registerSyscall(UNREGISTER_MOUSE, unregisterMouse);
-    log("Allocating mouse buffers");
-    mouseBuffers = allocate(sizeof(MouseBufferElement));
-    mouseBuffers->next = mouseBuffers;
-    mouseBuffers->prev = mouseBuffers;
-    mouseBuffers->buffer = 0;
     log("Enabling second PS/2 port");
     outb(MOUSE_COMMAND, PS2_ENABLE_SECOND);
     log("Checking second PS/2 port");
@@ -124,27 +111,26 @@ void initMouse()
 
 void registerMouse(MouseBuffer* buffer)
 {
-    lock(&mouseLock);
     MouseBufferElement* element = allocate(sizeof(MouseBufferElement));
-    ((MouseBufferElement*)mouseBuffers->prev)->next = element;
-    element->next = mouseBuffers;
-    element->prev = mouseBuffers->prev;
-    mouseBuffers->prev = element;
     element->buffer = getAddress(buffer);
+    lock(&mouseLock);
+    linkList(&mouseBuffers, &element->header);
     unlock(&mouseLock);
 }
 
 void unregisterMouse(MouseBuffer* buffer)
 {
-    lock(&mouseLock);
     MouseBuffer* address = getAddress(buffer);
-    MouseBufferElement* element = mouseBuffers;
-    while (element->buffer != address)
+    lock(&mouseLock);
+    MouseBufferElement* element = (MouseBufferElement*)&mouseBuffers;
+    while (iterateList(&mouseBuffers, (List**)&element))
     {
-        element = element->next;
+        if (element->buffer == address)
+        {
+            break;
+        }
     }
-    ((MouseBufferElement*)element->prev)->next = element->next;
-    ((MouseBufferElement*)element->next)->prev = element->prev;
-    unallocate(element);
+    unlinkList(&element->header);
     unlock(&mouseLock);
+    unallocate(element);
 }
