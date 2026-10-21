@@ -9,3 +9,7 @@
 void initHpet();
 
 uint64_t getFemtoseconds();
+
+void waitFemtoseconds(uint64_t femtoseconds);
+
+void cancelWait(uint64_t id);

@@ -38,20 +38,14 @@ uint16_t shutdownB = 0;
 
 void powerThread()
 {
-    uint64_t last = getFemtoseconds();
     while (true)
     {
-        uint64_t femtoseconds = getFemtoseconds();
-        if (femtoseconds - last >= FEMTOSECONDS_PER_MILLISECOND * 100)
+        if (inw(*(uint32_t*)(information.fadtAddress + POWER_PM1A_EVENT)) & POWER_POWER_BUTTON)
         {
-            last = femtoseconds;
-            if (inw(*(uint32_t*)(information.fadtAddress + POWER_PM1A_EVENT)) & POWER_POWER_BUTTON)
-            {
-                outw(*(uint32_t*)(information.fadtAddress + POWER_PM1A_EVENT), POWER_POWER_BUTTON);
-                shutdown();
-            }
+            outw(*(uint32_t*)(information.fadtAddress + POWER_PM1A_EVENT), POWER_POWER_BUTTON);
+            shutdown();
         }
-        yieldThread();
+        waitFemtoseconds(FEMTOSECONDS_PER_MILLISECOND * 100);
     }
 }
 
